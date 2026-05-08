@@ -1,27 +1,23 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Dokploy production compose — 4 services behind Traefik on `dokploy-network`.
 #
-# What you set in Dokploy UI (Environment tab):
-#   POSTGRES_PASSWORD         strong random
-#   JWT_SECRET                strong random (openssl rand -hex 48)
-#   FRONTEND_HOST             e.g. kopahi.example.com
-#   ADMIN_HOST                e.g. admin.kopahi.example.com
-#   API_HOST                  e.g. api.kopahi.example.com
-#   FRONTEND_URL              https://${FRONTEND_HOST}
-#   ADMIN_URL                 https://${ADMIN_HOST}
-#   NEXT_PUBLIC_API_URL       https://${API_HOST}
-#   NEXT_PUBLIC_ADMIN_URL     https://${ADMIN_HOST}
-#   (optional)                SMTP_*, CLOUDINARY_*, RAZORPAY_*
+# Required env vars (set in Dokploy → project → Environment):
+#   POSTGRES_PASSWORD       strong random
+#   JWT_SECRET              `openssl rand -hex 48`
+#   FRONTEND_HOST           bare hostname, no scheme  (e.g. aibaagri.sedawk.cloud)
+#   ADMIN_HOST              bare hostname, no scheme
+#   API_HOST                bare hostname, no scheme
+#   FRONTEND_URL            https://${FRONTEND_HOST}
+#   ADMIN_URL               https://${ADMIN_HOST}
+#   NEXT_PUBLIC_API_URL     https://${API_HOST}
+#   NEXT_PUBLIC_ADMIN_URL   https://${ADMIN_HOST}
+#   (optional)              SMTP_*, CLOUDINARY_*, RAZORPAY_*
 #
-# What you set in Dokploy UI (Domains tab):
-#   - Bind FRONTEND_HOST  → service `frontend`  → port 3000   (HTTPS via Let's Encrypt)
-#   - Bind ADMIN_HOST     → service `admin`     → port 80
-#   - Bind API_HOST       → service `backend`   → port 5000
-#   You can do this two ways:
-#     (a) via the Dokploy "Domains" UI for each service (recommended), OR
-#     (b) by uncommenting the `labels:` blocks below and removing the UI domains.
+# Domains are resolved via the explicit Traefik labels below — Dokploy's
+# Domains UI is informational here. Each service that should be public has
+# `traefik.enable=true` + a `Host()` rule.
 #
-# For local dev with Docker:
+# Local dev:
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -43,6 +39,8 @@ services:
       start_period: 20s
     networks:
       - kopahi_internal
+    labels:
+      - "traefik.enable=false"
 
   backend:
     build:
@@ -75,15 +73,14 @@ services:
     networks:
       - kopahi_internal
       - dokploy-network
-    # Uncomment ONLY if you're managing routing via labels instead of Dokploy's
-    # Domains UI. ${API_HOST} must be defined in env.
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.docker.network=dokploy-network"
-    #   - "traefik.http.routers.kopahi-backend.rule=Host(`${API_HOST}`)"
-    #   - "traefik.http.routers.kopahi-backend.entrypoints=websecure"
-    #   - "traefik.http.routers.kopahi-backend.tls.certresolver=letsencrypt"
-    #   - "traefik.http.services.kopahi-backend.loadbalancer.server.port=5000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      - "traefik.http.routers.kopahi-backend.rule=Host(`${API_HOST}`)"
+      - "traefik.http.routers.kopahi-backend.entrypoints=websecure"
+      - "traefik.http.routers.kopahi-backend.tls=true"
+      - "traefik.http.routers.kopahi-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.kopahi-backend.loadbalancer.server.port=5000"
 
   frontend:
     build:
@@ -96,19 +93,22 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
     expose:
       - "3000"
     depends_on:
       - backend
     networks:
       - dokploy-network
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.docker.network=dokploy-network"
-    #   - "traefik.http.routers.kopahi-frontend.rule=Host(`${FRONTEND_HOST}`)"
-    #   - "traefik.http.routers.kopahi-frontend.entrypoints=websecure"
-    #   - "traefik.http.routers.kopahi-frontend.tls.certresolver=letsencrypt"
-    #   - "traefik.http.services.kopahi-frontend.loadbalancer.server.port=3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      - "traefik.http.routers.kopahi-frontend.rule=Host(`${FRONTEND_HOST}`)"
+      - "traefik.http.routers.kopahi-frontend.entrypoints=websecure"
+      - "traefik.http.routers.kopahi-frontend.tls=true"
+      - "traefik.http.routers.kopahi-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.kopahi-frontend.loadbalancer.server.port=3000"
 
   admin:
     build:
@@ -123,13 +123,14 @@ services:
       - backend
     networks:
       - dokploy-network
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.docker.network=dokploy-network"
-    #   - "traefik.http.routers.kopahi-admin.rule=Host(`${ADMIN_HOST}`)"
-    #   - "traefik.http.routers.kopahi-admin.entrypoints=websecure"
-    #   - "traefik.http.routers.kopahi-admin.tls.certresolver=letsencrypt"
-    #   - "traefik.http.services.kopahi-admin.loadbalancer.server.port=80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      - "traefik.http.routers.kopahi-admin.rule=Host(`${ADMIN_HOST}`)"
+      - "traefik.http.routers.kopahi-admin.entrypoints=websecure"
+      - "traefik.http.routers.kopahi-admin.tls=true"
+      - "traefik.http.routers.kopahi-admin.tls.certresolver=letsencrypt"
+      - "traefik.http.services.kopahi-admin.loadbalancer.server.port=80"
 
 volumes:
   postgres_data:
