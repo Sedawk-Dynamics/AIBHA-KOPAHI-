@@ -1,13 +1,72 @@
 import { Router } from "express";
+import bcrypt from "bcryptjs";
 import db from "../db";
 import protect from "../middleware/authMiddleware";
 import { adminOnly } from "../middleware/adminMiddleware";
 import asyncHandler from "../middleware/asyncHandler";
 import { recordAudit } from "../utils/auditLogger";
+import { validatePassword } from "../utils/passwordPolicy";
 
 const router = Router();
 
 router.use(protect, adminOnly);
+
+const createInternalUser = async (
+  req: import("express").Request,
+  res: import("express").Response,
+  role: "vendor" | "admin"
+) => {
+  const { name, email, password, phone, businessName } = req.body || {};
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Name, email and password are required",
+    });
+  }
+  if (role === "vendor" && !businessName) {
+    return res
+      .status(400)
+      .json({ success: false, message: "businessName is required for vendor accounts" });
+  }
+  const policy = validatePassword(password);
+  if (!policy.ok) {
+    return res.status(400).json({ success: false, message: policy.reason });
+  }
+  const exists = await db.users.findByEmail(email);
+  if (exists) {
+    return res
+      .status(409)
+      .json({ success: false, message: "An account with this email already exists" });
+  }
+  const hashed = await bcrypt.hash(password, 10);
+  const user = await db.users.create({
+    name,
+    email: String(email).toLowerCase(),
+    password: hashed,
+    phone: phone || "",
+    role,
+    businessName: role === "vendor" ? businessName : "",
+  });
+  if (!user) {
+    return res
+      .status(500)
+      .json({ success: false, message: `Could not create ${role} account` });
+  }
+  // Manually-onboarded users skip the email-verify gate.
+  await db.users.updateById(String(user.id), { emailVerified: true });
+
+  await recordAudit(req, {
+    action: role === "vendor" ? "admin.user_create_vendor" : "admin.user_create_admin",
+    targetType: "User",
+    targetId: String(user.id),
+    metadata: { email: user.email, role, businessName: businessName || null },
+  });
+
+  return res.status(201).json({
+    success: true,
+    user: { ...user, emailVerified: true },
+  });
+};
 
 router.get(
   "/dashboard",
@@ -84,6 +143,20 @@ router.delete(
       metadata: { name: product.name },
     });
     res.json({ success: true, message: "Product deleted" });
+  })
+);
+
+router.post(
+  "/users/create-vendor",
+  asyncHandler(async (req, res) => {
+    await createInternalUser(req, res, "vendor");
+  })
+);
+
+router.post(
+  "/users/create-admin",
+  asyncHandler(async (req, res) => {
+    await createInternalUser(req, res, "admin");
   })
 );
 
