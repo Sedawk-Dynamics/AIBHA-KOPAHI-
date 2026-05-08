@@ -24,6 +24,10 @@ export type ProductFilters = {
   category?: string;
   page?: number;
   pageSize?: number;
+  /** When true, include the vendor relation on each product (admin view). */
+  includeVendor?: boolean;
+  /** When true, also include inactive products (admin view). */
+  all?: boolean;
 };
 
 export type ProductListResult = {

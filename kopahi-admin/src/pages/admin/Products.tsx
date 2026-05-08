@@ -1,28 +1,54 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DashboardShell, { StatusBadge, PageHeader } from "../../components/DashboardShell";
+import { listProducts } from "../../lib/resources/products";
+import type { ApiProduct } from "../../lib/types";
+import { ApiError } from "../../lib/api";
 
-const products = [
-  { id: 1, name: "Assam Tea Premium", vendor: "Brahmaputra Tea Co.", price: 499, stock: 142, sold: 312, status: "Active", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=200&q=80" },
-  { id: 2, name: "Black Rice (Chak-hao)", vendor: "Manipur Spices", price: 699, stock: 38, sold: 89, status: "Active", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&q=80" },
-  { id: 3, name: "Wild Forest Honey", vendor: "Naga Honey Co.", price: 599, stock: 22, sold: 156, status: "Active", image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=200&q=80" },
-  { id: 4, name: "Lakadong Turmeric", vendor: "Hills Organic Farm", price: 299, stock: 0, sold: 203, status: "Inactive", image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&q=80" },
-  { id: 5, name: "Bhut Jolokia Pack", vendor: "Manipur Spices", price: 399, stock: 67, sold: 124, status: "Active", image: "https://images.unsplash.com/photo-1583286814430-1c2f9af2716b?w=200&q=80" },
-  { id: 6, name: "Tulsi Herbal Tea", vendor: "Brahmaputra Tea Co.", price: 349, stock: 91, sold: 54, status: "Active", image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=200&q=80" },
-];
+const PAGE_SIZE = 50;
 
 export default function AdminProducts() {
   const [search, setSearch] = useState("");
-  const filtered = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.vendor.toLowerCase().includes(search.toLowerCase())
-  );
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    listProducts({ includeVendor: true, all: true, page: 1, pageSize: PAGE_SIZE })
+      .then((res) => {
+        setProducts(res.products);
+        setCount(res.count);
+      })
+      .catch((err: unknown) =>
+        setError(err instanceof ApiError ? err.message : "Could not load products")
+      )
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return products;
+    const q = search.toLowerCase();
+    return products.filter((p) => {
+      const vendorName =
+        p.vendor?.businessName ?? p.vendor?.name ?? "";
+      return (
+        p.name.toLowerCase().includes(q) ||
+        vendorName.toLowerCase().includes(q)
+      );
+    });
+  }, [products, search]);
 
   return (
     <DashboardShell role="Admin">
       <PageHeader
         title="Products"
-        desc={`${products.length} total products listed across the marketplace`}
+        desc={
+          loading
+            ? "Loading products..."
+            : `${count} total products listed across the marketplace`
+        }
         breadcrumbs={[{ label: "Dashboard", to: "/admin" }, { label: "Products" }]}
       />
 
@@ -41,48 +67,80 @@ export default function AdminProducts() {
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-xs uppercase tracking-wider text-gray-500 bg-gray-50">
-              <tr>
-                <th className="text-left px-6 py-3 font-medium">Product</th>
-                <th className="text-left px-6 py-3 font-medium">Vendor</th>
-                <th className="text-left px-6 py-3 font-medium">Price</th>
-                <th className="text-left px-6 py-3 font-medium">Stock</th>
-                <th className="text-left px-6 py-3 font-medium">Sold</th>
-                <th className="text-left px-6 py-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((p) => (
-                <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover bg-gray-100" />
-                      <p className="font-semibold text-gray-900">{p.name}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{p.vendor}</td>
-                  <td className="px-6 py-4 text-gray-900 font-semibold">₹{p.price}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`text-sm font-medium ${
-                        p.stock === 0 ? "text-red-600" : p.stock < 30 ? "text-amber-600" : "text-gray-900"
-                      }`}
-                    >
-                      {p.stock}
-                    </span>
-                    {p.stock === 0 && (
-                      <span className="ml-2 text-[10px] font-bold uppercase text-red-600">Out</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{p.sold}</td>
-                  <td className="px-6 py-4">
-                    <StatusBadge status={p.status} />
-                  </td>
+          {error ? (
+            <div className="text-center py-16 text-sm text-red-600">{error}</div>
+          ) : loading ? (
+            <div className="text-center py-16 text-sm text-gray-500">Loading...</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-16 text-sm text-gray-500">
+              {products.length === 0
+                ? "No products yet."
+                : "No products match your search."}
+            </div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="text-xs uppercase tracking-wider text-gray-500 bg-gray-50">
+                <tr>
+                  <th className="text-left px-6 py-3 font-medium">Product</th>
+                  <th className="text-left px-6 py-3 font-medium">Vendor</th>
+                  <th className="text-left px-6 py-3 font-medium">Price</th>
+                  <th className="text-left px-6 py-3 font-medium">Stock</th>
+                  <th className="text-left px-6 py-3 font-medium">Category</th>
+                  <th className="text-left px-6 py-3 font-medium">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((p) => {
+                  const vendorLabel =
+                    p.vendor?.businessName ?? p.vendor?.name ?? "—";
+                  const stockNum = Number(p.stock) || 0;
+                  return (
+                    <tr
+                      key={p.id}
+                      className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={p.images?.[0] ?? ""}
+                            alt={p.name}
+                            className="w-10 h-10 rounded-lg object-cover bg-gray-100"
+                          />
+                          <p className="font-semibold text-gray-900">{p.name}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{vendorLabel}</td>
+                      <td className="px-6 py-4 text-gray-900 font-semibold">
+                        ₹{Number(p.price).toLocaleString("en-IN")}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`text-sm font-medium ${
+                            stockNum === 0
+                              ? "text-red-600"
+                              : stockNum < 30
+                              ? "text-amber-600"
+                              : "text-gray-900"
+                          }`}
+                        >
+                          {stockNum}
+                        </span>
+                        {stockNum === 0 && (
+                          <span className="ml-2 text-[10px] font-bold uppercase text-red-600">
+                            Out
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{p.category ?? "—"}</td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={p.isActive ? "Active" : "Inactive"} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </DashboardShell>

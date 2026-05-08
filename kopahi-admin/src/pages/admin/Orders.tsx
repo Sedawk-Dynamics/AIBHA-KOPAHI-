@@ -1,48 +1,93 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DashboardShell, { StatusBadge, PageHeader } from "../../components/DashboardShell";
+import { listOrders } from "../../lib/resources/orders";
+import type { ApiOrder, OrderStatus } from "../../lib/types";
+import { ApiError } from "../../lib/api";
 
-const allOrders = [
-  { id: "KP-2847", customer: "Rahul Sharma", email: "rahul@example.com", product: "Assam Tea Premium", amount: "₹1,499", status: "Delivered", date: "26 Apr 2026" },
-  { id: "KP-2846", customer: "Priya Das", email: "priya@example.com", product: "Wild Forest Honey", amount: "₹899", status: "Shipped", date: "26 Apr 2026" },
-  { id: "KP-2845", customer: "Ankit Jain", email: "ankit@example.com", product: "Black Rice 5kg", amount: "₹3,495", status: "Processing", date: "25 Apr 2026" },
-  { id: "KP-2844", customer: "Sneha Roy", email: "sneha@example.com", product: "Lakadong Turmeric", amount: "₹649", status: "Delivered", date: "25 Apr 2026" },
-  { id: "KP-2843", customer: "Amit Verma", email: "amit@example.com", product: "Bhut Jolokia Pack", amount: "₹1,299", status: "Pending", date: "24 Apr 2026" },
-  { id: "KP-2842", customer: "Meera Iyer", email: "meera@example.com", product: "Assam Tea Gift Pack", amount: "₹2,299", status: "Delivered", date: "24 Apr 2026" },
-  { id: "KP-2841", customer: "Vikram Singh", email: "vikram@example.com", product: "Green Tea 500g", amount: "₹899", status: "Shipped", date: "23 Apr 2026" },
-  { id: "KP-2840", customer: "Anjali Roy", email: "anjali@example.com", product: "Masala Chai Blend", amount: "₹649", status: "Processing", date: "23 Apr 2026" },
+const STATUS_OPTIONS: ReadonlyArray<"All" | OrderStatus> = [
+  "All",
+  "Placed",
+  "Processing",
+  "Packed",
+  "Shipped",
+  "Delivered",
+  "Cancelled",
 ];
+
+const PAGE_SIZE = 20;
+
+const formatINR = (amount: number | string) =>
+  `₹${Number(amount).toLocaleString("en-IN")}`;
+
+const formatDate = (iso: string) => {
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
 export default function AdminOrders() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | OrderStatus>("All");
+  const [page, setPage] = useState(1);
 
-  const filtered = allOrders.filter((o) => {
-    const matchSearch =
-      o.id.toLowerCase().includes(search.toLowerCase()) ||
-      o.customer.toLowerCase().includes(search.toLowerCase()) ||
-      o.product.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "All" || o.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  const [orders, setOrders] = useState<ApiOrder[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [pages, setPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const statuses = ["All", "Pending", "Processing", "Shipped", "Delivered"];
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    listOrders({ status: statusFilter, page, pageSize: PAGE_SIZE })
+      .then((res) => {
+        setOrders(res.orders);
+        setTotalCount(res.count);
+        setPages(res.pages);
+      })
+      .catch((err: unknown) =>
+        setError(err instanceof ApiError ? err.message : "Could not load orders")
+      )
+      .finally(() => setLoading(false));
+  }, [statusFilter, page]);
+
+  // Search filters client-side over the page already on screen.
+  const filtered = useMemo(() => {
+    if (!search.trim()) return orders;
+    const q = search.toLowerCase();
+    return orders.filter((o) => {
+      const idMatch = o._id.toLowerCase().includes(q);
+      const customerMatch =
+        (o.user?.name ?? "").toLowerCase().includes(q) ||
+        (o.user?.email ?? "").toLowerCase().includes(q);
+      const productMatch = o.items.some((i) => i.name.toLowerCase().includes(q));
+      return idMatch || customerMatch || productMatch;
+    });
+  }, [orders, search]);
+
+  const needsAttentionCount = useMemo(
+    () =>
+      orders.filter(
+        (o) => o.orderStatus === "Placed" || o.orderStatus === "Processing"
+      ).length,
+    [orders]
+  );
 
   return (
     <DashboardShell role="Admin">
       <PageHeader
         title="Orders"
-        desc={`${allOrders.length} total orders · ${allOrders.filter((o) => o.status === "Pending" || o.status === "Processing").length} need attention`}
-        breadcrumbs={[{ label: "Dashboard", to: "/admin" }, { label: "Orders" }]}
-        action={
-          <button className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium inline-flex items-center gap-2 transition-colors">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Export CSV
-          </button>
+        desc={
+          loading
+            ? "Loading orders..."
+            : `${totalCount} total orders · ${needsAttentionCount} on this page need attention`
         }
+        breadcrumbs={[{ label: "Dashboard", to: "/admin" }, { label: "Orders" }]}
       />
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
@@ -54,17 +99,22 @@ export default function AdminOrders() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search orders..."
+              placeholder="Search this page..."
               className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:bg-white focus:border-green-600 focus:ring-2 focus:ring-green-100"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
-            {statuses.map((s) => (
+            {STATUS_OPTIONS.map((s) => (
               <button
                 key={s}
-                onClick={() => setStatusFilter(s)}
+                onClick={() => {
+                  setStatusFilter(s);
+                  setPage(1);
+                }}
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                  statusFilter === s ? "bg-green-700 text-white" : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                  statusFilter === s
+                    ? "bg-green-700 text-white"
+                    : "bg-gray-50 text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 {s}
@@ -74,8 +124,16 @@ export default function AdminOrders() {
         </div>
 
         <div className="overflow-x-auto">
-          {filtered.length === 0 ? (
-            <div className="text-center py-16 text-sm text-gray-500">No orders match your filters.</div>
+          {error ? (
+            <div className="text-center py-16 text-sm text-red-600">{error}</div>
+          ) : loading ? (
+            <div className="text-center py-16 text-sm text-gray-500">Loading...</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-16 text-sm text-gray-500">
+              {orders.length === 0
+                ? "No orders yet. They'll appear here as customers place them."
+                : "No orders match your search on this page."}
+            </div>
           ) : (
             <table className="w-full text-sm">
               <thead className="text-xs uppercase tracking-wider text-gray-500 bg-gray-50">
@@ -91,22 +149,29 @@ export default function AdminOrders() {
               <tbody>
                 {filtered.map((o) => (
                   <tr
-                    key={o.id}
-                    onClick={() => navigate(`/admin/orders/${o.id}`)}
+                    key={o._id}
+                    onClick={() => navigate(`/admin/orders/${o._id}`)}
                     className="border-t border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     <td className="px-6 py-4">
-                      <p className="font-medium text-gray-900">#{o.id}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{o.product}</p>
+                      <p className="font-medium text-gray-900">
+                        #{o._id.slice(-6).toUpperCase()}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {o.items[0]?.name ?? "—"}
+                        {o.items.length > 1 ? ` + ${o.items.length - 1} more` : ""}
+                      </p>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-gray-900">{o.customer}</p>
-                      <p className="text-xs text-gray-500">{o.email}</p>
+                      <p className="text-gray-900">{o.user?.name ?? "—"}</p>
+                      <p className="text-xs text-gray-500">{o.user?.email ?? ""}</p>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{o.date}</td>
-                    <td className="px-6 py-4 font-semibold text-gray-900">{o.amount}</td>
+                    <td className="px-6 py-4 text-gray-600">{formatDate(o.createdAt)}</td>
+                    <td className="px-6 py-4 font-semibold text-gray-900">
+                      {formatINR(o.totalPrice)}
+                    </td>
                     <td className="px-6 py-4">
-                      <StatusBadge status={o.status} />
+                      <StatusBadge status={o.orderStatus} />
                     </td>
                     <td className="px-6 py-4 text-right">
                       <svg className="w-4 h-4 text-gray-400 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,6 +184,30 @@ export default function AdminOrders() {
             </table>
           )}
         </div>
+
+        {pages > 1 && (
+          <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-600">
+            <span>
+              Page {page} of {pages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button
+                disabled={page >= pages}
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+                className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardShell>
   );
