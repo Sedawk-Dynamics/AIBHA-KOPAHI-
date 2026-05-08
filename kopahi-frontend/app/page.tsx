@@ -418,7 +418,17 @@ export default function Home() {
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/55 to-black/75"></div>
 
-        <div className="relative z-10 min-h-[100svh] flex items-center justify-center text-center px-5 sm:px-6 pt-24 sm:pt-28 lg:pt-36 pb-16 sm:pb-20">
+        {/*
+          Top padding must clear the fixed header on every breakpoint:
+            xs(<md): main 80px              -> pt-28 (112px)  buffer 32px
+            sm:     main 96px               -> pt-32 (128px)  buffer 32px
+            md:     topbar 36 + main 96=132 -> pt-40 (160px)  buffer 28px
+            lg+:    topbar 40 + main 112=152-> pt-48 (192px)  buffer 40px
+          The previous pt-24 sm:pt-28 lg:pt-36 dropped *below* the header at
+          lg, which pushed the "Farmer Stories of North East India" eyebrow
+          behind the navbar.
+        */}
+        <div className="relative z-10 min-h-[100svh] flex items-center justify-center text-center px-5 sm:px-6 pt-28 sm:pt-32 md:pt-40 lg:pt-48 pb-16 sm:pb-20">
           <div className="max-w-4xl text-white reveal">
             <p className="text-green-300 font-semibold text-xs sm:text-sm md:text-base mb-4 sm:mb-5 uppercase tracking-[0.22em] sm:tracking-[0.25em]">
               Farmer Stories of North East India
