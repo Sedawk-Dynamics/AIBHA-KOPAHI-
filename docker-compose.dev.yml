@@ -1,6 +1,9 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Local-dev override for `docker-compose.yml`. Publishes ports to host and
-# bypasses Dokploy's external `dokploy-network` (which doesn't exist locally).
+# Local-dev override for `docker-compose.yml`.
+#
+# In production the database is a separate Dokploy "Database" service.
+# For local development we add a throwaway Postgres container and wire the
+# backend to it via DATABASE_URL.
 #
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
@@ -13,18 +16,34 @@
 
 services:
   postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kopahi
+      POSTGRES_PASSWORD: kopahi
+      POSTGRES_DB: kopahi
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kopahi -d kopahi"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - dokploy-network
 
   backend:
     environment:
+      DATABASE_URL: postgresql://kopahi:kopahi@postgres:5432/kopahi?schema=public
       FRONTEND_URL: http://localhost:3000
       ADMIN_URL: http://localhost:3001
     ports:
       - "5000:5000"
-    networks:
-      - kopahi_internal
-      - dokploy-network
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   frontend:
     build:
@@ -33,8 +52,6 @@ services:
         NEXT_PUBLIC_ADMIN_URL: http://localhost:3001
     ports:
       - "3000:3000"
-    networks:
-      - dokploy-network
 
   admin:
     build:
@@ -42,12 +59,14 @@ services:
         VITE_API_URL: http://localhost:5000
     ports:
       - "3001:80"
-    networks:
-      - dokploy-network
+
+volumes:
+  postgres_data:
 
 networks:
-  # Override: define dokploy-network locally so the dev stack doesn't error on
-  # the `external: true` declaration in the production compose.
+  # Locally we don't have Dokploy's external network — define a regular bridge
+  # network with the same name so the production compose's `external: true`
+  # is overridden.
   dokploy-network:
     external: false
     driver: bridge

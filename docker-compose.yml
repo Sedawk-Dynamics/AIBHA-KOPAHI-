@@ -1,10 +1,16 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Dokploy production compose — 4 services behind Traefik on `dokploy-network`.
+# Dokploy production compose — 3 services behind Traefik on `dokploy-network`.
+#
+# DATABASE: this compose does NOT include Postgres. The DB is provisioned as
+# a separate Dokploy "Database" service (the `db` service in your project).
+# Copy the connection URL Dokploy shows on the db service page into the
+# DATABASE_URL env var below.
 #
 # Required env vars (set in Dokploy → project → Environment):
-#   POSTGRES_PASSWORD       strong random
+#   DATABASE_URL            postgresql://USER:PASS@db:5432/DBNAME?schema=public
+#                           (Dokploy gives you this on the db service page)
 #   JWT_SECRET              `openssl rand -hex 48`
-#   FRONTEND_HOST           bare hostname, no scheme  (e.g. aibaagri.sedawk.cloud)
+#   FRONTEND_HOST           bare hostname, no scheme (e.g. aibaagri.sedawk.cloud)
 #   ADMIN_HOST              bare hostname, no scheme
 #   API_HOST                bare hostname, no scheme
 #   FRONTEND_URL            https://${FRONTEND_HOST}
@@ -13,35 +19,11 @@
 #   NEXT_PUBLIC_ADMIN_URL   https://${ADMIN_HOST}
 #   (optional)              SMTP_*, CLOUDINARY_*, RAZORPAY_*
 #
-# Domains are resolved via the explicit Traefik labels below — Dokploy's
-# Domains UI is informational here. Each service that should be public has
-# `traefik.enable=true` + a `Host()` rule.
-#
-# Local dev:
+# Local dev (uses its own throwaway Postgres):
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-kopahi}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
-      POSTGRES_DB: ${POSTGRES_DB:-kopahi}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kopahi} -d ${POSTGRES_DB:-kopahi}"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 20s
-    networks:
-      - kopahi_internal
-    labels:
-      - "traefik.enable=false"
-
   backend:
     build:
       context: ./kopahi-backend
@@ -51,7 +33,7 @@ services:
       NODE_ENV: production
       PORT: "5000"
       LOG_LEVEL: ${LOG_LEVEL:-info}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-kopahi}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-kopahi}?schema=public
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set (copy from Dokploy db service)}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-30d}
       FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL must be set}
@@ -67,11 +49,7 @@ services:
       RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
     expose:
       - "5000"
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
-      - kopahi_internal
       - dokploy-network
     labels:
       - "traefik.enable=true"
@@ -132,14 +110,8 @@ services:
       - "traefik.http.routers.kopahi-admin.tls.certresolver=letsencrypt"
       - "traefik.http.services.kopahi-admin.loadbalancer.server.port=80"
 
-volumes:
-  postgres_data:
-    driver: local
-
 networks:
-  # Private network — only services that need DB access (backend + postgres) join.
-  kopahi_internal:
-    driver: bridge
-  # Dokploy's reverse-proxy network. External so Traefik can route to us.
+  # Dokploy's reverse-proxy network. The managed `db` service also joins this
+  # network so the backend can reach it by its internal hostname.
   dokploy-network:
     external: true

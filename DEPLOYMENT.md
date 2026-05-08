@@ -1,107 +1,126 @@
 # Deploying Kopahi on Dokploy
 
-Step-by-step for getting the three services + Postgres running on a Dokploy
-VPS, fronted by Traefik with Let's Encrypt SSL.
+The deployment uses **two separate Dokploy services**:
+
+1. A managed **PostgreSQL Database** service (Dokploy's built-in DB type)
+2. A **Compose** service that bundles the backend + frontend + admin
+
+Both join the `dokploy-network` so the apps reach the DB by its internal
+hostname (no public port needed).
+
+---
 
 ## 0. Prerequisites
 
-- A Dokploy server (self-hosted) with the dashboard accessible at
-  `https://your-dokploy-server.example.com`.
-- A domain you control (e.g. `kopahi.example.com`) with the ability to add
-  three subdomain A-records.
+- A Dokploy server (self-hosted) with the dashboard accessible.
+- A domain you control (e.g. `aibaagri.sedawk.cloud`) with the ability to add
+  three A-records.
 - This GitHub repo: `https://github.com/Sedawk-Dynamics/AIBHA-KOPAHI-`
 
 ## 1. DNS
 
-Add three A-records pointing at your Dokploy server's public IP:
+Add three A-records pointing to your Dokploy server's public IP:
 
-| Hostname (example) | Type | Points to |
+| Hostname | Type | Points to |
 |---|---|---|
-| `kopahi.example.com` | A | Dokploy server IP |
-| `admin.kopahi.example.com` | A | Dokploy server IP |
-| `api.kopahi.example.com` | A | Dokploy server IP |
+| `aibaagri.sedawk.cloud` | A | Dokploy server IP |
+| `admin.aibaagri.sedawk.cloud` | A | Dokploy server IP |
+| `api.aibaagri.sedawk.cloud` | A | Dokploy server IP |
 
-You can use any names — they just need to match the values you'll set in env vars below.
+Substitute your own subdomains as needed — they just have to match the
+`*_HOST` env vars below.
 
-## 2. Create the Compose project in Dokploy
+## 2. Create the PostgreSQL service
 
-1. Dokploy dashboard → **Projects → Create project** (e.g. `kopahi-prod`).
-2. Inside the project: **Create service → Compose**.
-3. **Provider**: GitHub. Connect this repo: `Sedawk-Dynamics/AIBHA-KOPAHI-`.
-4. **Branch**: `main`.
-5. **Compose path**: `docker-compose.yml` (default).
-6. **Compose type**: leave as default (Docker Compose).
+1. Dokploy → Project (e.g. **AIBHA**) → **Create service → Database → PostgreSQL**.
+2. Name it `db`.
+3. Choose Postgres version (16+).
+4. Set:
+   - **Database name**: `kopahi`
+   - **User**: `kopahi`
+   - **Password**: a strong random string
+5. Deploy.
+6. Once it's running, open the service page and copy the **internal
+   connection URL** — it looks like:
+   ```
+   postgresql://kopahi:<password>@db:5432/kopahi?schema=public
+   ```
+   (the host part is whatever Dokploy assigns — `db` if you named it that, or
+   sometimes a generated name like `aibha-db-abc123`).
 
-## 3. Set environment variables
+## 3. Create the Compose service
 
-In the project's **Environment** tab, paste these (substitute your values):
+1. Same project → **Create service → Compose**.
+2. **Provider**: GitHub. Connect this repo, branch `main`.
+3. **Compose path**: `docker-compose.yml`.
+
+## 4. Set environment variables on the Compose service
+
+In the Compose service's **Environment** tab paste this, substituting your values:
 
 ```env
-# REQUIRED
-POSTGRES_USER=kopahi
-POSTGRES_DB=kopahi
-POSTGRES_PASSWORD=<strong-random>
+# DB connection — from the db service in step 2
+DATABASE_URL=postgresql://kopahi:<password>@db:5432/kopahi?schema=public
+
+# Auth
 JWT_SECRET=<openssl rand -hex 48>
+JWT_EXPIRES_IN=30d
+LOG_LEVEL=info
 
-# Hostnames
-FRONTEND_HOST=kopahi.example.com
-ADMIN_HOST=admin.kopahi.example.com
-API_HOST=api.kopahi.example.com
+# Public hostnames (no scheme, no trailing slash)
+FRONTEND_HOST=aibaagri.sedawk.cloud
+ADMIN_HOST=admin.aibaagri.sedawk.cloud
+API_HOST=api.aibaagri.sedawk.cloud
 
-# Inter-service / build-time URLs
-FRONTEND_URL=https://kopahi.example.com
-ADMIN_URL=https://admin.kopahi.example.com
-NEXT_PUBLIC_API_URL=https://api.kopahi.example.com
-NEXT_PUBLIC_ADMIN_URL=https://admin.kopahi.example.com
+# Inter-service / browser-facing URLs (with https://)
+FRONTEND_URL=https://aibaagri.sedawk.cloud
+ADMIN_URL=https://admin.aibaagri.sedawk.cloud
+NEXT_PUBLIC_API_URL=https://api.aibaagri.sedawk.cloud
+NEXT_PUBLIC_ADMIN_URL=https://admin.aibaagri.sedawk.cloud
 
-# Optional
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-RAZORPAY_KEY_ID=
-RAZORPAY_KEY_SECRET=
+# Optional — uncomment / fill in as needed
+# SMTP_HOST=
+# SMTP_PORT=587
+# SMTP_USER=
+# SMTP_PASS=
+# CLOUDINARY_CLOUD_NAME=
+# CLOUDINARY_API_KEY=
+# CLOUDINARY_API_SECRET=
+# RAZORPAY_KEY_ID=
+# RAZORPAY_KEY_SECRET=
 ```
 
-> **Important:** the `NEXT_PUBLIC_*` vars are baked into the JavaScript bundles
-> at **build time**. If you change them, you must redeploy (rebuild) — restart
-> alone won't pick them up.
+> **Important:** the `NEXT_PUBLIC_*` vars are baked into the JavaScript bundle
+> at **build time**. If you change them, click **Redeploy** (a restart alone
+> won't pick them up).
 
-## 4. Map domains to services
+## 5. Map domains
 
-In the project's **Domains** tab, add three entries:
+The `docker-compose.yml` already declares Traefik labels for each public
+service, so domains route by `Host()` rule. You **also** want to add them to
+the Dokploy **Domains** tab so the UI shows DNS validation status:
 
-| Domain | Service | Port | HTTPS | Cert resolver |
-|---|---|---|---|---|
-| `kopahi.example.com` (or your `FRONTEND_HOST`) | `frontend` | `3000` | ✓ | Let's Encrypt |
-| `admin.kopahi.example.com` (your `ADMIN_HOST`) | `admin` | `80` | ✓ | Let's Encrypt |
-| `api.kopahi.example.com` (your `API_HOST`) | `backend` | `5000` | ✓ | Let's Encrypt |
+| Domain | Service | Port | HTTPS |
+|---|---|---|---|
+| `aibaagri.sedawk.cloud` | `frontend` | 3000 | ✓ |
+| `admin.aibaagri.sedawk.cloud` | `admin` | 80 | ✓ |
+| `api.aibaagri.sedawk.cloud` | `backend` | 5000 | ✓ |
 
-Dokploy will provision Let's Encrypt certs automatically once the DNS resolves
-to the server.
+## 6. Deploy
 
-## 5. Deploy
+Hit **Deploy** on the Compose service. Dokploy will:
 
-Hit **Deploy**. Dokploy will:
+1. Build all three Docker images (`backend`, `frontend`, `admin`).
+2. Bring them up on `dokploy-network`.
+3. Apply Traefik routing (declared in compose labels).
+4. Backend's start command is `npx prisma migrate deploy && node dist/server.js`,
+   so migrations run automatically on first boot. Idempotent across redeploys.
 
-1. Pull the repo.
-2. Build all three Docker images (`backend`, `frontend`, `admin`).
-3. Pull `postgres:16-alpine`.
-4. Bring the stack up on `dokploy-network`.
-5. Apply Traefik routing for the three domains.
-6. Backend's start command is `npx prisma migrate deploy && node dist/server.js`,
-   so migrations run automatically on first boot and any future deploy. Idempotent.
+## 7. Seed the database (one-time)
 
-## 6. Seed the database (one-time)
-
-Dokploy → service `backend` → **Terminal** tab → run:
+Compose service → backend → **Terminal** tab → run:
 
 ```bash
-node /app/node_modules/prisma/build/index.js db seed
-# or, equivalently:
 npx prisma db seed
 ```
 
@@ -114,55 +133,59 @@ Wait for `Seeded users, categories, products, coupons, blog posts.` Demo logins
 After your first real users exist, **change** the seed admin password (or
 delete the demo admin row) — the demo password is publicly documented.
 
-## 7. Verify
+## 8. Verify
 
-- `https://api.kopahi.example.com/api/health` → `{"success":true,"uptime":...}`
-- `https://api.kopahi.example.com/api/docs` → Swagger UI
-- `https://kopahi.example.com` → customer site
-- `https://admin.kopahi.example.com` → admin login → sign in as admin → lands on `/admin`
+- `https://api.aibaagri.sedawk.cloud/api/health` → `{"success":true,"uptime":...}`
+- `https://api.aibaagri.sedawk.cloud/api/docs` → Swagger UI
+- `https://aibaagri.sedawk.cloud` → customer site
+- `https://admin.aibaagri.sedawk.cloud` → admin login → sign in as admin → land on `/admin`
 
-## 8. (Optional) PostgreSQL backups
+## 9. (Optional) PostgreSQL backups
 
-In Dokploy → service `postgres` → **Backups** tab — schedule daily `pg_dump`
-into S3-compatible storage. The volume `postgres_data` already persists across
-restarts; backups protect against human error.
+Dokploy's managed Database service has its own **Backups** tab — schedule
+daily `pg_dump` to S3-compatible storage. The Postgres volume already persists
+across restarts; backups protect against human error.
 
 ---
 
-## Local development with the same compose
+## Local development
 
 ```bash
-# From the repo root
+# From the repo root — uses a throwaway Postgres in the override file
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-This override file:
-- Publishes Postgres on `:5432`, backend on `:5000`, frontend on `:3000`, admin on `:3001`.
-- Defines `dokploy-network` locally (it isn't external when not on Dokploy).
-- Sets `FRONTEND_URL`/`ADMIN_URL`/`NEXT_PUBLIC_*` to localhost values.
+Or without Docker:
+```bash
+# Postgres on host (or via npx ts-node kopahi-backend/scripts/start-pg.ts)
+cd kopahi-backend && npm install && npx prisma migrate dev && npm run seed && npm run dev   # :5000
+cd ../kopahi-frontend && npm install && npm run dev                                          # :3000
+cd ../kopahi-admin && npm install && npm run dev                                             # :3001
+```
 
 ## Troubleshooting
 
 **Frontend builds but renders against the wrong API URL.**
 You changed `NEXT_PUBLIC_API_URL` after the first deploy without rebuilding.
-Trigger a redeploy in Dokploy — Next.js bakes those vars into the bundle at build time.
+Click **Redeploy** in Dokploy — Next.js bakes those vars into the bundle at build time.
 
 **`Could not reach the server` from the admin app.**
 CORS rejecting it. Check that `ADMIN_URL` env on the backend matches the actual
-admin domain (no trailing slash, correct scheme). Check the backend logs for
+admin domain (no trailing slash, correct scheme). Backend logs will show
 `CORS: origin … not allowed`.
 
+**Black `404 page not found` page.**
+That's Traefik's default 404 — it received the request but couldn't find a
+matching service. Confirm:
+- The compose has Traefik labels (it does in this repo)
+- All three services are on `dokploy-network`
+- The `*_HOST` env vars are set and match the domains in the Domains tab
+- Containers are running (compose service → service tab → green status dot)
+
 **`Authentication failed for user "kopahi"`.**
-The Postgres password you set in `POSTGRES_PASSWORD` doesn't match the
-`DATABASE_URL` Postgres expects. Both are derived from the same env var in
-compose — if you changed `POSTGRES_PASSWORD` after the volume was initialized,
-the DB user still has the old password. Either:
-1. Wipe the `postgres_data` volume (Dokploy → Volumes → delete) and redeploy, or
-2. Open a `psql` shell into the postgres container and `ALTER USER kopahi WITH PASSWORD '<new>'`.
+Password mismatch between `DATABASE_URL` and what Postgres has. Open the
+`db` service in Dokploy → reset password → copy the fresh URL → paste into
+the Compose service's `DATABASE_URL` env → Redeploy.
 
 **Migrations didn't apply.**
-Open the backend logs — the start command is `prisma migrate deploy && node dist/server.js`. If migrate fails, the container exits. Most common cause is `DATABASE_URL` unreachable from the backend container — verify `postgres` service is healthy and on the same `kopahi_internal` network.
-
-**Image too big.**
-The Next.js Dockerfile uses `output: "standalone"` so the runtime image is just
-the standalone server + `.next/static` + `public/`. The admin image is `nginx:alpine` serving static files — both are < 100 MB.
+Open the backend logs — start command is `prisma migrate deploy && node dist/server.js`. If migrate fails, the container exits. Most common cause is `DATABASE_URL` not reachable from the backend container — check that both the Compose service and the `db` service are on the same network (Dokploy puts both on `dokploy-network` automatically).
