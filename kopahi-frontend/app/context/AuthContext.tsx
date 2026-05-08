@@ -14,13 +14,14 @@ type AuthState = {
   refresh: () => Promise<void>;
 };
 
+// Customer-only — backend's POST /api/auth/register strips role and always
+// creates role: "user". Vendor signups go through the dedicated
+// POST /api/auth/register-vendor endpoint (handled in app/vendor-signup/).
 type RegisterPayload = {
   name: string;
   email: string;
   password: string;
   phone?: string;
-  role?: "user" | "vendor";
-  businessName?: string;
 };
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
