@@ -16,6 +16,7 @@ import VendorOverview from "./pages/vendor/Overview";
 import VendorOrders from "./pages/vendor/Orders";
 import VendorProducts from "./pages/vendor/Products";
 import VendorProductNew from "./pages/vendor/ProductNew";
+import VendorProductEdit from "./pages/vendor/ProductEdit";
 import VendorEarnings from "./pages/vendor/Earnings";
 import VendorReviews from "./pages/vendor/Reviews";
 
@@ -46,6 +47,7 @@ export default function App() {
       <Route path="/vendor" element={<ProtectedRoute allow={["vendor", "admin"]}><VendorOverview /></ProtectedRoute>} />
       <Route path="/vendor/products" element={<ProtectedRoute allow={["vendor", "admin"]}><VendorProducts /></ProtectedRoute>} />
       <Route path="/vendor/products/new" element={<ProtectedRoute allow={["vendor", "admin"]}><VendorProductNew /></ProtectedRoute>} />
+      <Route path="/vendor/products/:id/edit" element={<ProtectedRoute allow={["vendor", "admin"]}><VendorProductEdit /></ProtectedRoute>} />
       <Route path="/vendor/orders" element={<ProtectedRoute allow={["vendor", "admin"]}><VendorOrders /></ProtectedRoute>} />
       <Route path="/vendor/earnings" element={<ProtectedRoute allow={["vendor", "admin"]}><VendorEarnings /></ProtectedRoute>} />
       <Route path="/vendor/reviews" element={<ProtectedRoute allow={["vendor", "admin"]}><VendorReviews /></ProtectedRoute>} />

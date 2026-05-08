@@ -1,42 +1,30 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import DashboardShell, { StatusBadge } from "../../components/DashboardShell";
-import { api, toApiError } from "../../lib/api";
+import { getAdminStats } from "../../lib/resources/dashboard";
+import { listOrders } from "../../lib/resources/orders";
+import { ApiError } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
-
-type Stats = {
-  totalUsers?: number;
-  totalVendors?: number;
-  totalOrders?: number;
-  totalProducts?: number;
-  revenue?: number;
-  leads?: number;
-};
-
-type ApiOrder = {
-  _id: string;
-  user?: { name?: string; email?: string };
-  totalPrice: number;
-  orderStatus: string;
-  items?: { name: string }[];
-};
+import type { AdminDashboard, ApiOrder } from "../../lib/types";
 
 export default function AdminOverview() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<AdminDashboard | null>(null);
   const [recentOrders, setRecentOrders] = useState<ApiOrder[]>([]);
   const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
-    api
-      .get<{ data: Stats }>("/api/admin/dashboard")
-      .then((res) => setStats(res.data as unknown as Stats))
-      .catch((err) => setLoadError(toApiError(err).message));
+    getAdminStats()
+      .then(setStats)
+      .catch((err: unknown) =>
+        setLoadError(err instanceof ApiError ? err.message : "Could not load stats")
+      );
 
-    api
-      .get<{ orders: ApiOrder[] }>("/api/orders")
-      .then((res) => setRecentOrders((res.data.orders || []).slice(0, 5)))
-      .catch(() => {});
+    listOrders({ page: 1, pageSize: 5 })
+      .then((res) => setRecentOrders(res.orders))
+      .catch(() => {
+        // Recent orders are non-critical — silently leave the list empty.
+      });
   }, []);
 
   const fmt = (n?: number) => (n === undefined ? "—" : n.toLocaleString("en-IN"));
@@ -109,9 +97,9 @@ export default function AdminOverview() {
                     <tr key={o._id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
                         <p className="font-medium text-gray-900">#{o._id.slice(-6).toUpperCase()}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{o.items?.[0]?.name || "—"}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{o.items[0]?.name ?? "—"}</p>
                       </td>
-                      <td className="px-6 py-4 text-gray-700">{o.user?.name || o.user?.email || "—"}</td>
+                      <td className="px-6 py-4 text-gray-700">{o.user?.name ?? o.user?.email ?? "—"}</td>
                       <td className="px-6 py-4 font-semibold text-gray-900">
                         ₹{Number(o.totalPrice).toLocaleString("en-IN")}
                       </td>

@@ -19,14 +19,47 @@ import type {
   ApiResource,
 } from "../types";
 
+export type OrderListFilters = {
+  status?: OrderStatus | "All";
+  page?: number;
+  pageSize?: number;
+};
+
+export type OrderListResult = {
+  orders: ApiOrder[];
+  page: number;
+  pages: number;
+  count: number;
+};
+
 /**
- * GET /api/orders — admin-only list of all orders, sorted newest first.
- * Returns user.name/email populated on each order.
+ * GET /api/orders — admin-only. Supports ?status=&page=&pageSize=.
+ * Returns user.name/email populated on each order. The status filter is
+ * applied server-side; "All" or unset disables the filter.
  */
-export const listOrders = async (): Promise<ApiOrder[]> => {
+export const listOrders = async (
+  filters: OrderListFilters = {}
+): Promise<OrderListResult> => {
   try {
-    const res = await api.get<ApiListResponse<"orders", ApiOrder>>("/api/orders");
-    return res.data.orders;
+    const params: Record<string, string | number> = {};
+    if (filters.status && filters.status !== "All") params.status = filters.status;
+    if (filters.page) params.page = filters.page;
+    if (filters.pageSize) params.pageSize = filters.pageSize;
+
+    const res = await api.get<{
+      success: true;
+      count: number;
+      page?: number;
+      pages?: number;
+      orders: ApiOrder[];
+    }>("/api/orders", { params });
+
+    return {
+      orders: res.data.orders,
+      page: res.data.page ?? 1,
+      pages: res.data.pages ?? 1,
+      count: res.data.count,
+    };
   } catch (err) {
     throw toApiError(err);
   }
