@@ -40,9 +40,16 @@ router.get(
       filter.category = req.query.category;
     }
 
+    // Admin Products view passes ?includeVendor=true to populate the
+    // vendor relation in the response.
+    const includeVendor = req.query.includeVendor === "true";
+    // When listing for admin, also surface inactive products so the toggle is visible.
+    if (req.query.all === "true") delete filter.isActive;
+
     const { count, page, pages, items } = await db.products.list(filter, {
       page: req.query.page as string,
       pageSize: req.query.pageSize as string,
+      includeVendor,
     });
 
     res.json({ success: true, page, pages, count, products: items });

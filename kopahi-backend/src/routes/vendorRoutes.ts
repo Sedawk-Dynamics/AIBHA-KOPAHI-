@@ -30,4 +30,13 @@ router.get(
   })
 );
 
+/* Orders containing at least one product owned by the logged-in vendor. */
+router.get(
+  "/orders",
+  asyncHandler(async (req, res) => {
+    const orders = await db.orders.findByVendor(String(req.user.id));
+    res.json({ success: true, count: orders?.length ?? 0, orders });
+  })
+);
+
 export default router;
