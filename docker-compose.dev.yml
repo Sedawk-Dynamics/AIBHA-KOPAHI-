@@ -1,0 +1,53 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Local-dev override for `docker-compose.yml`. Publishes ports to host and
+# bypasses Dokploy's external `dokploy-network` (which doesn't exist locally).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# Then open:
+#   http://localhost:3000  (customer)
+#   http://localhost:3001  (admin)
+#   http://localhost:5000  (backend / api docs at /api/docs)
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  backend:
+    environment:
+      FRONTEND_URL: http://localhost:3000
+      ADMIN_URL: http://localhost:3001
+    ports:
+      - "5000:5000"
+    networks:
+      - kopahi_internal
+      - dokploy-network
+
+  frontend:
+    build:
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:5000
+        NEXT_PUBLIC_ADMIN_URL: http://localhost:3001
+    ports:
+      - "3000:3000"
+    networks:
+      - dokploy-network
+
+  admin:
+    build:
+      args:
+        VITE_API_URL: http://localhost:5000
+    ports:
+      - "3001:80"
+    networks:
+      - dokploy-network
+
+networks:
+  # Override: define dokploy-network locally so the dev stack doesn't error on
+  # the `external: true` declaration in the production compose.
+  dokploy-network:
+    external: false
+    driver: bridge

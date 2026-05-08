@@ -1,0 +1,33 @@
+{
+  "$schema": "https://dokploy.com/schemas/compose.json",
+  "name": "kopahi",
+  "description": "Kopahi B2B2C agri-marketplace — North East India farm produce",
+  "compose": "docker-compose.yml",
+  "services": [
+    {
+      "name": "frontend",
+      "type": "web",
+      "port": 3000,
+      "domainEnv": "FRONTEND_HOST"
+    },
+    {
+      "name": "admin",
+      "type": "web",
+      "port": 80,
+      "domainEnv": "ADMIN_HOST"
+    },
+    {
+      "name": "backend",
+      "type": "api",
+      "port": 5000,
+      "domainEnv": "API_HOST",
+      "healthcheck": "/api/health"
+    },
+    {
+      "name": "postgres",
+      "type": "database",
+      "internal": true,
+      "volume": "postgres_data"
+    }
+  ]
+}

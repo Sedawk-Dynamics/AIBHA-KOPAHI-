@@ -1,32 +1,63 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Dokploy production compose — 4 services behind Traefik on `dokploy-network`.
+#
+# What you set in Dokploy UI (Environment tab):
+#   POSTGRES_PASSWORD         strong random
+#   JWT_SECRET                strong random (openssl rand -hex 48)
+#   FRONTEND_HOST             e.g. kopahi.example.com
+#   ADMIN_HOST                e.g. admin.kopahi.example.com
+#   API_HOST                  e.g. api.kopahi.example.com
+#   FRONTEND_URL              https://${FRONTEND_HOST}
+#   ADMIN_URL                 https://${ADMIN_HOST}
+#   NEXT_PUBLIC_API_URL       https://${API_HOST}
+#   NEXT_PUBLIC_ADMIN_URL     https://${ADMIN_HOST}
+#   (optional)                SMTP_*, CLOUDINARY_*, RAZORPAY_*
+#
+# What you set in Dokploy UI (Domains tab):
+#   - Bind FRONTEND_HOST  → service `frontend`  → port 3000   (HTTPS via Let's Encrypt)
+#   - Bind ADMIN_HOST     → service `admin`     → port 80
+#   - Bind API_HOST       → service `backend`   → port 5000
+#   You can do this two ways:
+#     (a) via the Dokploy "Domains" UI for each service (recommended), OR
+#     (b) by uncommenting the `labels:` blocks below and removing the UI domains.
+#
+# For local dev with Docker:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# ─────────────────────────────────────────────────────────────────────────────
+
 services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: kopahi
+      POSTGRES_USER: ${POSTGRES_USER:-kopahi}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
-      POSTGRES_DB: kopahi
+      POSTGRES_DB: ${POSTGRES_DB:-kopahi}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kopahi -d kopahi"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kopahi} -d ${POSTGRES_DB:-kopahi}"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 20s
+    networks:
+      - kopahi_internal
 
   backend:
-    build: ./kopahi-backend
+    build:
+      context: ./kopahi-backend
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: "5000"
-      LOG_LEVEL: info
-      DATABASE_URL: postgresql://kopahi:${POSTGRES_PASSWORD}@postgres:5432/kopahi?schema=public
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kopahi}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-kopahi}?schema=public
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-30d}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL must be set}
+      ADMIN_URL: ${ADMIN_URL:?ADMIN_URL must be set}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
@@ -36,36 +67,78 @@ services:
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
       RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
       RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - kopahi_internal
+      - dokploy-network
+    # Uncomment ONLY if you're managing routing via labels instead of Dokploy's
+    # Domains UI. ${API_HOST} must be defined in env.
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.docker.network=dokploy-network"
+    #   - "traefik.http.routers.kopahi-backend.rule=Host(`${API_HOST}`)"
+    #   - "traefik.http.routers.kopahi-backend.entrypoints=websecure"
+    #   - "traefik.http.routers.kopahi-backend.tls.certresolver=letsencrypt"
+    #   - "traefik.http.services.kopahi-backend.loadbalancer.server.port=5000"
 
   frontend:
     build:
       context: ./kopahi-frontend
+      dockerfile: Dockerfile
+      # NEXT_PUBLIC_* vars are baked into the bundle at build time.
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?NEXT_PUBLIC_API_URL must be set}
+        NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL:?NEXT_PUBLIC_ADMIN_URL must be set}
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000}
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     depends_on:
       - backend
+    networks:
+      - dokploy-network
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.docker.network=dokploy-network"
+    #   - "traefik.http.routers.kopahi-frontend.rule=Host(`${FRONTEND_HOST}`)"
+    #   - "traefik.http.routers.kopahi-frontend.entrypoints=websecure"
+    #   - "traefik.http.routers.kopahi-frontend.tls.certresolver=letsencrypt"
+    #   - "traefik.http.services.kopahi-frontend.loadbalancer.server.port=3000"
 
   admin:
     build:
       context: ./kopahi-admin
+      dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000}
+        VITE_API_URL: ${NEXT_PUBLIC_API_URL:?NEXT_PUBLIC_API_URL must be set}
     restart: unless-stopped
-    ports:
-      - "3001:80"
+    expose:
+      - "80"
     depends_on:
       - backend
+    networks:
+      - dokploy-network
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.docker.network=dokploy-network"
+    #   - "traefik.http.routers.kopahi-admin.rule=Host(`${ADMIN_HOST}`)"
+    #   - "traefik.http.routers.kopahi-admin.entrypoints=websecure"
+    #   - "traefik.http.routers.kopahi-admin.tls.certresolver=letsencrypt"
+    #   - "traefik.http.services.kopahi-admin.loadbalancer.server.port=80"
 
 volumes:
   postgres_data:
+    driver: local
+
+networks:
+  # Private network — only services that need DB access (backend + postgres) join.
+  kopahi_internal:
+    driver: bridge
+  # Dokploy's reverse-proxy network. External so Traefik can route to us.
+  dokploy-network:
+    external: true
