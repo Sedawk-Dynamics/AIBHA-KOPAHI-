@@ -1,3 +1,4 @@
+// TODO: persistence not yet implemented — this page is purely client state with a fake setTimeout save.
 import { Link } from "react-router-dom";
 import { useState, useEffect, type ReactNode } from "react";
 import DashboardShell from "../../components/DashboardShell";
