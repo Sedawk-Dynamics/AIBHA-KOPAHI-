@@ -130,8 +130,25 @@ Wait for `Seeded users, categories, products, coupons, blog posts.` Demo logins
 - `vendor@kopahi.com`
 - `customer@kopahi.com`
 
-After your first real users exist, **change** the seed admin password (or
-delete the demo admin row) — the demo password is publicly documented.
+> **Important — change the seed admin password before going live.** The seed
+> hashes a publicly-documented password. As soon as you have a real admin,
+> sign in with the demo admin once and either:
+> - `PATCH /api/auth/me/password` to set a new password, or
+> - delete the demo admin user via `DELETE /api/admin/user/<id>`.
+>
+> Same applies to the demo vendor and customer rows if you keep them around.
+
+## 7a. Onboarding more admins and vendors
+
+Public signup is **customer-only** — the standard `/api/auth/register`
+endpoint strips any `role` field and always creates a customer.
+
+| Who                | How                                                                                  |
+|--------------------|--------------------------------------------------------------------------------------|
+| Customers          | `/signup` on the customer site or `POST /api/auth/register`.                          |
+| Self-serve vendors | `/vendor-signup` on the customer site → `POST /api/auth/register-vendor`. Vendor accounts are created with `emailVerified: false`; the vendor must verify before their first login (server returns `403 EMAIL_NOT_VERIFIED` otherwise). |
+| Manual vendor onboarding | Sign in as admin and `POST /api/admin/users/create-vendor`. Created with `emailVerified: true` so they can sign in immediately. Audit action: `admin.user_create_vendor`. |
+| Additional admins  | Sign in as admin and `POST /api/admin/users/create-admin`. Audit action: `admin.user_create_admin`. |
 
 ## 8. Verify
 
@@ -139,6 +156,30 @@ delete the demo admin row) — the demo password is publicly documented.
 - `https://api.aibaagri.sedawk.cloud/api/docs` → Swagger UI
 - `https://aibaagri.sedawk.cloud` → customer site
 - `https://admin.aibaagri.sedawk.cloud` → admin login → sign in as admin → land on `/admin`
+
+## 8a. Rate limits
+
+The backend enforces an in-memory IP-based limiter on the auth surface
+(see [authRoutes.ts](kopahi-backend/src/routes/authRoutes.ts)):
+
+| Endpoint                       | Window  | Max | Notes                                                            |
+|--------------------------------|---------|-----|------------------------------------------------------------------|
+| `POST /api/auth/register`      | 15 min  | 5   | Shared `credentialLimiter`                                       |
+| `POST /api/auth/register-vendor` | 15 min | 5  | Shared `credentialLimiter`                                       |
+| `POST /api/auth/login`         | 15 min  | 5   | Shared `credentialLimiter`                                       |
+| `POST /api/auth/forgot-password` | 60 min | 5  | `passwordResetLimiter`                                           |
+| `POST /api/auth/reset-password`  | 60 min | 5  | Shares `passwordResetLimiter`                                    |
+| `POST /api/contact`            | 15 min  | 10  |                                                                  |
+
+Limits are per IP. The server has `app.set("trust proxy", 1)` so it reads
+the first `X-Forwarded-For` hop from Traefik / Nginx. If you put another
+proxy layer in front, raise that number to match the hop count or the
+limiter will key off the inner-most proxy's IP and rate-limit everyone
+together.
+
+The store is in-process — restarting the backend resets all buckets.
+For production-grade limiting across multiple replicas, swap in a Redis
+store (`rate-limit-redis`).
 
 ## 9. (Optional) PostgreSQL backups
 
