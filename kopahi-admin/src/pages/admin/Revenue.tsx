@@ -1,3 +1,4 @@
+// TODO: This page currently displays mock data. Wire to real APIs in a future task.
 import DashboardShell, { PageHeader } from "../../components/DashboardShell";
 
 export default function AdminRevenue() {

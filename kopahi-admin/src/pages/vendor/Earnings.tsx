@@ -1,3 +1,4 @@
+// TODO: This page currently displays mock data. Wire to real APIs in a future task.
 import { Link } from "react-router-dom";
 import DashboardShell from "../../components/DashboardShell";
 
