@@ -276,14 +276,39 @@ router.get(
   })
 );
 
-/* All orders — admin */
+/* All orders — admin. Supports ?status=&page=&pageSize= */
 router.get(
   "/",
   protect,
   adminOnly,
-  asyncHandler(async (_req, res) => {
-    const orders = await db.orders.listAll();
-    res.json({ success: true, count: orders?.length ?? 0, orders });
+  asyncHandler(async (req, res) => {
+    const status = req.query.status as string | undefined;
+    const page = req.query.page as string | undefined;
+    const pageSize = req.query.pageSize as string | undefined;
+
+    const validStatus =
+      status && ALLOWED_STATUS.includes(status as OrderStatus)
+        ? (status as OrderStatus)
+        : undefined;
+
+    const result = await db.orders.listAll({
+      status: validStatus,
+      page,
+      pageSize,
+    });
+
+    if (Array.isArray(result)) {
+      // Legacy shape — no pagination requested.
+      res.json({ success: true, count: result.length, orders: result });
+      return;
+    }
+    res.json({
+      success: true,
+      count: result.count,
+      page: result.page,
+      pages: result.pages,
+      orders: result.items,
+    });
   })
 );
 

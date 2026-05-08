@@ -9,7 +9,13 @@ import prisma from "../config/db";
 import { deepShape, withMongoId, withMongoIds } from "./_shape";
 
 type Sort = Record<string, "asc" | "desc">;
-type ListOpts = { page?: number | string; pageSize?: number | string; sort?: Sort };
+type ListOpts = {
+  page?: number | string;
+  pageSize?: number | string;
+  sort?: Sort;
+  /** When true, eagerly include the vendor relation. Used by the admin Products view. */
+  includeVendor?: boolean;
+};
 
 const findById = async (id: string) => {
   const p = await prisma.product.findUnique({ where: { id: String(id) } });
@@ -30,11 +36,19 @@ const create = async (data: Record<string, unknown>) => {
 
 const list = async (
   filter: Record<string, unknown> = {},
-  { page = 1, pageSize = 12, sort = { createdAt: "desc" } as Sort }: ListOpts = {}
+  {
+    page = 1,
+    pageSize = 12,
+    sort = { createdAt: "desc" } as Sort,
+    includeVendor = false,
+  }: ListOpts = {}
 ) => {
   const safeSize = Math.min(Math.max(Number(pageSize) || 12, 1), 50);
   const safePage = Math.max(Number(page) || 1, 1);
   const where = filter as never;
+  const include = includeVendor
+    ? { vendor: { select: { id: true, name: true, businessName: true } } }
+    : undefined;
   const [count, items] = await Promise.all([
     prisma.product.count({ where }),
     prisma.product.findMany({
@@ -42,9 +56,15 @@ const list = async (
       skip: safeSize * (safePage - 1),
       take: safeSize,
       orderBy: sort as never,
+      ...(include ? { include } : {}),
     }),
   ]);
-  withMongoIds(items);
+  if (includeVendor) {
+    // deepShape walks into the populated vendor too.
+    for (const p of items) deepShape(p);
+  } else {
+    withMongoIds(items);
+  }
   return {
     count,
     page: safePage,

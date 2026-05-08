@@ -146,6 +146,18 @@ router.delete(
   })
 );
 
+/*
+ * Per-vendor aggregate — productCount + salesTotal.
+ * Used by the admin Vendors page.
+ */
+router.get(
+  "/vendors/stats",
+  asyncHandler(async (_req, res) => {
+    const stats = await db.orders.vendorStats();
+    res.json({ success: true, count: stats.length, vendors: stats });
+  })
+);
+
 router.post(
   "/users/create-vendor",
   asyncHandler(async (req, res) => {

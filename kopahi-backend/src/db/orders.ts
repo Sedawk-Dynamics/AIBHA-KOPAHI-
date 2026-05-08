@@ -95,12 +95,113 @@ const findByUser = async (
   return deepShape(orders);
 };
 
-const listAll = async ({
+type ListAllOpts = {
+  sort?: { createdAt?: "asc" | "desc" };
+  status?: CreateOrderInput["orderStatus"];
+  page?: number | string;
+  pageSize?: number | string;
+};
+
+type OrderRow = Awaited<ReturnType<typeof prisma.order.findMany>>[number];
+type PaginatedOrders = {
+  count: number;
+  page: number;
+  pages: number;
+  items: OrderRow[];
+};
+
+// Overloads disambiguate the return type by whether pagination is requested.
+async function listAll(
+  opts?: { sort?: { createdAt?: "asc" | "desc" }; status?: CreateOrderInput["orderStatus"] }
+): Promise<OrderRow[]>;
+async function listAll(opts: ListAllOpts): Promise<OrderRow[] | PaginatedOrders>;
+async function listAll({
   sort = { createdAt: "desc" as const },
-}: { sort?: { createdAt?: "asc" | "desc" } } = {}) => {
+  status,
+  page,
+  pageSize,
+}: ListAllOpts = {}): Promise<OrderRow[] | PaginatedOrders> {
+  const where = status ? { orderStatus: status as never } : {};
+
+  // Pagination is opt-in: when neither page nor pageSize is supplied we keep
+  // the legacy "return everything" behavior.
+  if (page === undefined && pageSize === undefined) {
+    const orders = await prisma.order.findMany({
+      where,
+      orderBy: sort,
+      include: { items: true, user: { select: userJoinSelect } },
+    });
+    return deepShape(orders) as OrderRow[];
+  }
+
+  const safeSize = Math.min(Math.max(Number(pageSize) || 20, 1), 100);
+  const safePage = Math.max(Number(page) || 1, 1);
+  const [count, items] = await Promise.all([
+    prisma.order.count({ where }),
+    prisma.order.findMany({
+      where,
+      orderBy: sort,
+      include: { items: true, user: { select: userJoinSelect } },
+      skip: safeSize * (safePage - 1),
+      take: safeSize,
+    }),
+  ]);
+  deepShape(items);
+  return {
+    count,
+    page: safePage,
+    pages: Math.ceil(count / safeSize) || 1,
+    items,
+  };
+}
+
+/* Per-vendor aggregate — productCount + salesTotal across paid orders. */
+const vendorStats = async (): Promise<
+  Array<{ vendorId: string; productCount: number; salesTotal: number }>
+> => {
+  // 1. Product counts per vendor.
+  const productGroups = await prisma.product.groupBy({
+    by: ["vendorId"],
+    _count: { _all: true },
+    where: { vendorId: { not: null } },
+  });
+
+  // 2. Sales totals per vendor — sum (price * quantity) of OrderItems whose
+  //    parent Order is Paid, grouped by the product's vendor.
+  // Prisma's groupBy doesn't traverse relations, so do this via raw SQL.
+  const salesRows = await prisma.$queryRaw<
+    Array<{ vendorId: string; salesTotal: number | string | null }>
+  >`SELECT p."vendorId" AS "vendorId",
+           COALESCE(SUM(oi.price * oi.quantity), 0) AS "salesTotal"
+       FROM "OrderItem" oi
+       JOIN "Order" o ON o.id = oi."orderId"
+       JOIN "Product" p ON p.id = oi."productId"
+      WHERE o."paymentStatus" = 'Paid'
+        AND p."vendorId" IS NOT NULL
+      GROUP BY p."vendorId"`;
+
+  const salesMap = new Map(
+    salesRows.map((r) => [String(r.vendorId), Number(r.salesTotal ?? 0)])
+  );
+
+  return productGroups
+    .filter((g) => g.vendorId)
+    .map((g) => ({
+      vendorId: String(g.vendorId),
+      productCount: g._count._all,
+      salesTotal: salesMap.get(String(g.vendorId)) ?? 0,
+    }));
+};
+
+/* Orders that contain at least one product owned by `vendorId`. */
+const findByVendor = async (vendorId: string) => {
   const orders = await prisma.order.findMany({
-    orderBy: sort,
-    include: { items: true, user: { select: userJoinSelect } },
+    where: { items: { some: { product: { vendorId: String(vendorId) } } } },
+    orderBy: { createdAt: "desc" },
+    include: {
+      items: { include: { product: { select: { id: true, vendorId: true } } } },
+      user: { select: userJoinSelect },
+    },
   });
   return deepShape(orders);
 };
@@ -148,7 +249,9 @@ export default {
   findByIdWithUser,
   create,
   findByUser,
+  findByVendor,
   listAll,
+  vendorStats,
   count,
   totalPaidRevenue,
   setStatus,
