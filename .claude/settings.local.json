@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($pg = \"C:\\\\Program Files\\\\PostgreSQL\\\\16\\\\bin\"; $data = \"C:\\\\Users\\\\Sarthak Srivastava\\\\pgdata\"; New-Item -ItemType Directory -Force -Path $data | Out-Null; & \"$pg\\\\initdb.exe\" -D $data -U kopahi --pwfile=<\\(Write-Output \"kopahi\"\\) --auth=md5 --auth-host=md5 --encoding=UTF8 -E UTF8 --locale=C 2>&1 | Select-Object -Last 15; \"exit: $LASTEXITCODE\")",
+      "PowerShell($pg = \"C:\\\\Program Files\\\\PostgreSQL\\\\16\\\\bin\"; $data = \"C:\\\\Users\\\\Sarthak Srivastava\\\\pgdata\"; $pwfile = \"$env:TEMP\\\\pgpw.txt\"; \"kopahi\" | Out-File -Encoding ascii -NoNewline $pwfile; & \"$pg\\\\initdb.exe\" -D $data -U kopahi --pwfile=$pwfile --auth=md5 --auth-host=md5 --encoding=UTF8 --locale=C 2>&1 | Select-Object -Last 20; Remove-Item $pwfile -Force; \"exit: $LASTEXITCODE\")",
+      "PowerShell($data = \"C:\\\\pgdata_kopahi\"; if \\(Test-Path $data\\) { Remove-Item -Recurse -Force $data }; New-Item -ItemType Directory -Force -Path $data | Out-Null; \"ok: $data\")",
+      "PowerShell($pg = \"C:\\\\Program Files\\\\PostgreSQL\\\\16\\\\bin\"; $data = \"C:\\\\pgdata_kopahi\"; $pwfile = \"$env:TEMP\\\\pgpw.txt\"; \"kopahi\" | Out-File -Encoding ascii -NoNewline $pwfile; & \"$pg\\\\initdb.exe\" -D $data -U kopahi --pwfile=$pwfile --auth=md5 --auth-host=md5 --encoding=UTF8 --locale=C 2>&1 | Select-Object -Last 12; Remove-Item $pwfile -Force; \"exit: $LASTEXITCODE\")",
+      "PowerShell(Set-Location \"c:\\\\Users\\\\Sarthak Srivastava\\\\Desktop\\\\Aiba\\\\kopahi-backend\"; Start-Process powershell -ArgumentList \"-NoProfile\",\"-Command\",\"npx ts-node scripts/start-pg.ts > pg.log 2>&1\" -WindowStyle Hidden; Start-Sleep -Seconds 8; Get-Content pg.log -Tail 30 -ErrorAction SilentlyContinue)"
+    ]
+  }
+}

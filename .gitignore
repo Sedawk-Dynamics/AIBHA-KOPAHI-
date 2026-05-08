@@ -1,0 +1,69 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Monorepo .gitignore — covers root, kopahi-backend, kopahi-frontend, kopahi-admin
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Node
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files (never commit secrets) — only .env.example is tracked
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+**/.env
+**/.env.local
+**/.env.*.local
+!.env.example
+!**/.env.example
+
+# Build output
+dist/
+**/dist/
+build/
+**/build/
+.next/
+**/.next/
+out/
+**/out/
+
+# TypeScript
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Vite
+.vite/
+
+# Embedded Postgres (local dev data)
+.pg-data/
+**/.pg-data/
+pg.log
+**/pg.log
+
+# Prisma local env
+**/prisma/.env
+
+# Backend uploads (local-disk fallback)
+uploads/
+**/uploads/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Test / coverage
+coverage/
+**/coverage/
+.nyc_output/
+
+# Logs
+*.log
+logs/

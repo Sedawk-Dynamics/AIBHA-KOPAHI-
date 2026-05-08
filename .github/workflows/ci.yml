@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend (TS + Prisma)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kopahi-backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: kopahi-backend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Validate Prisma schema
+        run: npx prisma validate
+        env:
+          DATABASE_URL: postgresql://x:x@localhost:5432/x?schema=public
+      - name: Generate Prisma client
+        run: npx prisma generate
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Typecheck seed
+        run: npx tsc --noEmit -p tsconfig.seed.json
+
+  frontend:
+    name: Frontend (Next.js)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kopahi-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: kopahi-frontend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint --if-present
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:5000
+
+  admin:
+    name: Admin (Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kopahi-admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: kopahi-admin/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint --if-present
+      - run: npm run build
+        env:
+          VITE_API_URL: http://localhost:5000
+
+  docker:
+    name: Docker images build
+    runs-on: ubuntu-latest
+    needs: [backend, frontend, admin]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./kopahi-backend
+          push: false
+          tags: kopahi-backend:ci
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./kopahi-frontend
+          push: false
+          build-args: NEXT_PUBLIC_API_URL=http://localhost:5000
+          tags: kopahi-frontend:ci
+      - name: Build admin image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./kopahi-admin
+          push: false
+          build-args: VITE_API_URL=http://localhost:5000
+          tags: kopahi-admin:ci
