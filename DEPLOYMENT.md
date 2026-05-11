@@ -177,9 +177,15 @@ proxy layer in front, raise that number to match the hop count or the
 limiter will key off the inner-most proxy's IP and rate-limit everyone
 together.
 
-The store is in-process — restarting the backend resets all buckets.
-For production-grade limiting across multiple replicas, swap in a Redis
-store (`rate-limit-redis`).
+The store is in-process by default — restarting the backend resets all buckets.
+
+**For multi-replica deploys, set `REDIS_URL` in the Compose service's env**
+(e.g. `redis://kopahi-redis:6379`). When that env var is present, both
+`credentialLimiter` and `passwordResetLimiter` switch to a shared
+`rate-limit-redis` store keyed on `kopahi-rl:credential:` and
+`kopahi-rl:password-reset:` respectively, so all replicas see the same
+bucket per IP. If Redis is unreachable the limiter falls back to the
+in-process MemoryStore and logs `rate_limit_redis_store_failed`.
 
 ## 9. (Optional) PostgreSQL backups
 

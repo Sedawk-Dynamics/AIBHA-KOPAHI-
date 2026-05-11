@@ -79,16 +79,17 @@ After your first real users exist, **change the seed admin password** (or delete
 
 The standard signup endpoint (`/api/auth/register`) ignores any `role` field in the body and always creates a customer.
 
-## End-to-end smoke test
+## Tests
 
-A 13-step script that exercises the full stack lives at [scripts/smoke-test.ts](scripts/smoke-test.ts). With the backend running:
+| Layer | Command | What it covers |
+|---|---|---|
+| **Unit** (Vitest) | `cd kopahi-backend && npm test` | 29 tests across `passwordPolicy`, `escapeRegex`, `escapeHtml`, `generateToken`, and the `_shape` shim. Pure functions only — no Postgres needed. |
+| **End-to-end smoke** | `cd kopahi-backend && npm run smoke` | 13-step script against the live API. Signs up customer + vendor, admin onboards a second vendor, places an order with a coupon, verifies stock decrement + restore on cancel, confirms the rate limit trips on the 6th failed attempt. Uses fake `X-Forwarded-For` IPs so each simulated user gets its own rate-limit bucket. |
+| **Browser e2e** (Playwright) | `cd e2e && npm test` | 7 headless Chromium tests covering customer site (home, login, vendor-signup, forgot-password) and admin app (login form, dashboard load, Orders page). Pre-requisite: all three apps running. |
 
-```bash
-cd kopahi-backend
-npm run smoke
-```
+## Rate limits
 
-The script signs up a customer + vendor, has the admin onboard a second vendor, places an order with a coupon, verifies stock decrement + restore on cancel, and confirms the login rate limit triggers on the 6th failed attempt. It uses fake `X-Forwarded-For` IPs so the rate-limit buckets stay separate per simulated user.
+In-process `MemoryStore` by default. Set `REDIS_URL` to switch the credential + password-reset limiters to a shared Redis store (`rate-limit-redis`) — required for multi-replica deploys. See [DEPLOYMENT.md §8a](DEPLOYMENT.md).
 
 ## Type-checking
 
