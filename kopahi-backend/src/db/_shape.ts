@@ -43,6 +43,7 @@ export const userPublicSelect = {
   phone: true,
   role: true,
   businessName: true,
+  gstNumber: true,
   emailVerified: true,
   createdAt: true,
   updatedAt: true,
