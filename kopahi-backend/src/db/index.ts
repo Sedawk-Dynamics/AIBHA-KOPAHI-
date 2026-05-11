@@ -15,6 +15,9 @@ import leads from "./leads";
 import coupons from "./coupons";
 import blog from "./blog";
 import audit from "./audit";
+import analytics from "./analytics";
+import settings from "./settings";
+import reviews from "./reviews";
 
 const db = {
   users,
@@ -25,7 +28,22 @@ const db = {
   coupons,
   blog,
   audit,
+  analytics,
+  settings,
+  reviews,
 };
 
 export default db;
-export { users, products, orders, categories, leads, coupons, blog, audit };
+export {
+  users,
+  products,
+  orders,
+  categories,
+  leads,
+  coupons,
+  blog,
+  audit,
+  analytics,
+  settings,
+  reviews,
+};

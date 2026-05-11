@@ -39,4 +39,22 @@ router.get(
   })
 );
 
+/* Revenue summary + monthly history + top products — vendor Earnings page. */
+router.get(
+  "/earnings",
+  asyncHandler(async (req, res) => {
+    const earnings = await db.analytics.earningsForVendor(String(req.user.id));
+    res.json({ success: true, ...earnings });
+  })
+);
+
+/* Reviews on the logged-in vendor's products. */
+router.get(
+  "/reviews",
+  asyncHandler(async (req, res) => {
+    const reviews = await db.reviews.findByVendor(String(req.user.id));
+    res.json({ success: true, count: reviews.length, reviews });
+  })
+);
+
 export default router;
