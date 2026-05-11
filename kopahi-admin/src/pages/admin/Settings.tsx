@@ -1,7 +1,13 @@
-// TODO: persistence not yet implemented — this page is purely client state with a fake setTimeout save.
 import { Link } from "react-router-dom";
 import { useState, useEffect, type ReactNode } from "react";
 import DashboardShell from "../../components/DashboardShell";
+import { getAllSettings, upsertSetting } from "../../lib/resources/settings";
+import { ApiError } from "../../lib/api";
+
+// Single key under which the whole flat settings blob is stored. Each tab
+// could get its own key — keeping them together for now to minimize the
+// page's surgery footprint.
+const SETTINGS_KEY = "admin";
 
 type TabKey =
   | "general"
@@ -62,6 +68,7 @@ export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState<TabKey>("general");
   const [settings, setSettings] = useState<Settings>(initialSettings);
   const [originalSettings, setOriginalSettings] = useState<Settings>(initialSettings);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
@@ -70,13 +77,48 @@ export default function AdminSettings() {
   const update: UpdateFn = (key, value) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
 
+  // Initial load — fetch the stored settings blob (if any) and merge over
+  // the defaults so new fields appear with sane values when the schema grows.
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getAllSettings()
+      .then((all) => {
+        if (cancelled) return;
+        const stored = (all[SETTINGS_KEY] as Partial<Settings> | undefined) ?? null;
+        const merged: Settings = stored ? { ...initialSettings, ...stored } : initialSettings;
+        setSettings(merged);
+        setOriginalSettings(merged);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setToast({
+          type: "error",
+          message: err instanceof ApiError ? err.message : "Could not load settings",
+        });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleSave = async () => {
     setSaving(true);
-    setTimeout(() => {
+    try {
+      await upsertSetting(SETTINGS_KEY, settings);
       setOriginalSettings(settings);
-      setSaving(false);
       setToast({ type: "success", message: "Settings saved successfully" });
-    }, 900);
+    } catch (err) {
+      setToast({
+        type: "error",
+        message: err instanceof ApiError ? err.message : "Could not save settings",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDiscard = () => {
@@ -134,10 +176,10 @@ export default function AdminSettings() {
               Unsaved changes
             </span>
           )}
-          <button onClick={handleDiscard} disabled={!hasChanges || saving} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          <button onClick={handleDiscard} disabled={!hasChanges || saving || loading} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
             Discard
           </button>
-          <button onClick={handleSave} disabled={!hasChanges || saving} className="px-5 py-2 text-sm font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 disabled:bg-green-700/50 disabled:cursor-not-allowed transition-colors shadow-sm inline-flex items-center gap-2">
+          <button onClick={handleSave} disabled={!hasChanges || saving || loading} className="px-5 py-2 text-sm font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 disabled:bg-green-700/50 disabled:cursor-not-allowed transition-colors shadow-sm inline-flex items-center gap-2">
             {saving ? (
               <>
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
