@@ -146,6 +146,58 @@ router.delete(
   })
 );
 
+/* Headline KPIs + categories + top products for the admin Analytics page. */
+router.get(
+  "/analytics",
+  asyncHandler(async (_req, res) => {
+    const [kpis, categories, topProducts] = await Promise.all([
+      db.analytics.headlineKpis(),
+      db.analytics.revenueByCategory(),
+      db.analytics.topProducts(5),
+    ]);
+    res.json({ success: true, kpis, categories, topProducts });
+  })
+);
+
+/* Monthly revenue breakdown for the admin Revenue page. */
+router.get(
+  "/revenue/monthly",
+  asyncHandler(async (req, res) => {
+    const months = Math.min(Math.max(Number(req.query.months) || 12, 1), 36);
+    const rows = await db.analytics.monthlyRevenue(months);
+    res.json({ success: true, count: rows.length, monthly: rows });
+  })
+);
+
+/* Settings: free-form key/value store. */
+router.get(
+  "/settings",
+  asyncHandler(async (_req, res) => {
+    const settings = await db.settings.getAll();
+    res.json({ success: true, settings });
+  })
+);
+
+router.put(
+  "/settings/:key",
+  asyncHandler(async (req, res) => {
+    const key = String(req.params.key);
+    const value = req.body?.value;
+    if (value === undefined) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Body must include a `value` field" });
+    }
+    const saved = await db.settings.upsert(key, value, String(req.user.id));
+    await recordAudit(req, {
+      action: "admin.settings_update",
+      targetType: "Setting",
+      targetId: key,
+    });
+    res.json({ success: true, key, value: saved });
+  })
+);
+
 /*
  * Per-vendor aggregate — productCount + salesTotal.
  * Used by the admin Vendors page.
