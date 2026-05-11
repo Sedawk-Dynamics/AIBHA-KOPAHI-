@@ -1,5 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
+import { buildLimiterStore } from "../utils/rateLimitStore";
 import protect from "../middleware/authMiddleware";
 import {
   registerUser,
@@ -18,11 +19,15 @@ import {
 const router = Router();
 
 // Auth abuse limiters — 5 attempts per 15 min per IP for the credential paths.
+// When REDIS_URL is set, the bucket is shared across replicas via
+// rate-limit-redis; otherwise express-rate-limit's default MemoryStore is
+// used (fine for single-replica deploys).
 const credentialLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  store: buildLimiterStore("credential"),
   message: {
     success: false,
     message: "Too many attempts. Please try again in a few minutes.",
@@ -31,9 +36,10 @@ const credentialLimiter = rateLimit({
 
 const passwordResetLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 5,
+  limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  store: buildLimiterStore("password-reset"),
   message: { success: false, message: "Too many reset attempts. Try again later." },
 });
 
