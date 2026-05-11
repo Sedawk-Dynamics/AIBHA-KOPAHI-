@@ -53,6 +53,11 @@ export const errorHandler = (
     statusCode = 400;
     message = "Invalid data shape";
   } else if (err instanceof Error) {
+    // CORS rejects throw `new Error("CORS: origin ... not allowed")` from
+    // server.ts. Map to 403 (forbidden) instead of the default 500.
+    if (err.message.startsWith("CORS:")) {
+      statusCode = 403;
+    }
     message = err.message || message;
   }
 
