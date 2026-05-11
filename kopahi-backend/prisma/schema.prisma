@@ -40,6 +40,7 @@ model User {
   phone        String  @default("")
   role         Role    @default(user)
   businessName String  @default("")
+  gstNumber    String  @default("")
 
   emailVerified            Boolean   @default(false)
   emailVerificationToken   String?
@@ -235,6 +236,17 @@ model BlogPost {
   updatedAt   DateTime @updatedAt
 
   @@index([published, publishedAt])
+}
+
+// Key/value store for admin Settings. The settings page is a multi-tab
+// form; we serialize each tab as a JSON blob under a stable key (e.g.
+// "general", "shipping", "payments") so the schema doesn't have to know
+// every individual field.
+model Setting {
+  key       String   @id
+  value     Json
+  updatedBy String?
+  updatedAt DateTime @updatedAt
 }
 
 model AuditLog {

@@ -125,7 +125,6 @@ export const registerVendor = asyncHandler(async (req: Request, res: Response) =
   const hashed = await bcrypt.hash(password, 10);
   const verificationToken = crypto.randomBytes(32).toString("hex");
 
-  // gstNumber has no schema column yet — captured in the audit metadata.
   const user = await db.users.create({
     name,
     email: String(email).toLowerCase(),
@@ -133,6 +132,7 @@ export const registerVendor = asyncHandler(async (req: Request, res: Response) =
     phone: String(phone),
     role: "vendor",
     businessName: String(businessName),
+    gstNumber: gstNumber ? String(gstNumber).toUpperCase() : "",
     emailVerificationToken: hashToken(verificationToken),
     emailVerificationExpires: new Date(Date.now() + 24 * HOUR),
   });
@@ -215,13 +215,17 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
 
 export const updateProfile = asyncHandler(async (req: Request, res: Response) => {
   const updates: Record<string, unknown> = {};
-  // businessName only accepted from vendors.
-  const allowed: Array<"name" | "phone" | "businessName"> =
+  // businessName and gstNumber only accepted from vendors.
+  const allowed: Array<"name" | "phone" | "businessName" | "gstNumber"> =
     req.user.role === "vendor"
-      ? ["name", "phone", "businessName"]
+      ? ["name", "phone", "businessName", "gstNumber"]
       : ["name", "phone"];
   for (const k of allowed) {
-    if (req.body && req.body[k] !== undefined) updates[k] = req.body[k];
+    if (req.body && req.body[k] !== undefined) {
+      updates[k] = k === "gstNumber"
+        ? String(req.body[k]).toUpperCase()
+        : req.body[k];
+    }
   }
 
   const user = await db.users.updateById(String(req.user.id), updates);

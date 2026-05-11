@@ -39,6 +39,7 @@ export type ApiUser = {
   phone?: string;
   role: Role;
   businessName?: string;
+  gstNumber?: string;
   emailVerified?: boolean;
 } & Timestamps;
 

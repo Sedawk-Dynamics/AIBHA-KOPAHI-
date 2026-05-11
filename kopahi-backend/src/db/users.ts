@@ -74,6 +74,7 @@ type CreateUserInput = {
   phone?: string;
   role?: "user" | "vendor" | "admin";
   businessName?: string;
+  gstNumber?: string;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
 };
@@ -87,6 +88,7 @@ const create = async (data: CreateUserInput) => {
       phone: data.phone ?? "",
       role: data.role ?? "user",
       businessName: data.businessName ?? "",
+      gstNumber: data.gstNumber ?? "",
       emailVerificationToken: data.emailVerificationToken,
       emailVerificationExpires: data.emailVerificationExpires,
     },
