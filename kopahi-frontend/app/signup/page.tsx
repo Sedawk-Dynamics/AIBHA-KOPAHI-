@@ -1,35 +1,78 @@
 "use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../lib/api";
 
-/* ============================================================
-   SIGNUP PAGE — customer flow only.
-   Vendor signups go to /vendor-signup (different endpoint, requires
-   email verification before first login).
-   File: app/signup/page.tsx
-============================================================ */
+const TAGLINES = [
+  "Where every leaf has a name.",
+  "From seven sister states to your kitchen.",
+  "Authentic by geography. Pure by nature.",
+];
 
-// Mirror of kopahi-backend/src/utils/passwordPolicy.ts. Keep these in sync.
+const CUSTOMER_BENEFITS = [
+  "Direct sourcing from 500+ verified farmers",
+  "GI-tagged authentic NE produce",
+  "Pan-India shipping with order tracking",
+  "10% off your first order",
+  "Trusted by 10,000+ customers",
+];
+
+const VENDOR_BENEFITS = [
+  "Reach 10,000+ buyers across India",
+  "Direct-to-farmer pricing tools",
+  "Weekly payouts via UPI / bank",
+  "GI verification support",
+  "Free onboarding consultation",
+];
+
 const passwordPolicy = (pw: string): string | null => {
-  if (pw.length < 12) return "Password must be at least 12 characters";
-  if (!/[a-z]/.test(pw)) return "Password must contain a lowercase letter";
-  if (!/[A-Z]/.test(pw)) return "Password must contain an uppercase letter";
-  if (!/[0-9]/.test(pw)) return "Password must contain a digit";
-  if (!/[^a-zA-Z0-9]/.test(pw)) return "Password must contain a symbol";
+  if (pw.length < 12) return "At least 12 characters.";
+  if (!/[a-z]/.test(pw)) return "Add a lowercase letter.";
+  if (!/[A-Z]/.test(pw)) return "Add an uppercase letter.";
+  if (!/[0-9]/.test(pw)) return "Add a digit.";
+  if (!/[^a-zA-Z0-9]/.test(pw)) return "Add a symbol.";
   return null;
 };
 
+function passwordStrength(pw: string) {
+  if (!pw) return { score: 0, label: "" };
+  let score = 0;
+  if (pw.length >= 12) score++;
+  if (/[a-z]/.test(pw)) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^a-zA-Z0-9]/.test(pw)) score++;
+  const label = ["Too short", "Weak", "Fair", "Good", "Strong", "Strong"][score];
+  return { score, label };
+}
+
+type Role = "customer" | "vendor" | "admin";
+
 export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupInner />
+    </Suspense>
+  );
+}
+
+function SignupInner() {
   const router = useRouter();
+  const search = useSearchParams();
   const { register } = useAuth();
+
+  const inviteParam = search?.get("invite");
+  const adminInvite = !!inviteParam;
+
+  const [role, setRole] = useState<Role>("customer");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -43,32 +86,46 @@ export default function SignupPage() {
     if (errors[k]) setErrors((e) => ({ ...e, [k]: "" }));
   };
 
+  const [tagIndex, setTagIndex] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setTagIndex((i) => (i + 1) % TAGLINES.length), 6000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const benefits = role === "vendor" ? VENDOR_BENEFITS : CUSTOMER_BENEFITS;
+  const headingAccent = useMemo(() => (role === "vendor" ? "Direct." : "Fair."), [role]);
+  const subhead =
+    role === "vendor"
+      ? "List your produce and reach buyers across India and beyond."
+      : "Shop authentic GI-tagged North East produce, direct from farmers.";
+
   const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!form.name.trim()) newErrors.name = "Full name is required";
-    if (!form.email.trim()) newErrors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = "Please enter a valid email";
-    if (!form.phone.trim()) newErrors.phone = "Phone number is required";
-    else if (!/^\+?[\d\s-]{10,}$/.test(form.phone)) newErrors.phone = "Please enter a valid phone number";
-    if (!form.password) newErrors.password = "Password is required";
+    const e: Record<string, string> = {};
+    if (!form.name.trim()) e.name = "Full name, please.";
+    if (!form.email.trim()) e.email = "Email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Please enter a valid email.";
+    if (!form.phone.trim()) e.phone = "Phone helps us reach you.";
+    else if (!/^\+?[\d\s-]{10,}$/.test(form.phone)) e.phone = "Please check the phone number.";
+    if (!form.password) e.password = "Password is required.";
     else {
       const reason = passwordPolicy(form.password);
-      if (reason) newErrors.password = reason;
+      if (reason) e.password = reason;
     }
-    if (!form.agreedToTerms) newErrors.agreedToTerms = "You must agree to the terms";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (!form.agreedToTerms) e.agreedToTerms = "Please accept the terms to continue.";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError("");
+    if (role === "vendor") {
+      router.push("/vendor-signup");
+      return;
+    }
     if (!validate()) return;
     setLoading(true);
-
     try {
-      // Customer-only: backend strips role from the body and always creates
-      // as role: "user". Vendors must use /vendor-signup.
       await register({
         name: form.name,
         email: form.email,
@@ -77,272 +134,224 @@ export default function SignupPage() {
       });
       router.push("/dashboard");
     } catch (err) {
-      const msg =
-        err instanceof ApiError
-          ? err.message
-          : "Could not create your account. Please try again.";
-      setSubmitError(msg);
+      setSubmitError(err instanceof ApiError ? err.message : "Signup failed. Please try again.");
       setLoading(false);
     }
   };
 
-  // Password strength indicator (mirrors the policy: 12+ chars + upper/lower/digit/symbol).
-  const passwordStrength = () => {
-    const p = form.password;
-    if (!p) return { label: "", color: "", width: "0%" };
-    let score = 0;
-    if (p.length >= 12) score++;
-    if (/[A-Z]/.test(p) && /[a-z]/.test(p)) score++;
-    if (/[0-9]/.test(p)) score++;
-    if (/[^A-Za-z0-9]/.test(p)) score++;
-    const map = [
-      { label: "Too weak", color: "bg-red-500", width: "25%" },
-      { label: "Weak", color: "bg-orange-500", width: "50%" },
-      { label: "Good", color: "bg-yellow-500", width: "75%" },
-      { label: "Strong", color: "bg-green-500", width: "100%" },
-    ];
-    return map[Math.max(0, score - 1)] || map[0];
-  };
-
-  const strength = passwordStrength();
+  const strength = passwordStrength(form.password);
 
   return (
-    <main className="min-h-screen bg-white flex">
-      {/* LEFT — branding panel (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-700 via-green-800 to-green-900 text-white p-12 xl:p-16 flex-col justify-between relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-green-400/15 rounded-full blur-3xl"></div>
-
-        <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-2 group">
-            <Image src="/Logo1.png" alt="Kopahi" width={120} height={120} className="h-14 w-14 object-contain drop-shadow-lg group-hover:scale-105 transition-transform" />
-            <span className="text-3xl font-bold tracking-tight">Kopahi<span className="text-green-300">.</span></span>
+    <main className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-(--color-ivory) text-(--color-ink)">
+      <section className="relative px-6 sm:px-10 lg:px-16 py-12 flex flex-col justify-center">
+        <div className="absolute top-6 left-6 right-6 sm:top-10 sm:left-10 sm:right-10 flex items-center justify-between">
+          <Link href="/" className="font-display text-xl text-(--color-moss)">
+            Kopahi<span className="text-(--color-gold)">.</span>
+          </Link>
+          <Link href="/" className="text-xs uppercase tracking-[0.22em] text-(--color-bamboo) hover:text-(--color-moss) transition-colors">
+            ← Back to home
           </Link>
         </div>
 
-        <div className="relative z-10">
-          <h2 className="text-4xl xl:text-5xl font-bold leading-tight mb-6 tracking-tight">
-            Join the Kopahi family.
-            <span className="block text-green-200 mt-2">Authentic. Direct. Fair.</span>
-          </h2>
-          <p className="text-green-100 text-lg leading-relaxed mb-8 max-w-md">
-            Whether you're shopping for premium agri-products or you're a farmer ready to reach a wider audience — start here.
-          </p>
-
-          <div className="space-y-3">
-            {[
-              "Direct sourcing from 500+ verified farmers",
-              "GI-tagged authentic North East produce",
-              "Pan-India shipping with order tracking",
-              "10% off your first order",
-            ].map((line) => (
-              <div key={line} className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg className="w-3 h-3 text-green-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span className="text-sm text-green-50">{line}</span>
-              </div>
+        <div className="mx-auto w-full max-w-md mt-16 sm:mt-0">
+          <div className="inline-flex border border-(--color-bamboo)/30">
+            {(
+              [
+                { value: "customer", label: "Shop as Customer" },
+                { value: "vendor", label: "Sell as Vendor" },
+                ...(adminInvite ? [{ value: "admin", label: "Apply for Admin" }] : []),
+              ] as { value: Role; label: string }[]
+            ).map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => setRole(t.value)}
+                className={`px-4 py-2 text-[11px] uppercase tracking-[0.22em] transition-colors ${
+                  role === t.value
+                    ? "bg-(--color-moss) text-(--color-ivory)"
+                    : "text-(--color-ink)/70 hover:text-(--color-moss)"
+                }`}
+              >
+                {t.label}
+              </button>
             ))}
           </div>
-        </div>
 
-        <div className="relative z-10 flex items-center gap-3 text-xs text-green-200">
-          <div className="flex -space-x-2">
-            {["bg-amber-400", "bg-blue-400", "bg-pink-400"].map((c, i) => (
-              <div key={i} className={`w-7 h-7 rounded-full ${c} border-2 border-green-800`}></div>
+          <p className="eyebrow mt-8">→ Join the Kopahi family</p>
+          <h1 className="mt-5 font-display font-light tracking-tight text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.05]">
+            Authentic. Direct. <span className="accent-italic">{headingAccent}</span>
+          </h1>
+          <p className="mt-4 text-(--color-ink)/70 leading-relaxed">{subhead}</p>
+
+          <ul className="mt-8 grid grid-cols-1 gap-2 text-sm text-(--color-ink)/80">
+            {benefits.map((b) => (
+              <li key={b} className="flex items-start gap-3">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-(--color-gold) shrink-0 mt-1.5">
+                  <path d="M12 3c0 6 3 9 9 9-6 0-9 3-9 9 0-6-3-9-9-9 6 0 9-3 9-9z" fill="currentColor" />
+                </svg>
+                {b}
+              </li>
             ))}
-          </div>
-          <span>Trusted by 10,000+ customers across India</span>
-        </div>
-      </div>
+          </ul>
 
-      {/* RIGHT — signup form */}
-      <div className="w-full lg:w-1/2 flex flex-col">
-        {/* Mobile header */}
-        <div className="lg:hidden px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/Logo1.png" alt="Kopahi" width={80} height={80} className="h-10 w-10 object-contain" />
-            <span className="text-xl font-bold text-green-700 tracking-tight">Kopahi<span className="text-green-500">.</span></span>
-          </Link>
-          <Link href="/" className="text-sm text-gray-500 hover:text-green-700">← Back</Link>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center px-6 py-10 lg:px-12 lg:py-14">
-          <div className="w-full max-w-md">
-            {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">Create your account</h1>
-              <p className="text-gray-600 mt-2">
-                Already have one?{" "}
-                <Link href="/login" className="font-semibold text-green-700 hover:text-green-800">Sign in</Link>
+          {role === "vendor" ? (
+            <div className="mt-10 border border-(--color-bamboo)/25 bg-white p-6 sm:p-8">
+              <p className="font-display text-2xl text-(--color-ink) leading-snug">
+                Vendor onboarding has a dedicated form with GI verification &amp; payout setup.
               </p>
-            </div>
-
-            {/* Vendor referral — customer signup is the default; vendors get their own flow. */}
-            <div className="mb-6 px-4 py-3 rounded-xl bg-amber-50 border border-amber-100 text-sm text-amber-900">
-              Selling on Kopahi instead?{" "}
+              <p className="mt-3 text-(--color-ink)/70 text-sm leading-relaxed">
+                It takes about three minutes. You can save and continue at any time.
+              </p>
               <Link
                 href="/vendor-signup"
-                className="font-semibold underline underline-offset-2 hover:text-amber-700"
+                className="mt-6 inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
               >
-                Become a vendor →
+                Continue to vendor onboarding <span aria-hidden="true">→</span>
               </Link>
             </div>
-
-            {/* Google OAuth */}
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-3 py-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all font-medium text-gray-700"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-              </svg>
-              Continue with Google
-            </button>
-
-            {/* Divider */}
-            <div className="my-6 flex items-center gap-4">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="text-xs text-gray-500 font-medium">OR SIGN UP WITH EMAIL</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {submitError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg" role="alert">
-                  {submitError}
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">Full Name</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => update("name", e.target.value)}
-                  placeholder="Rahul Sharma"
-                  className={`w-full px-4 py-2.5 bg-gray-50 border rounded-lg focus:outline-none focus:bg-white focus:ring-4 transition-all ${
-                    errors.name ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-gray-200 focus:border-green-600 focus:ring-green-100"
-                  }`}
-                />
-                {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">Email Address</label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => update("email", e.target.value)}
-                  placeholder="you@example.com"
-                  className={`w-full px-4 py-2.5 bg-gray-50 border rounded-lg focus:outline-none focus:bg-white focus:ring-4 transition-all ${
-                    errors.email ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-gray-200 focus:border-green-600 focus:ring-green-100"
-                  }`}
-                />
-                {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">Phone Number</label>
-                <input
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) => update("phone", e.target.value)}
-                  placeholder="+91 98765 43210"
-                  className={`w-full px-4 py-2.5 bg-gray-50 border rounded-lg focus:outline-none focus:bg-white focus:ring-4 transition-all ${
-                    errors.phone ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-gray-200 focus:border-green-600 focus:ring-green-100"
-                  }`}
-                />
-                {errors.phone && <p className="text-xs text-red-600 mt-1">{errors.phone}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">Password</label>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-10 space-y-6" noValidate>
+              <Field id="name" label="Full name" error={errors.name}>
+                <input id="name" value={form.name} onChange={(e) => update("name", e.target.value)} autoComplete="name" className="kp-input" />
+              </Field>
+              <Field id="email" label="Email" error={errors.email}>
+                <input id="email" type="email" value={form.email} onChange={(e) => update("email", e.target.value)} autoComplete="email" className="kp-input" />
+              </Field>
+              <Field id="phone" label="Phone" error={errors.phone}>
+                <input id="phone" type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} autoComplete="tel" className="kp-input" />
+              </Field>
+              <Field id="password" label="Password" error={errors.password}>
                 <div className="relative">
                   <input
+                    id="password"
                     type={showPassword ? "text" : "password"}
                     value={form.password}
                     onChange={(e) => update("password", e.target.value)}
-                    placeholder="12+ chars · upper, lower, digit, symbol"
-                    className={`w-full px-4 py-2.5 pr-11 bg-gray-50 border rounded-lg focus:outline-none focus:bg-white focus:ring-4 transition-all ${
-                      errors.password ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-gray-200 focus:border-green-600 focus:ring-green-100"
-                    }`}
+                    autoComplete="new-password"
+                    className="kp-input pr-12"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                    onClick={() => setShowPassword((v) => !v)}
                     aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 text-(--color-bamboo) hover:text-(--color-moss) px-2 text-xs uppercase tracking-[0.18em]"
                   >
-                    {showPassword ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    )}
+                    {showPassword ? "Hide" : "Show"}
                   </button>
                 </div>
-                {errors.password && <p className="text-xs text-red-600 mt-1">{errors.password}</p>}
-                {form.password && !errors.password && (
-                  <div className="mt-2">
-                    <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-                      <div className={`h-full ${strength.color} transition-all duration-300`} style={{ width: strength.width }}></div>
+                {form.password && (
+                  <div className="mt-2 flex items-center gap-3">
+                    <div className="flex-1 h-1 bg-(--color-bamboo)/15">
+                      <div className="h-full bg-(--color-gold) transition-all" style={{ width: `${(strength.score / 5) * 100}%` }} />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Password strength: <span className="font-semibold">{strength.label}</span></p>
+                    <span className="text-[11px] uppercase tracking-[0.18em] text-(--color-bamboo)">{strength.label}</span>
                   </div>
                 )}
-              </div>
+              </Field>
 
-              {/* Terms checkbox */}
-              <label className="flex items-start gap-3 pt-1 cursor-pointer">
+              <label className="flex items-start gap-3 text-sm text-(--color-ink)/80 cursor-pointer select-none">
+                <span
+                  className={`inline-block h-4 w-4 mt-0.5 border shrink-0 ${
+                    form.agreedToTerms ? "bg-(--color-gold) border-(--color-gold)" : "border-(--color-bamboo)/40"
+                  }`}
+                  aria-hidden="true"
+                />
                 <input
                   type="checkbox"
                   checked={form.agreedToTerms}
                   onChange={(e) => update("agreedToTerms", e.target.checked)}
-                  className="mt-0.5 w-4 h-4 rounded border-gray-300 text-green-700 focus:ring-2 focus:ring-green-500 cursor-pointer"
+                  className="sr-only"
                 />
-                <span className="text-sm text-gray-600 leading-relaxed">
-                  I agree to Kopahi's{" "}
-                  <Link href="/terms" className="text-green-700 hover:text-green-800 font-medium underline">Terms of Service</Link>{" "}
+                <span>
+                  I agree to the{" "}
+                  <Link href="/terms" className="text-(--color-gold-dark) hover:text-(--color-gold) underline">terms</Link>{" "}
                   and{" "}
-                  <Link href="/privacy" className="text-green-700 hover:text-green-800 font-medium underline">Privacy Policy</Link>
+                  <Link href="/privacy" className="text-(--color-gold-dark) hover:text-(--color-gold) underline">privacy policy</Link>.
                 </span>
               </label>
-              {errors.agreedToTerms && <p className="text-xs text-red-600 -mt-2">{errors.agreedToTerms}</p>}
+              {errors.agreedToTerms && <p className="text-xs text-(--color-gold-dark) -mt-3">{errors.agreedToTerms}</p>}
 
-              {/* Submit */}
+              {submitError && <p role="alert" className="text-sm text-(--color-chilli)">{submitError}</p>}
+
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-green-700 hover:bg-green-800 disabled:bg-green-700/60 disabled:cursor-not-allowed text-white py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg inline-flex items-center justify-center gap-2"
+                className="w-full inline-flex items-center justify-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors disabled:opacity-60"
               >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Creating account...
-                  </>
-                ) : (
-                  <>
-                    Create Account
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
-                  </>
-                )}
+                {loading ? "Creating account…" : "Create Account"}
               </button>
 
-              <p className="text-xs text-center text-gray-500 pt-2">
-                Get 10% off your first order — code applied at checkout!
+              <p className="mt-2 text-xs italic text-(--color-bamboo) flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-(--color-gold)">
+                  <path d="M12 3c0 6 3 9 9 9-6 0-9 3-9 9 0-6-3-9-9-9 6 0 9-3 9-9z" fill="currentColor" />
+                </svg>
+                Get 10% off your first order — code applied at checkout.
               </p>
             </form>
-          </div>
+          )}
+
+          <p className="mt-10 text-sm text-(--color-ink)/70">
+            Already have an account?{" "}
+            <Link href="/login" className="text-(--color-gold-dark) hover:text-(--color-gold) uppercase tracking-[0.22em] text-xs ml-1">
+              Sign in →
+            </Link>
+          </p>
         </div>
-      </div>
+
+        <style jsx>{`
+          :global(.kp-input) {
+            width: 100%;
+            background: transparent;
+            border-bottom: 1px solid color-mix(in srgb, var(--color-bamboo) 45%, transparent);
+            padding: 0.75rem 0;
+            color: var(--color-ink);
+            outline: none;
+            transition: border-color 0.2s;
+          }
+          :global(.kp-input:focus) {
+            border-color: var(--color-gold);
+          }
+        `}</style>
+      </section>
+
+      <aside className="hidden lg:block relative overflow-hidden">
+        <Image
+          src="/products/muga-silk-stole.jpg"
+          alt="A Muga silk weaver's loom in Sualkuchi"
+          fill
+          priority
+          sizes="50vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-(--color-moss-dark)/30 via-(--color-moss-dark)/20 to-(--color-moss-dark)/85" />
+        <div className="absolute inset-0 grain" />
+        <div className="absolute inset-x-0 bottom-0 p-12 lg:p-16">
+          <p className="eyebrow text-(--color-gold)">Kopahi · A note</p>
+          <p
+            key={tagIndex}
+            className="mt-5 font-display italic text-[clamp(2rem,3.5vw,3rem)] leading-tight text-(--color-ivory)"
+            style={{ animation: "fadeUp 0.8s ease-out" }}
+          >
+            “{TAGLINES[tagIndex]}”
+          </p>
+        </div>
+        <style jsx>{`
+          @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+      </aside>
     </main>
+  );
+}
+
+function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label htmlFor={id} className="block eyebrow mb-2">{label}</label>
+      {children}
+      {error && <p className="mt-1.5 text-xs text-(--color-gold-dark)">{error}</p>}
+    </div>
   );
 }

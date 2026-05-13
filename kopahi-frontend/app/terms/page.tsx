@@ -1,93 +1,252 @@
-import PageShell from "../components/PageShell";
-import Footer from "../components/Footer";
+import type { Metadata } from "next";
+import LegalShell, { LegalList, LegalQuote, type LegalSection } from "../components/marketing/LegalShell";
 
-export const metadata = {
-  title: "Terms of Service",
-  description: "Terms governing the use of Kopahi's website, marketplace and vendor program.",
+export const metadata: Metadata = {
+  title: "Terms of Use",
+  description:
+    "Terms governing use of kopahi.com and the Kopahi marketplace, operated by AIBA AGRI NE LLP.",
 };
+
+const LAST_UPDATED = "April 2026";
+
+const SECTIONS: LegalSection[] = [
+  {
+    id: "about-kopahi",
+    title: "About Kopahi",
+    body: (
+      <p>
+        Kopahi is a multi-vendor marketplace for GI-tagged and indigenous produce, handcraft and beverages from
+        Northeast India. It is operated by <strong>AIBA AGRI NE LLP</strong> from its registered office in Jorhat,
+        Assam. Customers buy from us. Vendors list and sell through us. We hold the relationship together.
+      </p>
+    ),
+  },
+  {
+    id: "eligibility",
+    title: "Eligibility",
+    body: (
+      <LegalList
+        items={[
+          "You must be 18 years or older to use the platform.",
+          "Information you provide (name, contact, address, KYC) must be accurate and current.",
+          "Vendors must hold valid GST registration and FSSAI licence where applicable.",
+          "We may refuse service if these conditions are not met.",
+        ]}
+      />
+    ),
+  },
+  {
+    id: "account-access",
+    title: "Account & access",
+    body: (
+      <>
+        <p>
+          The platform supports three roles: <strong>Customer</strong>, <strong>Vendor</strong> and{" "}
+          <strong>Admin</strong>. You may have one role at a time on a given account; customers can apply to upgrade
+          to vendor.
+        </p>
+        <LegalList
+          items={[
+            "You are responsible for your own account and credentials.",
+            "Use a strong password and do not share it. We will never ask for your password by email or phone.",
+            "We may suspend an account that shows signs of fraud, abuse, or violation of these terms.",
+          ]}
+        />
+      </>
+    ),
+  },
+  {
+    id: "buying",
+    title: "Buying on Kopahi (customer terms)",
+    body: (
+      <>
+        <LegalList
+          items={[
+            "Placing an order is an offer to buy. We accept the offer when we ship.",
+            "Prices include applicable taxes unless otherwise stated. Shipping is calculated at checkout.",
+            "We try hard to keep pricing and stock accurate. If we make a mistake, we will tell you and offer a refund or alternative.",
+            "Standard shipping windows are 3–7 business days within India. Remote postcodes may take longer.",
+            "You may cancel before dispatch for a full refund. After dispatch, our returns policy applies.",
+            "Returns are available within 7 days of delivery for non-perishable, unopened items.",
+            "For complaints, write to inquiry@kopahi.com — we acknowledge within one working day.",
+          ]}
+        />
+      </>
+    ),
+  },
+  {
+    id: "selling",
+    title: "Selling on Kopahi (vendor terms)",
+    body: (
+      <>
+        <p>
+          Vendors join Kopahi through a dedicated onboarding flow and remain in <code>pending_review</code> status
+          until reviewed by our team.
+        </p>
+        <LegalList
+          items={[
+            "GI-tagged listings must be supported by valid GI documentation. We may request the original certificate.",
+            "Listings are subject to discretionary approval, edits and removal where claims cannot be verified.",
+            "Prices must be transparent and accurate. Bulk tiers must be honoured for the period stated.",
+            "Payouts settle weekly (Monday 00:00 IST) for orders delivered the previous week, net of platform commission and taxes.",
+            "Platform commission is 12% by default and is disclosed at the time of listing. We give vendors notice before any change.",
+            "You must keep KYC, GST and FSSAI documents current. Documents may be re-requested for audit.",
+            "Disputes are resolved per our published process; we may withhold funds during an active dispute.",
+            "Suspension grounds include repeated fulfilment failures, counterfeit listings, false origin claims and abusive conduct.",
+          ]}
+        />
+      </>
+    ),
+  },
+  {
+    id: "content-standards",
+    title: "Content standards & prohibited items",
+    body: (
+      <LegalList
+        items={[
+          "No counterfeit goods, including unverified GI claims.",
+          "No protected wildlife products, animal-derived items prohibited by law, or restricted substances.",
+          "No misleading farmer-origin or sourcing claims.",
+          "No hate speech, harassment, or unlawful content in listings, reviews or messages.",
+          "We may remove non-compliant content and, in serious cases, suspend the account.",
+        ]}
+      />
+    ),
+  },
+  {
+    id: "ip",
+    title: "Intellectual property",
+    body: (
+      <>
+        <p>
+          The Kopahi name, logo and editorial assets are the property of AIBA AGRI NE LLP. Vendor product images and
+          descriptions remain the vendor&apos;s property; by listing, vendors grant Kopahi a non-exclusive licence to
+          host and display them on the platform.
+        </p>
+        <p>
+          User submissions (reviews, questions, photos) remain yours; you grant us a non-exclusive licence to display
+          them in connection with the platform.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "payments-taxes",
+    title: "Payments & taxes",
+    body: (
+      <LegalList
+        items={[
+          "Payments are processed by our payment partners under their own terms.",
+          "GST invoices are issued for every order; vendor TDS and withholding follow Indian tax law.",
+          "Refunds are issued to the original payment method and may take 5–10 working days.",
+        ]}
+      />
+    ),
+  },
+  {
+    id: "logistics",
+    title: "Logistics & delivery",
+    body: (
+      <>
+        <p>
+          We work with verified logistics partners. Perishables and certain handcraft items follow specialised
+          handling.
+        </p>
+        <LegalList
+          items={[
+            "Cold-chain items require accurate, complete delivery addresses and a reachable phone number.",
+            "Perishables cannot be returned for change of mind; quality-related complaints are honoured.",
+            "Address inaccuracies that cause failed delivery may incur re-attempt or restocking costs.",
+          ]}
+        />
+      </>
+    ),
+  },
+  {
+    id: "disclaimers",
+    title: "Disclaimers & liability",
+    body: (
+      <>
+        <p>
+          We take reasonable care to provide an accurate and reliable platform. The service is provided on an
+          &ldquo;as is&rdquo; basis to the extent permitted by law.
+        </p>
+        <LegalQuote>
+          Our total aggregate liability for any claim arising from your use of the platform is limited to the value
+          of the transaction giving rise to the claim, or ₹10,000, whichever is greater.
+        </LegalQuote>
+      </>
+    ),
+  },
+  {
+    id: "termination",
+    title: "Termination",
+    body: (
+      <LegalList
+        items={[
+          "You can close your account at any time from Account Settings.",
+          "We may terminate or suspend an account for material breach of these terms, fraud or legal reasons.",
+          "Outstanding orders and payouts are settled in line with the relevant policy before closure.",
+        ]}
+      />
+    ),
+  },
+  {
+    id: "governing-law",
+    title: "Governing law & disputes",
+    body: (
+      <p>
+        These terms are governed by the laws of India. Disputes are subject to the exclusive jurisdiction of the
+        courts in Jorhat, Assam. Before initiating legal action, please raise your concern with our Grievance
+        Officer at <a className="text-(--color-gold-dark) hover:text-(--color-gold)" href="mailto:inquiry@kopahi.com">inquiry@kopahi.com</a>.
+      </p>
+    ),
+  },
+  {
+    id: "changes",
+    title: "Changes to these terms",
+    body: (
+      <p>
+        We may update these terms when our service or the law changes. Material updates are notified by email and
+        posted on this page; minor edits are reflected by changing the &ldquo;Last updated&rdquo; date.
+      </p>
+    ),
+  },
+  {
+    id: "contact",
+    title: "Contact us",
+    body: (
+      <>
+        <p>
+          AIBA AGRI NE LLP<br />
+          Bye Lane 2, Suraj Nagar, NA Ali,<br />
+          Jorhat, Assam — 785001
+        </p>
+        <p>
+          Email:{" "}
+          <a href="mailto:inquiry@kopahi.com" className="text-(--color-gold-dark) hover:text-(--color-gold)">
+            inquiry@kopahi.com
+          </a>
+        </p>
+      </>
+    ),
+  },
+];
 
 export default function TermsPage() {
   return (
-    <main className="bg-white text-gray-900 min-h-screen flex flex-col">
-      <PageShell>
-        <section className="bg-gradient-to-br from-green-50 via-white to-green-50/40 py-16 px-6 text-center">
-          <p className="uppercase tracking-[0.35em] text-green-700 font-semibold text-sm mb-3">Legal</p>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Terms of Service</h1>
-          <p className="text-gray-600 mt-4 max-w-xl mx-auto">Last updated: April 1, 2026</p>
-        </section>
-
-        <section className="py-16 px-6 flex-1">
-          <article className="max-w-3xl mx-auto text-gray-700 leading-relaxed space-y-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">1. Agreement</h2>
-              <p>
-                By accessing or using kopahi.com, you agree to these terms. If you do not agree, please do not use the site.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">2. Account & eligibility</h2>
-              <p>
-                You must be at least 18 years old to place orders or register as a vendor. You are responsible for keeping your login credentials secure and for all activity under your account.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">3. Orders & payment</h2>
-              <p>
-                Orders are confirmed only after successful payment. Prices are inclusive of taxes unless stated otherwise. We reserve the right to cancel orders due to inventory issues, pricing errors, or suspected fraud — full refunds will be issued in such cases.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">4. Shipping & delivery</h2>
-              <p>
-                Estimated delivery windows are best-effort and depend on courier capacity, location, and the nature of the product. Perishables ship under cold-chain conditions where applicable.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">5. Returns</h2>
-              <p>
-                Sealed, non-perishable items are returnable within 7 days of delivery if defective or damaged in transit. Perishables are not eligible for return except in case of quality issues, which must be reported within 24 hours of delivery with photos.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">6. Vendor terms</h2>
-              <p>
-                Vendors agree to ship within 48 hours of order confirmation, maintain the catalogue accuracy, comply with FSSAI standards, and accept the platform commission disclosed at sign-up. Payouts settle weekly.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">7. Intellectual property</h2>
-              <p>
-                All content on this site — including logos, photography, copy, and product names — is the property of Kopahi or its licensors and may not be reproduced without written permission.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">8. Limitation of liability</h2>
-              <p>
-                Our liability for any claim arising from your use of the site is limited to the amount paid for the relevant order. We are not liable for indirect or consequential losses.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">9. Governing law</h2>
-              <p>
-                These terms are governed by the laws of India. Disputes will be resolved in the courts of Guwahati, Assam.
-              </p>
-            </div>
-
-            <p className="text-sm text-gray-500 pt-4 border-t border-gray-100">
-              Questions? Email <a href="mailto:legal@kopahi.com" className="text-green-700 font-semibold">legal@kopahi.com</a>.
-            </p>
-          </article>
-        </section>
-      </PageShell>
-      <Footer />
-    </main>
+    <LegalShell
+      title="Terms of"
+      italicAccent="Use."
+      lastUpdated={LAST_UPDATED}
+      intro={
+        <p>
+          These terms govern your use of kopahi.com and the Kopahi marketplace, operated by AIBA AGRI NE LLP. By
+          using the site, or buying or selling on it, you agree to what follows. If you don&apos;t, please don&apos;t
+          use the platform.
+        </p>
+      }
+      sections={SECTIONS}
+    />
   );
 }

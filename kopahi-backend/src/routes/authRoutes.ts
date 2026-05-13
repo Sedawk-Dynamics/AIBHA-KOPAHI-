@@ -22,12 +22,28 @@ const router = Router();
 // When REDIS_URL is set, the bucket is shared across replicas via
 // rate-limit-redis; otherwise express-rate-limit's default MemoryStore is
 // used (fine for single-replica deploys).
+const DEMO_EMAILS = new Set([
+  "admin@kopahi.com",
+  "vendor@kopahi.com",
+  "customer@kopahi.com",
+]);
+const DEMO_BYPASS_ENABLED = process.env.ENABLE_DEMO === "true";
+
 const credentialLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
   store: buildLimiterStore("credential"),
+  // Seed-account demo logins bypass the limiter when ENABLE_DEMO=true so a
+  // quick click-through of the three role chips on /login doesn't lock the
+  // tester out for 15 minutes. The real credential paths still rate-limit
+  // normally.
+  skip: (req) => {
+    if (!DEMO_BYPASS_ENABLED) return false;
+    const email = typeof req.body?.email === "string" ? req.body.email.toLowerCase() : "";
+    return DEMO_EMAILS.has(email);
+  },
   message: {
     success: false,
     message: "Too many attempts. Please try again in a few minutes.",

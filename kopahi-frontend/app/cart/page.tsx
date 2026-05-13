@@ -1,45 +1,59 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import PageShell from "../components/PageShell";
-import Footer from "../components/Footer";
+
+import LenisProvider from "../components/marketing/LenisProvider";
+import MarketingHeader from "../components/marketing/MarketingHeader";
+import MarketingFooter from "../components/marketing/MarketingFooter";
+import WhatsAppFab from "../components/marketing/WhatsAppFab";
+import Eyebrow from "../components/marketing/Eyebrow";
+import OrganicDivider from "../components/marketing/OrganicDivider";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { ApiError } from "../lib/api";
 
 const SHIPPING_THRESHOLD = 999;
 const SHIPPING_FEE = 99;
+const GST_RATE = 0.05;
+
+function inr(amount: number) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(amount);
+}
+
+function countStates(items: { category?: string }[]) {
+  // We don't carry per-item state on the cart shape, so use category as a
+  // proxy for "stories" diversity. Reads naturally in the subhead.
+  return new Set(items.map((i) => i.category ?? "—")).size;
+}
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, setQuantity, remove, subtotal, coupon: appliedCoupon, applyCoupon: applyCouponApi, removeCoupon } = useCart();
+  const { items, setQuantity, remove, subtotal, coupon, applyCoupon, removeCoupon } = useCart();
   const { user } = useAuth();
 
-  const [coupon, setCoupon] = useState("");
+  const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
 
-  const discount = appliedCoupon ? appliedCoupon.discount : 0;
-  const shipping = subtotal === 0 || subtotal - discount >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-  const total = subtotal - discount + shipping;
+  const discount = coupon ? coupon.discount : 0;
+  const taxable = Math.max(0, subtotal - discount);
+  const shipping = subtotal === 0 || taxable >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const gst = Math.round(taxable * GST_RATE);
+  const total = taxable + shipping + gst;
 
-  const updateQty = (id: string, delta: number) => {
-    const item = items.find((i) => i.productId === id);
-    if (!item) return;
-    setQuantity(id, item.quantity + delta);
-  };
-
-  const applyCoupon = async () => {
-    const code = coupon.trim().toUpperCase();
-    setCouponError("");
+  const handleApply = async () => {
+    const code = couponInput.trim().toUpperCase();
     if (!code) return;
     setCouponLoading(true);
+    setCouponError("");
     try {
-      await applyCouponApi(code);
-      setCoupon("");
-    } catch (err: any) {
-      setCouponError(err?.message || "Invalid coupon code.");
+      await applyCoupon(code);
+      setCouponInput("");
+    } catch (err) {
+      setCouponError(err instanceof ApiError ? err.message : "Invalid coupon code.");
     } finally {
       setCouponLoading(false);
     }
@@ -54,222 +68,290 @@ export default function CartPage() {
     router.push("/checkout");
   };
 
-  const cartIsFromBackend = items.length > 0 && !items[0].productId.startsWith("fallback-");
+  const itemCount = items.reduce((s, i) => s + i.quantity, 0);
+  const stories = countStates(items);
 
   return (
-    <main className="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
-      <PageShell>
-        <section className="bg-gradient-to-br from-green-50 via-white to-green-50/40 py-12 px-6">
-          <div className="max-w-7xl mx-auto">
-            <p className="uppercase tracking-[0.35em] text-green-700 font-semibold text-sm mb-2">Your Cart</p>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-              {items.length === 0 ? "Your cart is empty" : `${items.length} item${items.length > 1 ? "s" : ""} in your cart`}
+    <LenisProvider>
+      <MarketingHeader />
+
+      <main className="bg-(--color-ivory) text-(--color-ink) min-h-screen">
+        {/* HERO — compact ~30vh */}
+        <section className="pt-32 sm:pt-40 pb-10">
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+            <Eyebrow>→ Your basket</Eyebrow>
+            <h1 className="mt-6 font-display font-light tracking-tight text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.02] text-(--color-ink) max-w-3xl">
+              Considered <span className="accent-italic">choices,</span> on their way.
             </h1>
+            <p className="mt-6 font-display italic text-(--color-bamboo) text-lg">
+              {items.length === 0
+                ? "An empty basket is a quiet kind of choice, too."
+                : `${itemCount} ${itemCount === 1 ? "item" : "items"} · ${stories} ${stories === 1 ? "story" : "stories"} from across the seven states.`}
+            </p>
           </div>
         </section>
 
-        <section className="py-12 px-6 flex-1">
-          <div className="max-w-7xl mx-auto">
+        <OrganicDivider />
+
+        {/* BODY */}
+        <section className="pb-32">
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
             {items.length === 0 ? (
-              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm py-20 px-6 text-center max-w-2xl mx-auto">
-                <div className="w-20 h-20 mx-auto rounded-full bg-green-50 flex items-center justify-center mb-6">
-                  <svg className="w-10 h-10 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M3 3h2l1 5h13l2-5h-15zm3 8h12l-1 6H7l-1-6z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold tracking-tight mb-3">Nothing here yet</h2>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                  Browse our catalogue to discover authentic Assam tea, GI-tagged spices, and wild honey.
-                </p>
-                <Link
-                  href="/products"
-                  className="inline-block bg-gradient-to-r from-green-700 to-green-600 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all"
-                >
-                  Continue shopping
-                </Link>
-              </div>
+              <EmptyCart />
             ) : (
-              <div className="grid lg:grid-cols-3 gap-8 items-start">
-                <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="px-6 md:px-8 py-5 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="font-bold text-lg">Items</h2>
-                    <Link href="/products" className="text-sm font-semibold text-green-700 hover:underline">
-                      + Add more
-                    </Link>
-                  </div>
-
-                  <ul className="divide-y divide-gray-100">
-                    {items.map((it) => (
-                      <li key={it.productId} className="p-6 md:p-7 flex gap-5">
-                        <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden bg-gray-100 shrink-0">
-                          <img src={it.image} alt={it.name} className="w-full h-full object-cover" />
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                <div className="lg:col-span-8 space-y-5">
+                  {items.map((it) => (
+                    <article
+                      key={it.productId}
+                      className="rounded-[2px] border border-(--color-bamboo)/25 bg-(--color-ivory-warm) p-5 sm:p-6 transition-shadow hover:shadow-md"
+                    >
+                      <div className="grid grid-cols-[96px_1fr] sm:grid-cols-[96px_1fr_auto_auto] gap-5 items-start">
+                        <div className="relative h-24 w-24 overflow-hidden border border-(--color-bamboo)/30 bg-(--color-ivory)">
+                          {it.image && (
+                            <Image src={it.image} alt={it.name} fill sizes="96px" className="object-cover" />
+                          )}
                         </div>
 
-                        <div className="flex-1 flex flex-col">
-                          <div className="flex items-start justify-between gap-3 mb-2">
-                            <div>
-                              {it.category && (
-                                <span className="inline-block px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-[10px] font-semibold uppercase tracking-wider mb-1.5">
-                                  {it.category}
-                                </span>
-                              )}
-                              <h3 className="font-bold tracking-tight">{it.name}</h3>
-                            </div>
-                            <button
-                              onClick={() => remove(it.productId)}
-                              aria-label={`Remove ${it.name}`}
-                              className="text-gray-400 hover:text-red-500 transition shrink-0 p-1"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
-                              </svg>
-                            </button>
+                        <div className="min-w-0">
+                          {it.category && (
+                            <p className="eyebrow text-(--color-bamboo)">→ {it.category}</p>
+                          )}
+                          <h2 className="mt-2 font-display text-xl sm:text-2xl text-(--color-ink) leading-tight">
+                            {it.name}
+                          </h2>
+                          <div className="mt-3 sm:hidden">
+                            <QuantityStepper qty={it.quantity} onChange={(q) => setQuantity(it.productId, q)} />
                           </div>
-
-                          <div className="flex items-end justify-between mt-auto flex-wrap gap-3">
-                            <div className="inline-flex items-center border border-gray-200 rounded-xl overflow-hidden">
-                              <button
-                                onClick={() => updateQty(it.productId, -1)}
-                                aria-label="Decrease quantity"
-                                className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-40"
-                                disabled={it.quantity <= 1}
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                                </svg>
-                              </button>
-                              <span className="w-10 text-center font-semibold tabular-nums">{it.quantity}</span>
-                              <button
-                                onClick={() => updateQty(it.productId, 1)}
-                                aria-label="Increase quantity"
-                                className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-40"
-                                disabled={it.quantity >= 50}
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                </svg>
-                              </button>
-                            </div>
-
-                            <p className="text-lg font-bold text-green-700 tabular-nums">
-                              ₹{(it.price * it.quantity).toLocaleString("en-IN")}
+                          <div className="mt-3 sm:hidden flex items-baseline gap-3">
+                            <p className="font-display text-(--color-moss) text-xl">
+                              {it.price > 0 ? inr(it.price * it.quantity) : "On request"}
                             </p>
+                            {it.price > 0 && (
+                              <p className="text-xs text-(--color-bamboo)">{inr(it.price)} each</p>
+                            )}
                           </div>
                         </div>
-                      </li>
-                    ))}
-                  </ul>
+
+                        <div className="hidden sm:block">
+                          <QuantityStepper qty={it.quantity} onChange={(q) => setQuantity(it.productId, q)} />
+                        </div>
+
+                        <div className="hidden sm:flex flex-col items-end justify-between min-h-24">
+                          <p className="font-display text-(--color-moss) text-xl sm:text-2xl">
+                            {it.price > 0 ? inr(it.price * it.quantity) : "On request"}
+                          </p>
+                          {it.price > 0 && (
+                            <p className="text-xs text-(--color-bamboo)">{inr(it.price)} each</p>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => remove(it.productId)}
+                            className="mt-2 font-display italic text-sm text-(--color-bamboo) hover:text-(--color-chilli) transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                      <div className="sm:hidden mt-4 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => remove(it.productId)}
+                          className="font-display italic text-sm text-(--color-bamboo) hover:text-(--color-chilli) transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </article>
+                  ))}
+                  <p className="font-display italic text-(--color-bamboo) pt-4">
+                    Heads up: shipping windows are 3–7 working days for in-stock origins.
+                  </p>
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-7 lg:sticky lg:top-[148px]">
-                  <h2 className="font-bold text-lg mb-5">Order Summary</h2>
+                <aside className="lg:col-span-4">
+                  <div className="lg:sticky lg:top-28 rounded-[2px] border border-(--color-bamboo)/25 bg-(--color-ivory-warm) p-7">
+                    <Eyebrow>→ Order summary</Eyebrow>
+                    <h2 className="mt-4 font-display text-2xl text-(--color-ink)">Your total</h2>
 
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Subtotal</span>
-                      <span className="font-semibold tabular-nums">₹{subtotal.toLocaleString("en-IN")}</span>
+                    <dl className="mt-6 space-y-3 text-sm">
+                      <Row label="Subtotal" value={inr(subtotal)} />
+                      {coupon && (
+                        <Row
+                          label={`Discount · ${coupon.code}`}
+                          value={`− ${inr(discount)}`}
+                          tone="gold"
+                          action={
+                            <button
+                              type="button"
+                              onClick={() => removeCoupon()}
+                              className="ml-2 text-xs italic text-(--color-bamboo) hover:text-(--color-chilli)"
+                            >
+                              remove
+                            </button>
+                          }
+                        />
+                      )}
+                      <Row
+                        label="Shipping"
+                        value={
+                          shipping === 0 ? (
+                            <span className="font-display italic text-(--color-moss)">Free</span>
+                          ) : (
+                            inr(shipping)
+                          )
+                        }
+                      />
+                      <Row label={`GST (${Math.round(GST_RATE * 100)}%)`} value={inr(gst)} />
+                    </dl>
+
+                    <div className="mt-6 pt-5 border-t border-(--color-bamboo)/25 flex items-baseline justify-between">
+                      <span className="eyebrow">Total</span>
+                      <span className="font-display text-3xl text-(--color-moss)">{inr(total)}</span>
                     </div>
+                    <span className="block mt-1 h-px w-16 bg-(--color-gold) ml-auto" aria-hidden="true" />
 
-                    {appliedCoupon && (
-                      <div className="flex justify-between text-green-700">
-                        <span>
-                          Discount ({appliedCoupon.code})
-                          <button
-                            onClick={removeCoupon}
-                            className="ml-2 text-xs text-gray-400 hover:text-red-500 underline"
-                          >
-                            remove
-                          </button>
-                        </span>
-                        <span className="font-semibold tabular-nums">−₹{discount.toLocaleString("en-IN")}</span>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Shipping</span>
-                      <span className="font-semibold tabular-nums">
-                        {shipping === 0 ? <span className="text-green-700">FREE</span> : `₹${shipping}`}
-                      </span>
-                    </div>
-
-                    {subtotal > 0 && subtotal - discount < SHIPPING_THRESHOLD && (
-                      <p className="text-xs text-gray-500 leading-relaxed pt-1">
-                        Add ₹{(SHIPPING_THRESHOLD - (subtotal - discount)).toLocaleString("en-IN")} more for free shipping.
-                      </p>
-                    )}
-                  </div>
-
-                  <hr className="my-5" />
-
-                  <div className="flex justify-between items-baseline mb-6">
-                    <span className="font-bold">Total</span>
-                    <span className="text-2xl font-bold text-green-700 tabular-nums">
-                      ₹{total.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-
-                  {!appliedCoupon && (
-                    <div className="mb-5">
-                      <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                        Have a coupon?
+                    {/* Promo */}
+                    <div className="mt-6">
+                      <label htmlFor="promo" className="eyebrow block mb-2">
+                        Promo code
                       </label>
-                      <div className="flex gap-2">
+                      <div className="flex items-center border-b border-(--color-bamboo)/40 focus-within:border-(--color-gold) transition-colors">
                         <input
-                          type="text"
-                          value={coupon}
-                          onChange={(e) => { setCoupon(e.target.value); setCouponError(""); }}
+                          id="promo"
+                          value={couponInput}
+                          onChange={(e) => setCouponInput(e.target.value)}
                           placeholder="WELCOME10"
-                          className="flex-1 border border-gray-200 px-3 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition uppercase"
+                          className="flex-1 bg-transparent py-2.5 text-(--color-ink) placeholder:text-(--color-ink)/40 outline-none uppercase tracking-[0.08em]"
                         />
                         <button
-                          onClick={applyCoupon}
-                          disabled={couponLoading}
-                          className="px-4 py-2.5 rounded-lg bg-gray-900 hover:bg-green-700 disabled:opacity-60 text-white font-semibold text-sm transition"
+                          type="button"
+                          onClick={handleApply}
+                          disabled={couponLoading || !couponInput.trim()}
+                          className="text-xs uppercase tracking-[0.22em] text-(--color-gold-dark) hover:text-(--color-gold) disabled:opacity-40 transition-colors px-2"
                         >
                           {couponLoading ? "…" : "Apply"}
                         </button>
                       </div>
-                      {couponError && <p className="text-xs text-red-600 mt-2">{couponError}</p>}
-                      <p className="text-[11px] text-gray-500 mt-2">Try: WELCOME10 · ASSAM15 · FESTIVE25</p>
+                      {couponError && (
+                        <p className="mt-2 text-xs text-(--color-chilli)">{couponError}</p>
+                      )}
                     </div>
-                  )}
 
-                  <button
-                    onClick={handleCheckout}
-                    disabled={!cartIsFromBackend}
-                    title={!cartIsFromBackend ? "Backend products are required to checkout" : undefined}
-                    className="w-full bg-gradient-to-r from-green-700 to-green-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {user ? "Proceed to Checkout" : "Log in & Checkout"}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleCheckout}
+                      className="mt-7 w-full inline-flex items-center justify-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+                    >
+                      Proceed to checkout <span aria-hidden="true">→</span>
+                    </button>
+                    <Link
+                      href="/products"
+                      className="mt-3 block text-center text-xs uppercase tracking-[0.22em] text-(--color-gold-dark) hover:text-(--color-gold) py-2"
+                    >
+                      Continue shopping
+                    </Link>
 
-                  {!cartIsFromBackend && (
-                    <p className="text-[11px] text-amber-700 mt-2 text-center">
-                      Some items are sample data. Refresh from the product page after seeding the backend to checkout.
-                    </p>
-                  )}
-
-                  <div className="mt-5 pt-5 border-t border-gray-100 grid grid-cols-3 gap-2 text-[11px] text-gray-500">
-                    {[
-                      { label: "Secure", icon: "M12 15v2m0 0v2m0-2h2m-2 0h-2m-7-5a7 7 0 1114 0v3a7 7 0 11-14 0v-3z" },
-                      { label: "Easy returns", icon: "M3 10h10a8 8 0 018 8v2M3 10l6-6m-6 6l6 6" },
-                      { label: "Fast ship", icon: "M13 10V3L4 14h7v7l9-11h-7z" },
-                    ].map((b) => (
-                      <div key={b.label} className="flex flex-col items-center gap-1.5 text-center">
-                        <svg className="w-4 h-4 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d={b.icon} />
-                        </svg>
-                        {b.label}
-                      </div>
-                    ))}
+                    <ul className="mt-7 pt-6 border-t border-(--color-bamboo)/20 space-y-2 text-xs uppercase tracking-[0.18em] text-(--color-bamboo)">
+                      {["Secure checkout", "FSSAI certified", "7-day returns"].map((c) => (
+                        <li key={c} className="flex items-center gap-2">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="text-(--color-gold)">
+                            <path d="M12 3c0 6 3 9 9 9-6 0-9 3-9 9 0-6-3-9-9-9 6 0 9-3 9-9z" />
+                          </svg>
+                          {c}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </div>
+                </aside>
               </div>
             )}
           </div>
         </section>
-      </PageShell>
-      <Footer />
-    </main>
+
+        <MarketingFooter />
+      </main>
+
+      <WhatsAppFab />
+    </LenisProvider>
+  );
+}
+
+function Row({
+  label,
+  value,
+  tone = "ink",
+  action,
+}: {
+  label: React.ReactNode;
+  value: React.ReactNode;
+  tone?: "ink" | "gold";
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <dt className="text-(--color-ink)/70 text-sm flex items-center">
+        {label}
+        {action}
+      </dt>
+      <dd className={`font-display ${tone === "gold" ? "text-(--color-gold-dark)" : "text-(--color-ink)"}`}>
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function QuantityStepper({ qty, onChange }: { qty: number; onChange: (q: number) => void }) {
+  return (
+    <div className="inline-flex items-center border-b border-(--color-bamboo)/40">
+      <button
+        type="button"
+        onClick={() => onChange(Math.max(0, qty - 1))}
+        aria-label="Decrease quantity"
+        className="h-9 w-9 text-(--color-ink)/80 hover:text-(--color-moss) transition-colors"
+      >
+        −
+      </button>
+      <span className="px-3 font-display text-(--color-ink) min-w-7 text-center">{qty}</span>
+      <button
+        type="button"
+        onClick={() => onChange(qty + 1)}
+        aria-label="Increase quantity"
+        className="h-9 w-9 text-(--color-ink)/80 hover:text-(--color-moss) transition-colors"
+      >
+        +
+      </button>
+    </div>
+  );
+}
+
+function EmptyCart() {
+  return (
+    <div className="py-20 text-center">
+      <svg
+        viewBox="0 0 120 120"
+        className="mx-auto w-16 h-16 text-(--color-bamboo)/40"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        aria-hidden="true"
+      >
+        <path d="M60 18C40 28 28 48 28 70c20 0 38-12 48-32" strokeLinecap="round" />
+        <path d="M60 18C76 36 88 56 88 70c-18 0-36-10-48-32" strokeLinecap="round" />
+        <path d="M60 18v82" strokeLinecap="round" />
+      </svg>
+      <p className="mt-8 font-display italic text-(--color-bamboo) text-2xl sm:text-3xl leading-snug max-w-md mx-auto">
+        Your basket is quiet. Let&apos;s change that.
+      </p>
+      <p className="mt-4 text-sm text-(--color-ink)/65 max-w-md mx-auto leading-relaxed">
+        Begin with a single origin — first-flush tea from Naharani, perhaps. Each tile carries a story.
+      </p>
+      <Link
+        href="/products"
+        className="mt-10 inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+      >
+        Discover products <span aria-hidden="true">→</span>
+      </Link>
+    </div>
   );
 }

@@ -1,13 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import PageShell from "../components/PageShell";
-import Footer from "../components/Footer";
+
+import LenisProvider from "../components/marketing/LenisProvider";
+import MarketingHeader from "../components/marketing/MarketingHeader";
+import MarketingFooter from "../components/marketing/MarketingFooter";
+import WhatsAppFab from "../components/marketing/WhatsAppFab";
+import Eyebrow from "../components/marketing/Eyebrow";
+import OrganicDivider from "../components/marketing/OrganicDivider";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { api, ApiError } from "../lib/api";
+
+const GST_RATE = 0.05;
+const FREE_SHIPPING_THRESHOLD = 999;
+const SHIPPING_FEE = 99;
+
+function inr(n: number) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -31,12 +45,20 @@ export default function CheckoutPage() {
   }, [authLoading, user, router]);
 
   useEffect(() => {
-    if (user) setForm((f) => ({ ...f, fullName: f.fullName || user.name || "", phone: f.phone || user.phone || "" }));
+    // user is hydrated async — seed name/phone once it lands.
+    if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setForm((f) => ({
+        ...f,
+        fullName: f.fullName || user.name || "",
+        phone: f.phone || user.phone || "",
+      }));
+    }
   }, [user]);
 
   if (authLoading || !user) {
     return (
-      <main className="bg-gray-50 min-h-screen flex items-center justify-center text-gray-500">
+      <main className="min-h-screen bg-(--color-ivory) flex items-center justify-center font-display italic text-(--color-bamboo)">
         Loading…
       </main>
     );
@@ -44,25 +66,37 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <main className="bg-gray-50 min-h-screen flex flex-col">
-        <PageShell>
-          <section className="py-24 px-6 text-center">
-            <h1 className="text-3xl font-bold mb-3">No items to checkout</h1>
-            <p className="text-gray-600 mb-6">Add something to your cart first.</p>
-            <Link href="/products" className="inline-block bg-green-700 text-white px-6 py-3 rounded-xl font-bold">
-              Browse products
-            </Link>
+      <LenisProvider>
+        <MarketingHeader />
+        <main className="bg-(--color-ivory) text-(--color-ink) min-h-screen">
+          <section className="pt-40 pb-32 text-center">
+            <div className="mx-auto max-w-2xl px-6">
+              <Eyebrow>→ Checkout</Eyebrow>
+              <h1 className="mt-6 font-display font-light tracking-tight text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.02] text-(--color-ink)">
+                Your basket is <span className="accent-italic">quiet.</span>
+              </h1>
+              <p className="mt-6 font-display italic text-(--color-bamboo) text-lg">
+                Add a few origins first — we&apos;ll meet you back here.
+              </p>
+              <Link
+                href="/products"
+                className="mt-10 inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+              >
+                Browse origins →
+              </Link>
+            </div>
           </section>
-        </PageShell>
-        <Footer />
-      </main>
+          <MarketingFooter />
+        </main>
+        <WhatsAppFab />
+      </LenisProvider>
     );
   }
 
   const discount = coupon?.discount ?? 0;
   const discountedSubtotal = Math.max(0, subtotal - discount);
-  const shipping = discountedSubtotal >= 999 ? 0 : 99;
-  const tax = Math.round(discountedSubtotal * 0.05);
+  const shipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const tax = Math.round(discountedSubtotal * GST_RATE);
   const total = discountedSubtotal + shipping + tax;
 
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -71,7 +105,6 @@ export default function CheckoutPage() {
   const placeOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
     for (const k of ["fullName", "phone", "address", "city", "state", "pincode"] as const) {
       if (!form[k].trim()) {
         setError("Please fill in all shipping fields.");
@@ -82,7 +115,6 @@ export default function CheckoutPage() {
       setError("Please enter a valid 6-digit PIN code.");
       return;
     }
-
     setSubmitting(true);
     try {
       const res = await api.post<{ success: boolean; order: { _id: string } }>(
@@ -104,88 +136,233 @@ export default function CheckoutPage() {
   };
 
   return (
-    <main className="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
-      <PageShell>
-        <section className="bg-gradient-to-br from-green-50 via-white to-green-50/40 py-10 px-6">
-          <div className="max-w-7xl mx-auto">
-            <p className="uppercase tracking-[0.35em] text-green-700 font-semibold text-sm mb-2">Checkout</p>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Complete your order</h1>
+    <LenisProvider>
+      <MarketingHeader />
+      <main className="bg-(--color-ivory) text-(--color-ink) min-h-screen">
+        {/* HERO */}
+        <section className="pt-32 sm:pt-40 pb-10">
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+            <Eyebrow>→ Checkout</Eyebrow>
+            <h1 className="mt-6 font-display font-light tracking-tight text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.02] text-(--color-ink) max-w-3xl">
+              One last <span className="accent-italic">step.</span>
+            </h1>
+            <p className="mt-5 font-display italic text-(--color-bamboo)">
+              We&apos;ll confirm by email within minutes, ship within a working day.
+            </p>
           </div>
         </section>
 
-        <section className="py-10 px-6 flex-1">
-          <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-8">
-            <form onSubmit={placeOrder} className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
-              <h2 className="font-bold text-lg mb-5">Shipping address</h2>
+        <OrganicDivider />
 
-              {error && (
-                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{error}</div>
-              )}
+        <section className="pb-32">
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            {/* FORM */}
+            <form onSubmit={placeOrder} className="lg:col-span-8 space-y-10">
+              <div className="rounded-[2px] border border-(--color-bamboo)/25 bg-(--color-ivory-warm) p-7 sm:p-8">
+                <Eyebrow>→ 01 · Shipping address</Eyebrow>
+                <h2 className="mt-3 font-display text-2xl text-(--color-ink)">Where it&apos;s going</h2>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <input value={form.fullName} onChange={update("fullName")} placeholder="Full name" className="border border-gray-200 px-4 py-3 rounded-xl md:col-span-2 focus:outline-none focus:ring-2 focus:ring-green-300" />
-                <input value={form.phone} onChange={update("phone")} placeholder="Phone" className="border border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-300" />
-                <input value={form.pincode} onChange={update("pincode")} placeholder="PIN code" className="border border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-300" />
-                <input value={form.address} onChange={update("address")} placeholder="Address (house, street)" className="border border-gray-200 px-4 py-3 rounded-xl md:col-span-2 focus:outline-none focus:ring-2 focus:ring-green-300" />
-                <input value={form.city} onChange={update("city")} placeholder="City" className="border border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-300" />
-                <input value={form.state} onChange={update("state")} placeholder="State" className="border border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-300" />
+                {error && (
+                  <div role="alert" className="mt-5 border border-(--color-chilli)/30 bg-(--color-chilli)/10 px-4 py-3 text-sm text-(--color-chilli)">
+                    {error}
+                  </div>
+                )}
+
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <Field id="fullName" label="Full name" className="sm:col-span-2">
+                    <input id="fullName" value={form.fullName} onChange={update("fullName")} autoComplete="name" className="kp-input" />
+                  </Field>
+                  <Field id="phone" label="Phone">
+                    <input id="phone" type="tel" value={form.phone} onChange={update("phone")} autoComplete="tel" className="kp-input" />
+                  </Field>
+                  <Field id="pincode" label="PIN code">
+                    <input
+                      id="pincode"
+                      inputMode="numeric"
+                      pattern="\d{6}"
+                      maxLength={6}
+                      value={form.pincode}
+                      onChange={update("pincode")}
+                      autoComplete="postal-code"
+                      className="kp-input"
+                    />
+                  </Field>
+                  <Field id="address" label="Address — house, street" className="sm:col-span-2">
+                    <input id="address" value={form.address} onChange={update("address")} autoComplete="street-address" className="kp-input" />
+                  </Field>
+                  <Field id="city" label="City">
+                    <input id="city" value={form.city} onChange={update("city")} autoComplete="address-level2" className="kp-input" />
+                  </Field>
+                  <Field id="state" label="State">
+                    <input id="state" value={form.state} onChange={update("state")} autoComplete="address-level1" className="kp-input" />
+                  </Field>
+                </div>
               </div>
 
-              <h2 className="font-bold text-lg mt-8 mb-3">Payment</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {(["COD", "Online"] as const).map((p) => (
-                  <label key={p} className={`border rounded-xl p-4 cursor-pointer transition ${paymentMethod === p ? "border-green-600 bg-green-50" : "border-gray-200 hover:border-gray-300"}`}>
-                    <input type="radio" className="sr-only" checked={paymentMethod === p} onChange={() => setPaymentMethod(p)} />
-                    <p className="font-semibold">{p === "COD" ? "Cash on Delivery" : "Online (Razorpay)"}</p>
-                    <p className="text-xs text-gray-500 mt-1">{p === "COD" ? "Pay when you receive your order" : "Pay securely via Razorpay (if configured)"}</p>
-                  </label>
-                ))}
+              <div className="rounded-[2px] border border-(--color-bamboo)/25 bg-(--color-ivory-warm) p-7 sm:p-8">
+                <Eyebrow>→ 02 · Payment</Eyebrow>
+                <h2 className="mt-3 font-display text-2xl text-(--color-ink)">How you&apos;d like to settle</h2>
+
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {(
+                    [
+                      { value: "COD", label: "Cash on delivery", body: "Pay the rider on receipt." },
+                      { value: "Online", label: "Online · Razorpay", body: "Cards, UPI, netbanking." },
+                    ] as const
+                  ).map((p) => {
+                    const active = paymentMethod === p.value;
+                    return (
+                      <label
+                        key={p.value}
+                        className={`block cursor-pointer p-5 border transition-colors ${
+                          active
+                            ? "border-(--color-gold) bg-(--color-gold)/10"
+                            : "border-(--color-bamboo)/30 hover:border-(--color-bamboo)/60"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          className="sr-only"
+                          checked={active}
+                          onChange={() => setPaymentMethod(p.value)}
+                        />
+                        <p className={`font-display text-lg ${active ? "text-(--color-moss)" : "text-(--color-ink)"}`}>
+                          {p.label}
+                        </p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-(--color-bamboo)">{p.body}</p>
+                      </label>
+                    );
+                  })}
+                </div>
+                {paymentMethod === "Online" && (
+                  <p className="mt-3 text-xs italic text-(--color-bamboo)">
+                    Razorpay integration pending — you can place a COD order today.
+                  </p>
+                )}
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full mt-8 bg-gradient-to-r from-green-700 to-green-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:shadow-2xl transition-all disabled:opacity-60"
+                className="w-full inline-flex items-center justify-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors disabled:opacity-60"
               >
-                {submitting ? "Placing order…" : `Place order · ₹${total.toLocaleString("en-IN")}`}
+                {submitting ? "Placing order…" : <>Place order · {inr(total)}<span aria-hidden="true">→</span></>}
               </button>
             </form>
 
-            <aside className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-7 lg:sticky lg:top-[120px] h-fit">
-              <h2 className="font-bold text-lg mb-4">Order summary</h2>
-              <ul className="divide-y divide-gray-100 -mx-6 mb-4">
-                {items.map((i) => (
-                  <li key={i.productId} className="px-6 py-3 flex gap-3 items-center">
-                    <img src={i.image} alt={i.name} className="w-12 h-12 rounded-lg object-cover bg-gray-100" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate">{i.name}</p>
-                      <p className="text-xs text-gray-500">Qty {i.quantity}</p>
-                    </div>
-                    <p className="text-sm font-semibold tabular-nums">₹{(i.price * i.quantity).toLocaleString("en-IN")}</p>
-                  </li>
-                ))}
-              </ul>
+            {/* SUMMARY */}
+            <aside className="lg:col-span-4">
+              <div className="lg:sticky lg:top-28 rounded-[2px] border border-(--color-bamboo)/25 bg-(--color-ivory-warm) p-7">
+                <Eyebrow>→ Your basket</Eyebrow>
+                <h2 className="mt-3 font-display text-2xl text-(--color-ink)">
+                  {items.length} {items.length === 1 ? "item" : "items"}
+                </h2>
 
-              <div className="space-y-2 text-sm border-t border-gray-100 pt-4">
-                <div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span className="font-semibold">₹{subtotal.toLocaleString("en-IN")}</span></div>
-                {coupon && (
-                  <div className="flex justify-between text-green-700">
-                    <span>Coupon ({coupon.code})</span>
-                    <span className="font-semibold">−₹{discount.toLocaleString("en-IN")}</span>
-                  </div>
-                )}
-                <div className="flex justify-between"><span className="text-gray-600">Shipping</span><span className="font-semibold">{shipping === 0 ? "Free" : `₹${shipping}`}</span></div>
-                <div className="flex justify-between"><span className="text-gray-600">Tax (5%)</span><span className="font-semibold">₹{tax}</span></div>
-                <div className="flex justify-between text-base pt-2 border-t border-gray-100">
-                  <span className="font-bold">Total</span>
-                  <span className="font-bold text-green-700">₹{total.toLocaleString("en-IN")}</span>
+                <ul className="mt-6 divide-y divide-(--color-bamboo)/15">
+                  {items.map((it) => (
+                    <li key={it.productId} className="py-4 flex items-center gap-4">
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-(--color-ivory) border border-(--color-bamboo)/25">
+                        {it.image && <Image src={it.image} alt={it.name} fill sizes="56px" className="object-cover" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-display text-(--color-ink) leading-tight">{it.name}</p>
+                        <p className="text-xs text-(--color-bamboo) mt-0.5">× {it.quantity}</p>
+                      </div>
+                      <p className="font-display text-(--color-moss)">
+                        {it.price > 0 ? inr(it.price * it.quantity) : "—"}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+
+                <dl className="mt-6 space-y-2.5 text-sm">
+                  <Row label="Subtotal" value={inr(subtotal)} />
+                  {coupon && <Row label={`Discount · ${coupon.code}`} value={`− ${inr(discount)}`} tone="gold" />}
+                  <Row
+                    label="Shipping"
+                    value={shipping === 0 ? <span className="font-display italic text-(--color-moss)">Free</span> : inr(shipping)}
+                  />
+                  <Row label={`GST (${Math.round(GST_RATE * 100)}%)`} value={inr(tax)} />
+                </dl>
+
+                <div className="mt-5 pt-5 border-t border-(--color-bamboo)/25 flex items-baseline justify-between">
+                  <span className="eyebrow">Total</span>
+                  <span className="font-display text-3xl text-(--color-moss)">{inr(total)}</span>
                 </div>
+                <span className="block mt-1 h-px w-16 bg-(--color-gold) ml-auto" aria-hidden="true" />
+
+                <ul className="mt-7 pt-6 border-t border-(--color-bamboo)/20 space-y-2 text-xs uppercase tracking-[0.18em] text-(--color-bamboo)">
+                  {["Secure checkout", "FSSAI certified", "7-day returns"].map((c) => (
+                    <li key={c} className="flex items-center gap-2">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="text-(--color-gold)">
+                        <path d="M12 3c0 6 3 9 9 9-6 0-9 3-9 9 0-6-3-9-9-9 6 0 9-3 9-9z" />
+                      </svg>
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/cart"
+                  className="mt-6 block text-center text-xs uppercase tracking-[0.22em] text-(--color-gold-dark) hover:text-(--color-gold) py-2"
+                >
+                  ← Back to basket
+                </Link>
               </div>
             </aside>
           </div>
         </section>
-      </PageShell>
-      <Footer />
-    </main>
+
+        <MarketingFooter />
+      </main>
+      <WhatsAppFab />
+
+      <style jsx>{`
+        :global(.kp-input) {
+          width: 100%;
+          background: transparent;
+          border-bottom: 1px solid color-mix(in srgb, var(--color-bamboo) 45%, transparent);
+          padding: 0.75rem 0;
+          color: var(--color-ink);
+          outline: none;
+          transition: border-color 0.2s;
+        }
+        :global(.kp-input:focus) {
+          border-color: var(--color-gold);
+        }
+      `}</style>
+    </LenisProvider>
+  );
+}
+
+function Field({
+  id,
+  label,
+  className = "",
+  children,
+}: {
+  id: string;
+  label: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={className}>
+      <label htmlFor={id} className="block eyebrow mb-2">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function Row({ label, value, tone = "ink" }: { label: React.ReactNode; value: React.ReactNode; tone?: "ink" | "gold" }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <dt className="text-(--color-ink)/70">{label}</dt>
+      <dd className={`font-display ${tone === "gold" ? "text-(--color-gold-dark)" : "text-(--color-ink)"}`}>
+        {value}
+      </dd>
+    </div>
   );
 }

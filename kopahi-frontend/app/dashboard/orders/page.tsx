@@ -1,8 +1,10 @@
 "use client";
+
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import DashboardShell, { StatusBadge } from "../../components/DashboardShell";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import EditorialShell from "../../components/dashboard/EditorialShell";
+import { DashCard, StatusPill } from "../../components/dashboard/DashPrimitives";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
 
@@ -14,125 +16,274 @@ type ApiOrder = {
   createdAt: string;
 };
 
-/* ============================================================
-   CUSTOMER MY ORDERS
-   File: app/dashboard/orders/page.tsx
-============================================================ */
+const STATUSES = ["All", "Processing", "Shipped", "Delivered", "Cancelled"] as const;
+type Status = (typeof STATUSES)[number];
 
-const orders = [
-  { id: "KP-2847", date: "26 Apr, 2026", product: "Assam Tea Premium 250g", qty: 3, amount: "₹1,499", status: "Shipped", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=200&q=80" },
-  { id: "KP-2812", date: "18 Apr, 2026", product: "Wild Forest Honey 500g", qty: 1, amount: "₹899", status: "Delivered", image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=200&q=80" },
-  { id: "KP-2789", date: "10 Apr, 2026", product: "Black Rice 5kg + Turmeric", qty: 1, amount: "₹3,495", status: "Delivered", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&q=80" },
-  { id: "KP-2734", date: "28 Mar, 2026", product: "Bhut Jolokia Spice Pack", qty: 2, amount: "₹1,299", status: "Delivered", image: "https://images.unsplash.com/photo-1583286814430-1c2f9af2716b?w=200&q=80" },
-  { id: "KP-2698", date: "15 Mar, 2026", product: "Lakadong Turmeric 250g", qty: 1, amount: "₹649", status: "Delivered", image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&q=80" },
-  { id: "KP-2654", date: "2 Mar, 2026", product: "Tulsi Herbal Tea", qty: 1, amount: "₹349", status: "Cancelled", image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=200&q=80" },
-];
+function inr(n: number) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+}
+
+function trackingStep(status: string): number {
+  // Placed → Packed → Shipped → Delivered
+  const s = status.toLowerCase();
+  if (s.includes("deliver")) return 4;
+  if (s.includes("ship")) return 3;
+  if (s.includes("pack")) return 2;
+  if (s.includes("cancel")) return 0;
+  return 1;
+}
+
+const STEPS = ["Placed", "Packed", "Shipped", "Delivered"];
 
 export default function CustomerOrdersPage() {
-  const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [liveOrders, setLiveOrders] = useState<ApiOrder[] | null>(null);
+  const { user } = useAuth();
+  const [orders, setOrders] = useState<ApiOrder[] | null>(null);
   const [fetchError, setFetchError] = useState("");
+  const [status, setStatus] = useState<Status>("All");
+  const [query, setQuery] = useState("");
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) { router.replace("/login?next=/dashboard/orders"); return; }
-
+    if (!user) return;
     api
       .get<{ orders: ApiOrder[] }>("/api/orders/mine", { auth: true })
-      .then((res) => setLiveOrders(res.orders || []))
-      .catch((err) => setFetchError(err.message || "Could not load orders"));
-  }, [authLoading, user, router]);
+      .then((res) => setOrders(res.orders || []))
+      .catch((err) => setFetchError(err?.message || "Could not load orders"));
+  }, [user]);
 
-  const sourceOrders = liveOrders
-    ? liveOrders.map((o) => ({
-        id: o._id.slice(-6).toUpperCase(),
-        date: new Date(o.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
-        product: o.items.map((i) => i.name).join(", ") || "—",
-        qty: o.items.reduce((s, i) => s + i.quantity, 0),
-        amount: `₹${o.totalPrice.toLocaleString("en-IN")}`,
-        status: o.orderStatus,
-        image: o.items[0]?.image || "https://placehold.co/200x200/14532d/ffffff?text=Kopahi",
-      }))
-    : orders;
-
-  const filtered = sourceOrders.filter((o) => {
-    const matchSearch = o.id.toLowerCase().includes(search.toLowerCase()) || o.product.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "All" || o.status === statusFilter;
-    return matchSearch && matchStatus;
+  const filtered = (orders || []).filter((o) => {
+    const matchStatus = status === "All" || o.orderStatus.toLowerCase().includes(status.toLowerCase());
+    const q = query.toLowerCase();
+    const matchQuery =
+      !q ||
+      o._id.toLowerCase().includes(q) ||
+      o.items.some((i) => i.name.toLowerCase().includes(q));
+    return matchStatus && matchQuery;
   });
 
-  const statuses = ["All", "Shipped", "Delivered", "Cancelled"];
-
   return (
-    <DashboardShell role="Customer" userName={user?.name} userEmail={user?.email}>
-      <div className="mb-6 md:mb-8">
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-          <Link href="/dashboard" className="hover:text-green-700">Dashboard</Link>
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          <span className="text-gray-900 font-medium">My Orders</span>
+    <EditorialShell
+      eyebrow="→ My Orders"
+      title={
+        <>
+          Every order, <span className="accent-italic">remembered.</span>
+        </>
+      }
+      actions={
+        <div className="relative w-full sm:w-72">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by order ID or item"
+            className="w-full bg-transparent border-b border-(--color-bamboo)/40 focus:border-(--color-gold) outline-none py-2.5 text-(--color-ink) placeholder:text-(--color-ink)/40"
+          />
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">My Orders</h1>
-        <p className="text-sm md:text-base text-gray-600 mt-1">{sourceOrders.length} total orders · {sourceOrders.filter((o) => o.status === "Shipped").length} arriving soon</p>
-        {fetchError && <p className="text-xs text-red-600 mt-1">{fetchError}</p>}
+      }
+    >
+      {fetchError && (
+        <div className="mb-8 border border-(--color-gold)/40 bg-(--color-gold)/10 px-5 py-4 text-sm text-(--color-moss)">
+          {fetchError}
+        </div>
+      )}
+
+      <div className="flex gap-1 mb-10 flex-wrap border-b border-(--color-bamboo)/15">
+        {STATUSES.map((s) => {
+          const active = status === s;
+          return (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setStatus(s)}
+              className={`relative px-4 py-3 text-[11px] uppercase tracking-[0.22em] transition-colors ${
+                active ? "text-(--color-moss) font-display italic" : "text-(--color-ink)/60 hover:text-(--color-moss)"
+              }`}
+            >
+              {s}
+              {active && <span aria-hidden="true" className="absolute -bottom-px left-2 right-2 h-[2px] bg-(--color-gold)" />}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-        <div className="p-4 md:p-5 border-b border-gray-100 flex items-center justify-between gap-4 flex-wrap">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search orders..." className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:bg-white focus:border-green-600 focus:ring-2 focus:ring-green-100" />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {statuses.map((s) => (
-              <button key={s} onClick={() => setStatusFilter(s)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${statusFilter === s ? "bg-green-700 text-white" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}>{s}</button>
-            ))}
-          </div>
-        </div>
-
-        <div className="divide-y divide-gray-100">
-          {filtered.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-              </div>
-              <p className="font-semibold text-gray-900">No orders found</p>
-              <p className="text-sm text-gray-500 mt-1">Try adjusting your filters</p>
-            </div>
-          ) : (
-            filtered.map((o) => (
-              <Link key={o.id} href={`/dashboard/orders/${o.id}`} className="block p-4 md:p-5 hover:bg-gray-50 transition-colors">
-                <div className="flex gap-4">
-                  <img src={o.image} alt={o.product} className="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover bg-gray-100 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-3 flex-wrap mb-1">
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                          <p className="text-sm md:text-base font-bold text-gray-900">#{o.id}</p>
-                          <StatusBadge status={o.status} />
+      {orders === null ? (
+        <p className="py-16 text-center font-display italic text-(--color-bamboo)">Reading the books…</p>
+      ) : filtered.length === 0 ? (
+        <EmptyOrders />
+      ) : (
+        <div className="space-y-5">
+          {filtered.map((o) => {
+            const id = o._id.slice(-6).toUpperCase();
+            const step = trackingStep(o.orderStatus);
+            const isOpen = expanded === o._id;
+            return (
+              <article
+                key={o._id}
+                className="rounded-[2px] border border-(--color-bamboo)/25 bg-(--color-ivory-warm)"
+              >
+                <button
+                  type="button"
+                  onClick={() => setExpanded(isOpen ? null : o._id)}
+                  className="w-full text-left p-6 sm:p-7 flex items-center justify-between gap-6 flex-wrap"
+                >
+                  <div className="flex items-center gap-5 flex-1 min-w-0">
+                    <div className="flex -space-x-2">
+                      {o.items.slice(0, 3).map((it, i) => (
+                        <div
+                          key={i}
+                          className="relative h-14 w-14 sm:h-16 sm:w-16 rounded-[2px] overflow-hidden bg-(--color-ivory) border border-(--color-bamboo)/30"
+                        >
+                          {it.image ? (
+                            <Image src={it.image} alt={it.name} fill sizes="64px" className="object-cover" />
+                          ) : (
+                            <span className="absolute inset-0 flex items-center justify-center font-display italic text-(--color-bamboo)">
+                              ·
+                            </span>
+                          )}
                         </div>
-                        <p className="text-sm text-gray-700 line-clamp-1">{o.product}</p>
-                      </div>
-                      <p className="text-base md:text-lg font-bold text-gray-900 whitespace-nowrap">{o.amount}</p>
+                      ))}
+                      {o.items.length > 3 && (
+                        <span className="h-14 w-14 sm:h-16 sm:w-16 inline-flex items-center justify-center rounded-[2px] border border-(--color-bamboo)/30 bg-(--color-ivory) text-xs text-(--color-bamboo) uppercase tracking-[0.18em]">
+                          +{o.items.length - 3}
+                        </span>
+                      )}
                     </div>
-                    <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
-                      <p className="text-xs text-gray-500">Qty: {o.qty} · Ordered on {o.date}</p>
-                      <span className="text-xs font-medium text-green-700 inline-flex items-center gap-1">
-                        {o.status === "Shipped" ? "Track order" : "View details"}
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                      </span>
+                    <div className="min-w-0">
+                      <p className="font-display italic text-lg sm:text-xl text-(--color-ink) leading-tight">
+                        #{id}
+                      </p>
+                      <p className="eyebrow text-(--color-bamboo) mt-1">
+                        {new Date(o.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                      </p>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))
-          )}
+                  <div className="flex items-center gap-5">
+                    <StatusPill status={o.orderStatus} />
+                    <span className="font-display text-2xl text-(--color-moss)">{inr(o.totalPrice)}</span>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                      className={`text-(--color-bamboo) transition-transform ${isOpen ? "rotate-180" : ""}`}
+                    >
+                      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </button>
+
+                {isOpen && (
+                  <div className="border-t border-(--color-bamboo)/20 px-6 sm:px-7 py-6 space-y-7">
+                    {/* Tracking */}
+                    {step > 0 && (
+                      <div>
+                        <p className="eyebrow mb-4">Tracking</p>
+                        <div className="flex items-center">
+                          {STEPS.map((label, i) => {
+                            const active = i < step;
+                            const isLast = i === STEPS.length - 1;
+                            return (
+                              <div key={label} className="flex items-center flex-1 last:flex-none">
+                                <div className="flex flex-col items-center">
+                                  <span
+                                    className={`h-3 w-3 rounded-full ${
+                                      active ? "bg-(--color-gold)" : "bg-(--color-bamboo)/30"
+                                    }`}
+                                  />
+                                  <span
+                                    className={`mt-2 text-[10px] uppercase tracking-[0.22em] whitespace-nowrap ${
+                                      active ? "text-(--color-moss)" : "text-(--color-bamboo)"
+                                    }`}
+                                  >
+                                    {label}
+                                  </span>
+                                </div>
+                                {!isLast && (
+                                  <span
+                                    aria-hidden="true"
+                                    className={`flex-1 h-px mx-2 ${i + 1 < step ? "bg-(--color-gold)" : "bg-(--color-bamboo)/30"}`}
+                                  />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Line items */}
+                    <div>
+                      <p className="eyebrow mb-3">Items</p>
+                      <ul className="divide-y divide-(--color-bamboo)/15">
+                        {o.items.map((it, i) => (
+                          <li key={i} className="py-3 flex items-center justify-between">
+                            <span className="font-display text-(--color-ink)">{it.name}</span>
+                            <span className="text-sm text-(--color-bamboo)">× {it.quantity}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                      <Link
+                        href="/products"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-(--color-gold) text-(--color-moss-dark) text-[11px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+                      >
+                        Reorder →
+                      </Link>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 border border-(--color-moss)/40 text-(--color-moss) text-[11px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-moss) hover:text-(--color-ivory) transition-colors"
+                      >
+                        Download invoice
+                      </button>
+                      <Link
+                        href="/contact"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 font-display italic text-sm text-(--color-bamboo) hover:text-(--color-moss) transition-colors"
+                      >
+                        Contact vendor
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </article>
+            );
+          })}
         </div>
+      )}
+    </EditorialShell>
+  );
+}
+
+function EmptyOrders() {
+  return (
+    <DashCard>
+      <div className="py-12 text-center">
+        <svg
+          viewBox="0 0 120 120"
+          className="mx-auto w-16 h-16 text-(--color-bamboo)/40"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.25"
+          aria-hidden="true"
+        >
+          <path d="M60 18C40 28 28 48 28 70c20 0 38-12 48-32" strokeLinecap="round" />
+          <path d="M60 18C76 36 88 56 88 70c-18 0-36-10-48-32" strokeLinecap="round" />
+          <path d="M60 18v82" strokeLinecap="round" />
+        </svg>
+        <p className="mt-6 font-display italic text-xl text-(--color-bamboo)">
+          No orders match that view yet.
+        </p>
+        <p className="mt-3 text-sm text-(--color-ink)/65 max-w-md mx-auto">
+          Try a different status — or begin with a single origin.
+        </p>
+        <Link
+          href="/products"
+          className="mt-8 inline-flex items-center gap-3 px-6 py-3 bg-(--color-gold) text-(--color-moss-dark) text-[12px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+        >
+          Browse origins →
+        </Link>
       </div>
-    </DashboardShell>
+    </DashCard>
   );
 }
