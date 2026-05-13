@@ -175,12 +175,7 @@ export default function AboutPage() {
           </div>
           <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-20">
             {FOUNDERS.map((f) => (
-              <div key={f.name}>
-                <FounderCard {...f} />
-                <p className="mt-6 sm:ml-[calc(41.666%+2rem)] font-display italic text-(--color-bamboo) max-w-prose text-sm sm:text-base">
-                  {f.anecdote}
-                </p>
-              </div>
+              <FounderCard key={f.name} {...f} />
             ))}
           </div>
         </Section>

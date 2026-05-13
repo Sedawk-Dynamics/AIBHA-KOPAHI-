@@ -23,41 +23,36 @@ const PILLARS = [
   {
     index: "01",
     title: "Source",
-    body:
-      "Direct relationships with farmer and weaver cooperatives across all seven Northeast states — no middlemen, no opacity.",
-    image: "/products/tea-garden.jpg",
+    body: "Direct relationships with farmer and weaver cooperatives across all seven Northeast states — no middlemen, no opacity.",
+    image: "/products/sources.png",
     href: "/about",
   },
   {
     index: "02",
     title: "Process",
-    body:
-      "Modern processing infrastructure that protects the integrity of the harvest and dramatically reduces post-harvest loss.",
-    image: "/products/ginger-fresh.jpg",
+    body: "Modern processing infrastructure that protects the integrity of the harvest and dramatically reduces post-harvest loss.",
+    image: "/products/dist.png",
     href: "/sustainability",
   },
   {
     index: "03",
     title: "Brand",
-    body:
-      "GI storytelling, premium packaging and export-ready labelling — heritage translated for global shelves without losing its soul.",
-    image: "/products/muga-silk-stole.jpg",
+    body: "GI storytelling, premium packaging and export-ready labelling — heritage translated for global shelves without losing its soul.",
+    image: "/products/brand.png",
     href: "/products",
   },
   {
     index: "04",
     title: "Distribute",
-    body:
-      "Premium domestic retail, B2B channels and global export — measured, deliberate, and built on long-term partnerships.",
-    image: "/products/judima.jpg",
+    body: "Premium domestic retail, B2B channels and global export — measured, deliberate, and built on long-term partnerships.",
+    image: "/products/distributtion.png",
     href: "/contact",
   },
   {
     index: "05",
     title: "Empower",
-    body:
-      "Fair-price, traceable, farmer-first value chains. Every margin we earn loops back into the soil it came from.",
-    image: "/products/gi-turmeric-powder.jpeg",
+    body: "Fair-price, traceable, farmer-first value chains. Every margin we earn loops back into the soil it came from.",
+    image: "/products/fair.png",
     href: "/farmers",
   },
 ];
@@ -73,40 +68,60 @@ const FEATURED = getFeaturedHomepageProducts().map((p) => ({
 }));
 
 const FARMERS = [
-  { name: "Bipul Hazarika", village: "Naharani, Jorhat", crop: "First-flush tea", years: 14 },
-  { name: "Rinki Daimary", village: "Kokrajhar, Assam", crop: "Joha rice", years: 9 },
-  { name: "Banjop Lyngdoh", village: "Laskein, Meghalaya", crop: "Lakadong turmeric", years: 12 },
+  {
+    name: "Bipul Hazarika",
+    village: "Naharani, Jorhat",
+    crop: "First-flush tea",
+    years: 14,
+  },
+  {
+    name: "Rinki Daimary",
+    village: "Kokrajhar, Assam",
+    crop: "Joha rice",
+    years: 9,
+  },
+  {
+    name: "Banjop Lyngdoh",
+    village: "Laskein, Meghalaya",
+    crop: "Lakadong turmeric",
+    years: 12,
+  },
 ];
 
 const FOUNDERS = [
   {
-    name: "Barsha Saikia",
-    role: "Co-Founder · Strategy",
+    name: "Barsha Prakash Choudhury",
+    role: "Founder",
+    email: "mgmt@kopahi.com",
+    phone: "+91 97406 72727",
     quote:
       "Heritage isn't a marketing word. It's a contract with the people who grew this knowledge before us.",
-    bio:
-      "Barsha leads brand and partnerships at Kopahi, bringing a decade of work in regional sourcing and consumer storytelling to the table. Her north star is making Northeast craftsmanship legible to a global audience without flattening it.",
+    bio: "Barsha leads brand and partnerships, drawing on a decade in regional sourcing and consumer storytelling.",
   },
   {
-    name: "Ashreeta Borah",
-    role: "Co-Founder · Sourcing",
+    name: "Ashreeta Gogoi",
+    role: "Founder",
+    email: "mgmt@kopahi.com",
+    phone: "+91 98540 75705",
     quote: "Every leaf has a name. Every name has a face.",
-    bio:
-      "Ashreeta has spent years on the ground with grower cooperatives across Assam, Meghalaya and Nagaland. She designs the farmer-first protocols that keep Kopahi traceable end-to-end.",
+    bio: "Ashreeta works on the ground with grower cooperatives across Assam, Meghalaya and Nagaland. She designs the farmer-first protocols that keep Kopahi traceable end-to-end.",
   },
   {
-    name: "Trideep Mahanta",
-    role: "Co-Founder · Operations",
-    quote: "Quality is not what we promise on a label — it's what we refuse to ship.",
-    bio:
-      "Trideep runs processing, logistics and export readiness. His obsession with the unglamorous middle of the value chain is what lets Kopahi stand behind every shipment.",
+    name: "Trideep Khanikar",
+    role: "Director · Operations",
+    email: "trideep@kopahi.com",
+    phone: "+91 93654 72113",
+    quote:
+      "Quality is not what we promise on a label — it's what we refuse to ship.",
+    bio: "Trideep runs processing, logistics and export readiness. His obsession with the unglamorous middle of the value chain is what lets Kopahi stand behind every shipment.",
   },
   {
-    name: "Prakash Borah",
-    role: "Co-Founder · Markets",
+    name: "Prakash Natarajan",
+    role: "Director · Sales & Marketing",
+    email: "prakash@kopahi.com",
+    phone: "+91 99019 72727",
     quote: "We are not here to sell more. We are here to sell better.",
-    bio:
-      "Prakash leads B2B and international markets. He chooses partners the way a tea-taster chooses a flush — slowly, carefully, with a long memory.",
+    bio: "Prakash leads B2B and international markets. He chooses partners the way a tea-taster chooses a flush — slowly, carefully, with a long memory.",
   },
 ];
 
@@ -125,32 +140,27 @@ const USPS = [
   {
     index: "01",
     title: "GI-Tagged Authenticity",
-    body:
-      "Geographically protected origin, verified at the source. Not a claim — a certification.",
+    body: "Geographically protected origin, verified at the source. Not a claim — a certification.",
   },
   {
     index: "02",
     title: "Northeast Exclusivity",
-    body:
-      "Our entire sourcing footprint sits inside seven states most agri brands have never set foot in.",
+    body: "Our entire sourcing footprint sits inside seven states most agri brands have never set foot in.",
   },
   {
     index: "03",
     title: "Farmer-First Traceability",
-    body:
-      "Every SKU is mapped back to a grower, a village, and a season. We publish what we know.",
+    body: "Every SKU is mapped back to a grower, a village, and a season. We publish what we know.",
   },
   {
     index: "04",
     title: "Premium, Export-Ready",
-    body:
-      "Packaging, labelling and compliance designed for the world's most discerning shelves.",
+    body: "Packaging, labelling and compliance designed for the world's most discerning shelves.",
   },
   {
     index: "05",
     title: "End-to-End Value Chain",
-    body:
-      "Farm, process, brand, distribute. One team. One standard. One accountable spine.",
+    body: "Farm, process, brand, distribute. One team. One standard. One accountable spine.",
   },
 ];
 
@@ -169,7 +179,7 @@ function HeroVideo() {
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
         >
-          <source src="/farmer.mp4" type="video/mp4" />
+          <source src="/hero.mp4" type="video/mp4" />
         </video>
       ) : (
         <Image
@@ -204,26 +214,43 @@ export default function Home() {
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 28 }}
               animate={reduce ? undefined : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: [0.2, 0.8, 0.2, 1], delay: 0.1 }}
+              transition={{
+                duration: 0.9,
+                ease: [0.2, 0.8, 0.2, 1],
+                delay: 0.1,
+              }}
             >
               <Eyebrow tone="gold">AIBA Agri NE LLP</Eyebrow>
             </motion.div>
-            <Headline as="h1" tone="ivory" className="mt-6 max-w-4xl" accent="Pure By Nature.">
+            <Headline
+              as="h1"
+              tone="ivory"
+              className="mt-6 max-w-4xl"
+              accent="Pure By Nature."
+            >
               Authentic By Geography,
             </Headline>
             <motion.p
               initial={reduce ? false : { opacity: 0, y: 16 }}
               animate={reduce ? undefined : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1], delay: 0.55 }}
+              transition={{
+                duration: 0.8,
+                ease: [0.2, 0.8, 0.2, 1],
+                delay: 0.55,
+              }}
               className="mt-8 max-w-xl font-display italic text-lg sm:text-xl text-(--color-ivory)/85 leading-relaxed"
             >
-              Bringing Northeast India&apos;s GI-certified heritage to the world&apos;s
-              discerning tables.
+              Bringing Northeast India&apos;s GI-certified heritage to the
+              world&apos;s discerning tables.
             </motion.p>
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 16 }}
               animate={reduce ? undefined : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1], delay: 0.75 }}
+              transition={{
+                duration: 0.8,
+                ease: [0.2, 0.8, 0.2, 1],
+                delay: 0.75,
+              }}
               className="mt-10 flex flex-wrap gap-4"
             >
               <Link
@@ -243,7 +270,9 @@ export default function Home() {
           </div>
 
           <div className="hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 text-(--color-ivory)/75">
-            <span className="text-[10px] uppercase tracking-[0.32em]">Scroll</span>
+            <span className="text-[10px] uppercase tracking-[0.32em]">
+              Scroll
+            </span>
             <span className="relative block h-10 w-px bg-(--color-ivory)/40 overflow-hidden">
               <span className="scroll-dot absolute top-0 left-1/2 -translate-x-1/2 h-2 w-px bg-(--color-gold)" />
             </span>
@@ -257,43 +286,43 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
             <div className="lg:col-span-7">
               <Eyebrow>Our Story</Eyebrow>
-              <Headline
-                as="h2"
-                className="mt-6"
-                accent="A Promise."
-              >
+              <Headline as="h2" className="mt-6" accent="A Promise.">
                 A Land. A Lineage.
               </Headline>
               <div className="mt-10 space-y-6 text-(--color-ink)/80 leading-relaxed max-w-prose text-base sm:text-lg">
                 <p>
-                  Kopahi was born in Jorhat, between mist-soaked tea gardens and the
-                  patient hands of weavers whose looms have been quiet for too long.
-                  We are not a startup that discovered Northeast India. We are of it.
+                  Kopahi was born in Jorhat, between mist-soaked tea gardens and
+                  the patient hands of weavers whose looms have been quiet for
+                  too long. We are not a startup that discovered Northeast
+                  India. We are of it.
                 </p>
                 <p>
                   Across seven sister states, we work with farmer and weaver
                   cooperatives growing what the rest of the world calls rare —
-                  Lakadong turmeric, Joha rice, Muga silk, Bhut Jolokia, Judima — and
-                  what their families have always called dinner, dowry, daily life.
+                  Lakadong turmeric, Joha rice, Muga silk, Bhut Jolokia, Judima
+                  — and what their families have always called dinner, dowry,
+                  daily life.
                 </p>
                 <p>
-                  Our promise is simple. We protect the geography. We pay the people.
-                  We tell the truth on every label.
+                  Our promise is simple. We protect the geography. We pay the
+                  people. We tell the truth on every label.
                 </p>
               </div>
             </div>
 
-                        <div className="lg:col-span-5">
+            <div className="lg:col-span-5">
               <div className="relative aspect-[4/5] overflow-hidden rounded-sm">
                 <Image
-                  src="/products/assam-tea.jpg"                  alt="Hands of a Muga silk weaver in Sualkuchi"
+                  src="/products/story.jpeg"
+                  alt="Hands of a Muga silk weaver in Sualkuchi"
                   fill
                   sizes="(max-width:1024px) 100vw, 40vw"
                   className="object-cover ken-burns"
                 />
               </div>
               <p className="mt-4 font-display italic text-(--color-bamboo) text-sm">
-                A Tea Picker· Sualkuchi, Assam              </p>
+                A Tea Picker· Sualkuchi, Assam{" "}
+              </p>
             </div>
           </div>
         </Section>
@@ -305,14 +334,35 @@ export default function Home() {
            ============================================================ */}
         <Section tone="moss" grain>
           <Eyebrow tone="gold">Why Now</Eyebrow>
-          <Headline as="h2" tone="ivory" className="mt-6 max-w-3xl" accent="Northeast Stands Apart.">
+          <Headline
+            as="h2"
+            tone="ivory"
+            className="mt-6 max-w-3xl"
+            accent="Northeast Stands Apart."
+          >
             The World Is Looking For Origin.
           </Headline>
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-10">
-            <StatCallout tone="ivory" value="$8B" label="Global GI-certified market, growing 12% YoY" />
-            <StatCallout tone="ivory" value="07" label="Northeast states inside our sourcing footprint" />
-            <StatCallout tone="ivory" value="100+" label="GI-tagged & indigenous SKUs in development" />
-            <StatCallout tone="ivory" value="E2E" label="Farm · Process · Brand · Export, under one roof" />
+            <StatCallout
+              tone="ivory"
+              value="$8B"
+              label="Global GI-certified market, growing 12% YoY"
+            />
+            <StatCallout
+              tone="ivory"
+              value="07"
+              label="Northeast states inside our sourcing footprint"
+            />
+            <StatCallout
+              tone="ivory"
+              value="100+"
+              label="GI-tagged & indigenous SKUs in development"
+            />
+            <StatCallout
+              tone="ivory"
+              value="E2E"
+              label="Farm · Process · Brand · Export, under one roof"
+            />
           </div>
         </Section>
 
@@ -322,11 +372,16 @@ export default function Home() {
         <Section tone="ivory">
           <div className="max-w-3xl">
             <Eyebrow>Our Sourcing Network</Eyebrow>
-            <Headline as="h2" className="mt-6" accent="Seven States. One Promise.">
+            <Headline
+              as="h2"
+              className="mt-6"
+              accent="Seven States. One Promise."
+            >
               Eight Origins.
             </Headline>
             <p className="mt-6 font-display italic text-(--color-bamboo) text-lg max-w-prose">
-              Every line on the map ends in a name. Every name has a face. Every face has a season.
+              Every line on the map ends in a name. Every name has a face. Every
+              face has a season.
             </p>
           </div>
 
@@ -341,7 +396,8 @@ export default function Home() {
               />
             </div>
             <figcaption className="mt-5 text-center font-display italic text-(--color-bamboo) text-sm">
-              Assam Tea · Black Rice · Honey · Turmeric · Ginger · Lemon · Naga Chilli · Black Pepper
+              Assam Tea · Black Rice · Honey · Turmeric · Ginger · Lemon · Naga
+              Chilli · Black Pepper
             </figcaption>
           </figure>
         </Section>
@@ -358,8 +414,9 @@ export default function Home() {
               One Promise.
             </Headline>
             <p className="mt-6 text-(--color-ink)/75 max-w-prose text-lg">
-              Sourcing, processing, branding, distribution and farmer empowerment —
-              held together as a single accountable spine, not a stack of vendors.
+              Sourcing, processing, branding, distribution and farmer
+              empowerment — held together as a single accountable spine, not a
+              stack of vendors.
             </p>
           </div>
 
@@ -402,14 +459,14 @@ export default function Home() {
             06 · KNOW YOUR FARMER
            ============================================================ */}
         <Section tone="bamboo">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-            <div className="lg:col-span-6 relative aspect-[4/5] overflow-hidden rounded-sm">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-stretch">
+            <div className="lg:col-span-6 relative aspect-[11/6] lg:aspect-auto lg:h-full min-h-[320px] overflow-hidden rounded-sm">
               <Image
-                src="/products/tea-garden.jpg"
-                alt="Tea garden worker in Upper Assam"
+                src="/products/empover.png"
+                alt="Empowering Northeast farmer communities"
                 fill
                 sizes="(max-width:1024px) 100vw, 50vw"
-                className="object-cover"
+                className="object-cover object-center"
               />
             </div>
             <div className="lg:col-span-6">
@@ -419,14 +476,21 @@ export default function Home() {
               </p>
               <div className="mt-10 space-y-5">
                 {FARMERS.map((f) => (
-                  <div key={f.name} className="flex items-center justify-between border-t border-(--color-bamboo)/30 pt-4">
+                  <div
+                    key={f.name}
+                    className="flex items-center justify-between border-t border-(--color-bamboo)/30 pt-4"
+                  >
                     <div>
-                      <p className="font-display text-xl text-(--color-ink)">{f.name}</p>
+                      <p className="font-display text-xl text-(--color-ink)">
+                        {f.name}
+                      </p>
                       <p className="font-display italic text-sm text-(--color-bamboo)">
                         {f.village} · {f.crop}
                       </p>
                     </div>
-                    <span className="text-sm text-(--color-ink)/60">{f.years} yrs partnered</span>
+                    <span className="text-sm text-(--color-ink)/60">
+                      {f.years} yrs partnered
+                    </span>
                   </div>
                 ))}
               </div>
@@ -502,7 +566,12 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <div className="lg:col-span-7">
               <Eyebrow tone="gold">Partner With Us</Eyebrow>
-              <Headline as="h2" tone="ivory" className="mt-6" accent="Soil To Story.">
+              <Headline
+                as="h2"
+                tone="ivory"
+                className="mt-6"
+                accent="Soil To Story."
+              >
                 Be A Part Of The Journey From
               </Headline>
             </div>

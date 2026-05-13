@@ -3,17 +3,19 @@ import Image from "next/image";
 export default function FounderCard({
   name,
   role,
-  email,
   quote,
   bio,
   image,
 }: {
   name: string;
   role: string;
-  email?: string;
   quote: string;
   bio: string;
   image?: string;
+  /** Kept for compatibility with FOUNDERS data; not rendered on the card. */
+  email?: string;
+  phone?: string;
+  anecdote?: string;
 }) {
   return (
     <article className="grid grid-cols-1 sm:grid-cols-12 gap-6 sm:gap-8 items-start">
@@ -44,14 +46,6 @@ export default function FounderCard({
           “{quote}”
         </p>
         <p className="text-(--color-ink)/75 leading-relaxed mt-5 max-w-prose">{bio}</p>
-        {email && (
-          <a
-            href={`mailto:${email}`}
-            className="mt-5 inline-block text-(--color-gold-dark) hover:text-(--color-gold) text-sm uppercase tracking-[0.18em]"
-          >
-            {email}
-          </a>
-        )}
       </div>
     </article>
   );
