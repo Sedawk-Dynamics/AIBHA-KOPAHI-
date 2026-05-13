@@ -1,12 +1,8 @@
 "use client";
-import Link from "next/link";
-import { useState } from "react";
-import DashboardShell from "../../components/DashboardShell";
 
-/* ============================================================
-   CUSTOMER ADDRESSES
-   File: app/dashboard/addresses/page.tsx
-============================================================ */
+import { useState } from "react";
+import EditorialShell from "../../components/dashboard/EditorialShell";
+import { DashCard } from "../../components/dashboard/DashPrimitives";
 
 type Address = {
   id: number;
@@ -21,155 +17,302 @@ type Address = {
   isDefault: boolean;
 };
 
+const SEED: Address[] = [
+  {
+    id: 1,
+    label: "Home",
+    name: "Rahul Sharma",
+    line1: "Flat 12B, Lotus Residency",
+    line2: "Indiranagar 2nd Stage",
+    city: "Bengaluru",
+    state: "Karnataka",
+    pincode: "560038",
+    phone: "+91 98765 43210",
+    isDefault: true,
+  },
+  {
+    id: 2,
+    label: "Work",
+    name: "Rahul Sharma",
+    line1: "5th Floor, Prestige Tower",
+    line2: "MG Road",
+    city: "Bengaluru",
+    state: "Karnataka",
+    pincode: "560001",
+    phone: "+91 98765 43210",
+    isDefault: false,
+  },
+];
+
 export default function AddressesPage() {
-  const [addresses, setAddresses] = useState<Address[]>([
-    { id: 1, label: "Home", name: "Rahul Sharma", line1: "42, Gandhi Nagar", line2: "Near MG Road Metro Station", city: "Bengaluru", state: "Karnataka", pincode: "560001", phone: "+91 98765 43210", isDefault: true },
-    { id: 2, label: "Work", name: "Rahul Sharma", line1: "Tower B, Phoenix Marketcity", line2: "Whitefield Main Road", city: "Bengaluru", state: "Karnataka", pincode: "560066", phone: "+91 98765 43210", isDefault: false },
-  ]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [addresses, setAddresses] = useState<Address[]>(SEED);
+  const [editing, setEditing] = useState<Address | null>(null);
+  const [adding, setAdding] = useState(false);
 
-  const setAsDefault = (id: number) => {
-    setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a.id === id })));
-  };
+  const setDefault = (id: number) =>
+    setAddresses((cur) => cur.map((a) => ({ ...a, isDefault: a.id === id })));
 
-  const removeAddress = (id: number) => {
-    if (confirm("Delete this address?")) {
-      setAddresses((prev) => prev.filter((a) => a.id !== id));
-    }
-  };
-
-  const labelStyles: Record<string, string> = {
-    Home: "bg-green-50 text-green-700",
-    Work: "bg-blue-50 text-blue-700",
-    Other: "bg-gray-100 text-gray-700",
-  };
+  const remove = (id: number) => setAddresses((cur) => cur.filter((a) => a.id !== id));
 
   return (
-    <DashboardShell role="Customer" userName="Rahul Sharma" userEmail="rahul@example.com">
-      <div className="mb-6 md:mb-8 flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-            <Link href="/dashboard" className="hover:text-green-700">Dashboard</Link>
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            <span className="text-gray-900 font-medium">Addresses</span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Saved Addresses</h1>
-          <p className="text-sm md:text-base text-gray-600 mt-1">Manage where your orders get delivered.</p>
-        </div>
-        <button onClick={() => { setEditingId(null); setShowForm(true); }} className="bg-green-700 hover:bg-green-800 text-white px-4 md:px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow-md inline-flex items-center gap-2 text-sm whitespace-nowrap">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-          </svg>
-          Add new address
+    <EditorialShell
+      eyebrow="→ Addresses"
+      title={
+        <>
+          Where we send your <span className="accent-italic">parcels.</span>
+        </>
+      }
+      actions={
+        <button
+          type="button"
+          onClick={() => {
+            setEditing(null);
+            setAdding(true);
+          }}
+          className="inline-flex items-center gap-2 px-5 py-3 bg-(--color-gold) text-(--color-moss-dark) text-[12px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+        >
+          + Add address
         </button>
-      </div>
-
+      }
+    >
       {addresses.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
-          <div className="w-20 h-20 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-5">
-            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        <DashCard>
+          <div className="py-12 text-center">
+            <p className="font-display italic text-xl text-(--color-bamboo)">
+              No addresses yet.
+            </p>
+            <p className="mt-3 text-sm text-(--color-ink)/65 max-w-md mx-auto">
+              Add a delivery address to make checkout faster.
+            </p>
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              className="mt-8 inline-flex items-center gap-3 px-6 py-3 bg-(--color-gold) text-(--color-moss-dark) text-[12px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+            >
+              Add first address →
+            </button>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">No saved addresses</h2>
-          <p className="text-sm text-gray-500 mb-6">Add an address to make checkout faster.</p>
-          <button onClick={() => setShowForm(true)} className="bg-green-700 hover:bg-green-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Add address</button>
-        </div>
+        </DashCard>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {addresses.map((a) => (
-            <div key={a.id} className={`bg-white rounded-2xl border-2 shadow-sm p-5 md:p-6 transition-all ${a.isDefault ? "border-green-500" : "border-gray-100"}`}>
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${labelStyles[a.label]}`}>{a.label}</span>
-                  {a.isDefault && (
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-green-700 text-white">Default</span>
-                  )}
+            <article
+              key={a.id}
+              className="rounded-[2px] border border-(--color-bamboo)/25 bg-(--color-ivory-warm) p-7"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="eyebrow text-(--color-bamboo)">→ {a.label}</p>
+                  <h3 className="mt-2 font-display text-xl text-(--color-ink)">{a.name}</h3>
                 </div>
-                <button className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors" aria-label="More options">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01" /></svg>
+                {a.isDefault && (
+                  <span className="px-3 py-1 text-[10px] uppercase tracking-[0.22em] bg-(--color-gold)/15 text-(--color-gold-dark)">
+                    Default
+                  </span>
+                )}
+              </div>
+              <address className="mt-4 not-italic text-sm text-(--color-ink)/80 leading-relaxed">
+                {a.line1}
+                {a.line2 ? <><br />{a.line2}</> : null}
+                <br />
+                {a.city}, {a.state} — {a.pincode}
+                <br />
+                <span className="text-(--color-bamboo)">{a.phone}</span>
+              </address>
+              <div className="mt-6 flex flex-wrap items-center gap-3 pt-5 border-t border-(--color-bamboo)/15">
+                <button
+                  type="button"
+                  onClick={() => setEditing(a)}
+                  className="text-xs uppercase tracking-[0.22em] text-(--color-gold-dark) hover:text-(--color-gold)"
+                >
+                  Edit
+                </button>
+                {!a.isDefault && (
+                  <button
+                    type="button"
+                    onClick={() => setDefault(a.id)}
+                    className="text-xs uppercase tracking-[0.22em] text-(--color-ink)/70 hover:text-(--color-moss)"
+                  >
+                    Make default
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => remove(a.id)}
+                  className="font-display italic text-sm text-(--color-bamboo) hover:text-(--color-chilli) transition-colors ml-auto"
+                >
+                  Remove
                 </button>
               </div>
-
-              <p className="font-bold text-gray-900">{a.name}</p>
-              <p className="text-sm text-gray-700 mt-1">{a.line1}</p>
-              {a.line2 && <p className="text-sm text-gray-700">{a.line2}</p>}
-              <p className="text-sm text-gray-700">{a.city}, {a.state} {a.pincode}</p>
-              <p className="text-sm text-gray-500 mt-2">📞 {a.phone}</p>
-
-              <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-                <button onClick={() => { setEditingId(a.id); setShowForm(true); }} className="text-xs font-medium px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-md transition-colors">Edit</button>
-                {!a.isDefault && (
-                  <button onClick={() => setAsDefault(a.id)} className="text-xs font-medium px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-md transition-colors">Set as default</button>
-                )}
-                <button onClick={() => removeAddress(a.id)} className="text-xs font-medium px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors ml-auto">Delete</button>
-              </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
 
-      {/* Modal */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-          <div onClick={(e) => e.stopPropagation()} className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-5 md:p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="font-bold text-gray-900">{editingId ? "Edit Address" : "Add New Address"}</h2>
-              <button onClick={() => setShowForm(false)} className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
-            <form className="p-5 md:p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">Label</label>
-                <div className="flex gap-2 flex-wrap">
-                  {["Home", "Work", "Other"].map((l) => (
-                    <button key={l} type="button" className="px-4 py-1.5 text-sm font-medium rounded-lg border border-gray-200 hover:border-green-600 hover:bg-green-50 transition-colors">{l}</button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">Full Name</label>
-                <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" placeholder="Rahul Sharma" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">Phone Number</label>
-                <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" placeholder="+91 98765 43210" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">Address Line 1</label>
-                <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" placeholder="House no, building, street" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">Address Line 2 <span className="text-gray-400 font-normal">(optional)</span></label>
-                <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" placeholder="Landmark, area" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-1.5">City</label>
-                  <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-1.5">Pincode</label>
-                  <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">State</label>
-                <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" />
-              </div>
-              <label className="flex items-center gap-2 cursor-pointer pt-2">
-                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-green-700 focus:ring-2 focus:ring-green-500" />
-                <span className="text-sm text-gray-700">Make this my default address</span>
-              </label>
-              <div className="flex gap-3 pt-3 border-t border-gray-100">
-                <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
-                <button type="submit" className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 transition-colors">Save address</button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {(adding || editing) && (
+        <AddressDrawer
+          initial={editing}
+          onClose={() => {
+            setAdding(false);
+            setEditing(null);
+          }}
+          onSave={(addr) => {
+            if (editing) {
+              setAddresses((cur) => cur.map((a) => (a.id === editing.id ? { ...addr, id: editing.id } : a)));
+            } else {
+              const id = Math.max(0, ...addresses.map((a) => a.id)) + 1;
+              setAddresses((cur) => [...cur, { ...addr, id }]);
+            }
+            setAdding(false);
+            setEditing(null);
+          }}
+        />
       )}
-    </DashboardShell>
+    </EditorialShell>
+  );
+}
+
+function AddressDrawer({
+  initial,
+  onClose,
+  onSave,
+}: {
+  initial: Address | null;
+  onClose: () => void;
+  onSave: (a: Omit<Address, "id">) => void;
+}) {
+  const [form, setForm] = useState<Omit<Address, "id">>(
+    initial
+      ? { ...initial }
+      : {
+          label: "Home",
+          name: "",
+          line1: "",
+          line2: "",
+          city: "",
+          state: "",
+          pincode: "",
+          phone: "",
+          isDefault: false,
+        }
+  );
+
+  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(form);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true">
+      <div onClick={onClose} aria-hidden="true" className="absolute inset-0 bg-(--color-moss-dark)/40" />
+      <aside className="relative w-full sm:w-[480px] h-full bg-(--color-ivory) overflow-y-auto">
+        <header className="px-8 py-6 flex items-center justify-between border-b border-(--color-bamboo)/20">
+          <div>
+            <p className="eyebrow">→ {initial ? "Edit address" : "New address"}</p>
+            <h2 className="mt-2 font-display text-2xl text-(--color-ink)">Delivery details</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="h-10 w-10 inline-flex items-center justify-center rounded-full border border-(--color-bamboo)/30 text-(--color-ink) hover:border-(--color-gold)"
+          >
+            ×
+          </button>
+        </header>
+
+        <form onSubmit={handleSubmit} className="px-8 py-6 space-y-6">
+          <Field id="label" label="Label">
+            <select
+              id="label"
+              value={form.label}
+              onChange={(e) => set("label", e.target.value as Address["label"])}
+              className="kp-input"
+            >
+              <option>Home</option>
+              <option>Work</option>
+              <option>Other</option>
+            </select>
+          </Field>
+          <Field id="name" label="Full name">
+            <input id="name" value={form.name} onChange={(e) => set("name", e.target.value)} className="kp-input" required />
+          </Field>
+          <Field id="line1" label="Address line 1">
+            <input id="line1" value={form.line1} onChange={(e) => set("line1", e.target.value)} className="kp-input" required />
+          </Field>
+          <Field id="line2" label="Address line 2 (optional)">
+            <input id="line2" value={form.line2 ?? ""} onChange={(e) => set("line2", e.target.value)} className="kp-input" />
+          </Field>
+          <div className="grid grid-cols-2 gap-6">
+            <Field id="city" label="City">
+              <input id="city" value={form.city} onChange={(e) => set("city", e.target.value)} className="kp-input" required />
+            </Field>
+            <Field id="state" label="State">
+              <input id="state" value={form.state} onChange={(e) => set("state", e.target.value)} className="kp-input" required />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            <Field id="pincode" label="Pincode">
+              <input id="pincode" value={form.pincode} onChange={(e) => set("pincode", e.target.value)} className="kp-input" required />
+            </Field>
+            <Field id="phone" label="Phone">
+              <input id="phone" type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} className="kp-input" required />
+            </Field>
+          </div>
+
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <span
+              className={`inline-block h-4 w-4 border ${
+                form.isDefault ? "bg-(--color-gold) border-(--color-gold)" : "border-(--color-bamboo)/40"
+              }`}
+              aria-hidden="true"
+            />
+            <input
+              type="checkbox"
+              checked={form.isDefault}
+              onChange={(e) => set("isDefault", e.target.checked)}
+              className="sr-only"
+            />
+            <span className="text-sm text-(--color-ink)/80">Set as default delivery address</span>
+          </label>
+
+          <button
+            type="submit"
+            className="w-full inline-flex items-center justify-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+          >
+            {initial ? "Save changes" : "Save address"}
+          </button>
+        </form>
+
+        <style jsx>{`
+          :global(.kp-input) {
+            width: 100%;
+            background: transparent;
+            border-bottom: 1px solid color-mix(in srgb, var(--color-bamboo) 45%, transparent);
+            padding: 0.75rem 0;
+            color: var(--color-ink);
+            outline: none;
+            transition: border-color 0.2s;
+          }
+          :global(.kp-input:focus) {
+            border-color: var(--color-gold);
+          }
+        `}</style>
+      </aside>
+    </div>
+  );
+}
+
+function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label htmlFor={id} className="block eyebrow mb-2">
+        {label}
+      </label>
+      {children}
+    </div>
   );
 }

@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import EditorialShell from "../components/dashboard/EditorialShell";
+import { DashCard } from "../components/dashboard/DashPrimitives";
 import { useAuth } from "../context/AuthContext";
 import { api, API_URL, ApiError, tokenStore } from "../lib/api";
+import { CATEGORIES } from "../lib/marketing";
 
 type Form = {
   name: string;
@@ -48,11 +52,13 @@ export default function AddProductPage() {
     }
   }, [loading, user, router]);
 
-  const update = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const val =
-      e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value;
-    setForm((f) => ({ ...f, [k]: val } as Form));
-  };
+  const update =
+    (k: keyof Form) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const val =
+        e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value;
+      setForm((f) => ({ ...f, [k]: val } as Form));
+    };
 
   const uploadImage = async () => {
     if (!file) return;
@@ -71,8 +77,8 @@ export default function AddProductPage() {
       if (!res.ok || !data?.success) throw new Error(data?.message || "Upload failed");
       const url = data.image || data.url;
       setImageUrl(url.startsWith("http") ? url : `${API_URL}${url}`);
-    } catch (err: any) {
-      setError(err?.message || "Upload failed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
     }
@@ -105,7 +111,7 @@ export default function AddProductPage() {
         },
         { auth: true }
       );
-      setSuccess("Product added successfully.");
+      setSuccess("Product submitted for review.");
       setForm(empty);
       setFile(null);
       setImageUrl("");
@@ -116,84 +122,245 @@ export default function AddProductPage() {
     }
   };
 
-  if (loading || !user) {
-    return <main className="min-h-screen flex items-center justify-center text-gray-500">Loading…</main>;
-  }
-
   return (
-    <main className="min-h-screen bg-gray-100 px-8 py-12">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-10">
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold">Add New Product</h1>
-            <p className="text-gray-500 mt-1">Listed by {user.name} · {user.role}</p>
-          </div>
-          <Link href={user.role === "admin" ? "/admin/products" : "/vendor/products"} className="text-sm text-green-700 hover:underline">
-            ← Back to products
-          </Link>
+    <EditorialShell
+      eyebrow={`→ ${user?.role === "admin" ? "Admin · " : ""}Add product`}
+      title={
+        <>
+          A new origin, <span className="accent-italic">considered.</span>
+        </>
+      }
+      actions={
+        <Link
+          href="/dashboard/products"
+          className="text-xs uppercase tracking-[0.22em] text-(--color-gold-dark) hover:text-(--color-gold) py-2"
+        >
+          ← Back to products
+        </Link>
+      }
+    >
+      {error && (
+        <div role="alert" className="mb-8 border border-(--color-chilli)/30 bg-(--color-chilli)/10 px-5 py-4 text-sm text-(--color-chilli)">
+          {error}
         </div>
+      )}
+      {success && (
+        <div role="status" className="mb-8 border border-(--color-gold)/40 bg-(--color-gold)/10 px-5 py-4 text-sm text-(--color-moss)">
+          {success} {user?.role !== "admin" && "An editor will review and publish within a working day."}
+        </div>
+      )}
 
-        {error && <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{error}</div>}
-        {success && <div className="mb-4 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">{success}</div>}
+      <p className="mb-10 font-display italic text-(--color-bamboo) text-lg max-w-2xl">
+        Tell us what it is, where it comes from, and how to find it. Listings stay in <span className="text-(--color-moss)">draft</span> until an editor approves them.
+      </p>
 
-        <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
-          <input value={form.name} onChange={update("name")} type="text" placeholder="Product Name" className="border p-4 rounded-lg md:col-span-2" />
-
-          <select value={form.category} onChange={update("category")} className="border p-4 rounded-lg">
-            <option>Tea</option>
-            <option>Honey</option>
-            <option>Spices</option>
-            <option>Rice</option>
-            <option>Other</option>
-          </select>
-
-          <input value={form.brand} onChange={update("brand")} type="text" placeholder="Brand" className="border p-4 rounded-lg" />
-          <input value={form.price} onChange={update("price")} type="number" min="0" placeholder="Price (₹)" className="border p-4 rounded-lg" />
-          <input value={form.originalPrice} onChange={update("originalPrice")} type="number" min="0" placeholder="Original Price (optional)" className="border p-4 rounded-lg" />
-          <input value={form.stock} onChange={update("stock")} type="number" min="0" placeholder="Stock Quantity" className="border p-4 rounded-lg md:col-span-2" />
-
-          <textarea value={form.description} onChange={update("description")} placeholder="Product Description" rows={5} className="border p-4 rounded-lg md:col-span-2" />
-
-          <label className="flex items-center gap-2 md:col-span-2">
-            <input type="checkbox" checked={form.featured} onChange={update("featured")} />
-            <span className="text-sm">Mark as featured</span>
-          </label>
-
-          <div className="md:col-span-2 border border-dashed border-gray-300 rounded-lg p-4 space-y-3">
-            <div className="flex items-center gap-3">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* ============== BASICS ============== */}
+        <DashCard title="01 · Basics">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Field id="name" label="Product name" className="sm:col-span-2">
               <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="text-sm"
+                id="name"
+                value={form.name}
+                onChange={update("name")}
+                placeholder="e.g. GI Lakadong Turmeric Powder"
+                className="kp-input"
               />
-              <button
-                type="button"
-                disabled={!file || uploading}
-                onClick={uploadImage}
-                className="px-4 py-2 rounded-lg bg-gray-900 hover:bg-green-700 text-white text-sm font-semibold disabled:opacity-50"
-              >
-                {uploading ? "Uploading…" : "Upload"}
-              </button>
-            </div>
-            {imageUrl && (
-              <div className="flex items-center gap-3">
-                <img src={imageUrl} alt="preview" className="w-16 h-16 object-cover rounded-lg border" />
-                <p className="text-xs text-gray-500 break-all">{imageUrl}</p>
+            </Field>
+            <Field id="category" label="Category">
+              <select id="category" value={form.category} onChange={update("category")} className="kp-input">
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+                <option value="Other">Other</option>
+              </select>
+            </Field>
+            <Field id="brand" label="Brand">
+              <input id="brand" value={form.brand} onChange={update("brand")} className="kp-input" />
+            </Field>
+            <Field id="description" label="Editorial description" className="sm:col-span-2">
+              <textarea
+                id="description"
+                value={form.description}
+                onChange={update("description")}
+                rows={5}
+                placeholder="One paragraph. What it is, where it grows, why it matters. Avoid 'world-class' or 'best-in-class'."
+                className="kp-input resize-none"
+              />
+            </Field>
+          </div>
+        </DashCard>
+
+        {/* ============== PRICING & STOCK ============== */}
+        <DashCard title="02 · Pricing & Stock">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <Field id="price" label="Selling price (₹)">
+              <input
+                id="price"
+                type="number"
+                min="0"
+                value={form.price}
+                onChange={update("price")}
+                placeholder="349"
+                className="kp-input"
+              />
+            </Field>
+            <Field id="originalPrice" label="MRP (optional)">
+              <input
+                id="originalPrice"
+                type="number"
+                min="0"
+                value={form.originalPrice}
+                onChange={update("originalPrice")}
+                placeholder="449"
+                className="kp-input"
+              />
+            </Field>
+            <Field id="stock" label="Stock on hand">
+              <input
+                id="stock"
+                type="number"
+                min="0"
+                value={form.stock}
+                onChange={update("stock")}
+                className="kp-input"
+              />
+            </Field>
+          </div>
+
+          <label className="mt-6 flex items-center gap-3 cursor-pointer select-none">
+            <span
+              className={`inline-block h-4 w-4 border shrink-0 ${
+                form.featured ? "bg-(--color-gold) border-(--color-gold)" : "border-(--color-bamboo)/40"
+              }`}
+              aria-hidden="true"
+            />
+            <input
+              type="checkbox"
+              checked={form.featured}
+              onChange={update("featured")}
+              className="sr-only"
+            />
+            <span className="text-sm text-(--color-ink)/80">
+              Submit for homepage featured row (subject to editor approval)
+            </span>
+          </label>
+        </DashCard>
+
+        {/* ============== MEDIA ============== */}
+        <DashCard title="03 · Hero photograph">
+          <div className="border border-dashed border-(--color-bamboo)/40 hover:border-(--color-gold) transition-colors p-6 flex flex-col sm:flex-row items-start gap-5">
+            {imageUrl ? (
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden bg-(--color-ivory) border border-(--color-bamboo)/30">
+                <Image src={imageUrl} alt="Preview" fill sizes="96px" className="object-cover" />
+              </div>
+            ) : (
+              <div className="h-24 w-24 shrink-0 flex items-center justify-center bg-(--color-ivory) border border-(--color-bamboo)/30 text-(--color-bamboo)/60">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 4h18v16H3z" stroke="currentColor" strokeWidth="1.25" />
+                  <circle cx="8.5" cy="9" r="1.5" fill="currentColor" />
+                  <path d="M3 17l5-5 4 4 3-3 6 6" stroke="currentColor" strokeWidth="1.25" />
+                </svg>
               </div>
             )}
-            <p className="text-xs text-gray-500">Image is optional. JPG/PNG/WebP up to 5 MB.</p>
+            <div className="flex-1 min-w-0">
+              <p className="eyebrow">Upload an image</p>
+              <p className="mt-2 text-sm text-(--color-ink)/65 leading-relaxed">
+                JPG, PNG or WebP. Up to 5&nbsp;MB. Square or vertical works best.
+              </p>
+              <div className="mt-4 flex items-center gap-3 flex-wrap">
+                <label className="inline-flex items-center gap-2 px-4 py-2.5 border border-(--color-bamboo)/40 text-(--color-ink) text-[12px] uppercase tracking-[0.22em] cursor-pointer hover:border-(--color-gold) transition-colors">
+                  Choose file
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    className="sr-only"
+                  />
+                </label>
+                {file && (
+                  <span className="text-xs italic text-(--color-bamboo) truncate max-w-[14rem]">
+                    {file.name}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  disabled={!file || uploading}
+                  onClick={uploadImage}
+                  className="ml-auto inline-flex items-center gap-2 px-5 py-2.5 bg-(--color-moss) text-(--color-ivory) text-[12px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-moss-dark) transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {uploading ? "Uploading…" : "Upload"}
+                </button>
+              </div>
+              {imageUrl && (
+                <p className="mt-3 text-xs italic text-(--color-bamboo) break-all">
+                  Saved to {imageUrl.replace(API_URL, "")}
+                </p>
+              )}
+            </div>
           </div>
+        </DashCard>
 
+        <div className="flex items-center justify-end gap-4 pt-2">
+          <Link
+            href="/dashboard/products"
+            className="text-[12px] uppercase tracking-[0.22em] text-(--color-bamboo) hover:text-(--color-moss) transition-colors"
+          >
+            Cancel
+          </Link>
           <button
             type="submit"
             disabled={submitting}
-            className="md:col-span-2 mt-2 w-full bg-green-700 text-white py-4 rounded-lg hover:bg-green-800 disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors disabled:opacity-60"
           >
-            {submitting ? "Saving…" : "Upload Product"}
+            {submitting
+              ? "Submitting…"
+              : user?.role === "admin"
+              ? "Publish product"
+              : "Submit for review"}{" "}
+            <span aria-hidden="true">→</span>
           </button>
-        </form>
-      </div>
-    </main>
+        </div>
+      </form>
+
+      <style jsx>{`
+        :global(.kp-input) {
+          width: 100%;
+          background: transparent;
+          border-bottom: 1px solid color-mix(in srgb, var(--color-bamboo) 45%, transparent);
+          padding: 0.75rem 0;
+          color: var(--color-ink);
+          outline: none;
+          transition: border-color 0.2s;
+        }
+        :global(.kp-input:focus) {
+          border-color: var(--color-gold);
+        }
+        :global(textarea.kp-input) {
+          padding-top: 0.5rem;
+        }
+      `}</style>
+    </EditorialShell>
+  );
+}
+
+function Field({
+  id,
+  label,
+  className = "",
+  children,
+}: {
+  id: string;
+  label: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={className}>
+      <label htmlFor={id} className="block eyebrow mb-2">
+        {label}
+      </label>
+      {children}
+    </div>
   );
 }

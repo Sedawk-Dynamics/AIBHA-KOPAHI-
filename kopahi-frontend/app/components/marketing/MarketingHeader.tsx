@@ -1,0 +1,321 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
+
+const NAV = [
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/products", label: "Products" },
+  { href: "/b2b", label: "B2B" },
+  { href: "/journal", label: "Journal" },
+  { href: "/contact", label: "Contact" },
+];
+
+function initialsOf(name?: string | null) {
+  if (!name) return "K";
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "K";
+}
+
+function AvatarMenu({
+  initials,
+  role,
+  name,
+  onSignOut,
+}: {
+  initials: string;
+  role: "user" | "vendor" | "admin";
+  name?: string;
+  onSignOut: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const secondLabel = role === "vendor" ? "My Products" : role === "admin" ? "Approvals" : "Orders";
+  const secondHref = role === "vendor" ? "/dashboard/products" : role === "admin" ? "/dashboard/approvals" : "/dashboard/orders";
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center gap-2 h-11 px-2 rounded-full border border-(--color-bamboo)/30 hover:border-(--color-gold) bg-(--color-ivory)/90 transition-colors"
+      >
+        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-(--color-moss) text-(--color-ivory) text-xs font-medium tracking-[0.08em]">
+          {initials}
+        </span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true" className={`mr-1 transition-transform ${open ? "rotate-180" : ""}`}>
+          <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 mt-3 w-64 bg-(--color-ivory) border border-(--color-bamboo)/30 shadow-xl py-2"
+        >
+          <div className="px-4 py-3 border-b border-(--color-bamboo)/20">
+            <p className="font-display text-base text-(--color-ink) leading-tight">{name ?? "Welcome"}</p>
+            <p className="text-[10px] uppercase tracking-[0.22em] text-(--color-bamboo) mt-1">{role}</p>
+          </div>
+          <MenuLink href="/dashboard" onClick={() => setOpen(false)}>My Profile</MenuLink>
+          <MenuLink href={secondHref} onClick={() => setOpen(false)}>{secondLabel}</MenuLink>
+          <MenuLink href="/dashboard/settings" onClick={() => setOpen(false)}>Settings</MenuLink>
+          <div className="my-2 mx-4 h-px bg-(--color-bamboo)/30" />
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onSignOut();
+            }}
+            className="w-full text-left px-4 py-2.5 font-display italic text-(--color-bamboo) hover:bg-(--color-ivory-warm) transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MenuLink({ href, children, onClick }: { href: string; children: React.ReactNode; onClick: () => void }) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className="block px-4 py-2.5 font-display text-(--color-ink) hover:bg-(--color-ivory-warm) hover:text-(--color-moss) transition-colors"
+    >
+      {children}
+    </Link>
+  );
+}
+
+export default function MarketingHeader() {
+  const { user, logout } = useAuth();
+  const { count } = useCart();
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const navColor = scrolled
+    ? "text-(--color-ink)/80 hover:text-(--color-moss)"
+    : "text-(--color-ivory)/85 hover:text-(--color-ivory)";
+
+  return (
+    <header
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-(--color-ivory)/90 backdrop-blur-md border-b border-(--color-bamboo)/15"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 h-20 flex items-center justify-between gap-4">
+        <Link href="/" aria-label="Kopahi home" className="flex items-center gap-3">
+          <div className="relative h-10 w-10 sm:h-12 sm:w-12">
+            <Image src="/Logo1.png" alt="" fill sizes="48px" className="object-contain" priority />
+          </div>
+          <span
+            className={`font-display text-xl sm:text-2xl tracking-tight transition-colors ${
+              scrolled ? "text-(--color-moss)" : "text-(--color-ivory)"
+            }`}
+          >
+            Kopahi
+            <span className="text-(--color-gold)">.</span>
+          </span>
+        </Link>
+
+        <nav className="hidden lg:flex items-center gap-9" aria-label="Primary">
+          {NAV.map((n) => (
+            <Link
+              key={n.href}
+              href={n.href}
+              className={`relative text-[13px] uppercase tracking-[0.22em] font-medium transition-colors group ${navColor}`}
+            >
+              {n.label}
+              <span className="absolute left-0 -bottom-1.5 h-px w-0 bg-(--color-gold) transition-all duration-500 group-hover:w-full" />
+            </Link>
+          ))}
+        </nav>
+
+        <div className="hidden lg:flex items-center gap-3">
+          <Link
+            href="/cart"
+            aria-label={`Cart${count ? `, ${count} items` : ""}`}
+            className={`relative inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors ${
+              scrolled
+                ? "border-(--color-bamboo)/30 text-(--color-moss) hover:border-(--color-gold)"
+                : "border-(--color-ivory)/40 text-(--color-ivory) hover:border-(--color-gold)"
+            }`}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M3 4h2l2.5 11h11L21 7H7"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle cx="9" cy="20" r="1.4" fill="currentColor" />
+              <circle cx="17" cy="20" r="1.4" fill="currentColor" />
+            </svg>
+            {count > 0 && (
+              <span className="absolute -top-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-gold) text-(--color-moss-dark) text-[10px] font-medium px-1.5">
+                {count}
+              </span>
+            )}
+          </Link>
+
+          {user ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="text-[13px] uppercase tracking-[0.22em] font-medium px-5 py-2.5 rounded-sm bg-(--color-gold) text-(--color-moss-dark) hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+              >
+                Dashboard
+              </Link>
+              <AvatarMenu
+                initials={initialsOf(user.name)}
+                role={user.role}
+                name={user.name}
+                onSignOut={() => logout()}
+              />
+            </>
+          ) : (
+            <>
+              <Link href="/login" className={`text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-2 transition-colors ${navColor}`}>
+                Login
+              </Link>
+              <Link href="/signup" className={`text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-2 transition-colors ${navColor}`}>
+                Sign up
+              </Link>
+              <Link
+                href="/products"
+                className="text-[13px] uppercase tracking-[0.22em] font-medium px-5 py-2.5 rounded-sm bg-(--color-gold) text-(--color-moss-dark) hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+              >
+                Shop →
+              </Link>
+            </>
+          )}
+        </div>
+
+        <button
+          type="button"
+          aria-label="Toggle navigation"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+          className={`lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-sm border ${
+            scrolled ? "border-(--color-bamboo)/30 text-(--color-ink)" : "border-(--color-ivory)/40 text-(--color-ivory)"
+          }`}
+        >
+          <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+            {open ? (
+              <path d="M2 2l14 10M16 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            ) : (
+              <>
+                <path d="M0 1h18" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M0 7h18" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M0 13h18" stroke="currentColor" strokeWidth="1.5" />
+              </>
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {open && (
+        <div className="lg:hidden bg-(--color-ivory) border-t border-(--color-bamboo)/15">
+          <nav className="mx-auto max-w-7xl px-6 py-6 flex flex-col gap-4" aria-label="Mobile navigation">
+            {NAV.map((n) => (
+              <Link
+                key={n.href}
+                href={n.href}
+                onClick={() => setOpen(false)}
+                className="text-[14px] uppercase tracking-[0.22em] font-medium text-(--color-ink) py-2 border-b border-(--color-bamboo)/15"
+              >
+                {n.label}
+              </Link>
+            ))}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <Link
+                href="/cart"
+                onClick={() => setOpen(false)}
+                className="col-span-2 inline-flex items-center justify-between px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink) text-[13px] uppercase tracking-[0.22em]"
+              >
+                Cart <span className="text-(--color-bamboo)">{count}</span>
+              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="col-span-2 text-center text-[13px] uppercase tracking-[0.22em] font-medium px-5 py-3 rounded-sm bg-(--color-gold) text-(--color-moss-dark)"
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      logout();
+                    }}
+                    className="col-span-2 px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink) text-[13px] uppercase tracking-[0.22em]"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    className="text-center text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink)"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setOpen(false)}
+                    className="text-center text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink)"
+                  >
+                    Sign up
+                  </Link>
+                  <Link
+                    href="/products"
+                    onClick={() => setOpen(false)}
+                    className="col-span-2 text-center text-[13px] uppercase tracking-[0.22em] font-medium px-5 py-3 rounded-sm bg-(--color-gold) text-(--color-moss-dark)"
+                  >
+                    Shop →
+                  </Link>
+                </>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
+    </header>
+  );
+}

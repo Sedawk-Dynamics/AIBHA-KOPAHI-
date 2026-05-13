@@ -1,42 +1,49 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
+import CookieBanner from "./components/marketing/CookieBanner";
+import CartDrawer from "./components/marketing/CartDrawer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fraunces = Fraunces({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-body",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Kopahi — Truly Indigenous · North East Farms To Your Home",
+    default: "Kopahi — Authentic by Geography, Pure by Nature",
     template: "%s · Kopahi",
   },
   description:
-    "Premium agri-marketplace of North East India. Authentic, GI-tagged tea, honey, rice, ginger, lychee, Judima, Naga chilli, turmeric, black pepper and Muga silk sourced directly from verified farmers across the seven sister states.",
+    "Kopahi sources, processes, brands and exports the GI-tagged heritage of Northeast India — tea, silk, spices, rice, honey and handcraft from seven sister states.",
   keywords: [
     "Kopahi",
-    "Assam tea",
+    "AIBA AGRI NE LLP",
     "GI tagged",
-    "North East India",
-    "organic produce",
-    "wild honey",
-    "black rice",
+    "Northeast India",
+    "Assam tea",
+    "Muga silk",
     "Lakadong turmeric",
     "Bhut Jolokia",
-    "agri marketplace",
+    "Joha rice",
+    "heritage agri export",
   ],
   metadataBase: new URL("https://kopahi.com"),
   openGraph: {
-    title: "Kopahi — Truly Indigenous · North East Farms To Your Home",
+    title: "Kopahi — Authentic by Geography, Pure by Nature",
     description:
-      "Premium agri-marketplace of North East India. Authentic, GI-tagged tea, honey, rice and spices direct from verified farmers.",
+      "GI-certified heritage of Northeast India — farm to story, soil to export.",
     url: "https://kopahi.com",
     siteName: "Kopahi",
     locale: "en_IN",
@@ -44,9 +51,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kopahi — Truly Indigenous",
+    title: "Kopahi — Authentic by Geography, Pure by Nature",
     description:
-      "Premium agri-marketplace of North East India. Authentic, GI-tagged produce direct from verified farmers.",
+      "GI-certified heritage of Northeast India — farm to story, soil to export.",
   },
   icons: {
     icon: "/Logo1.png",
@@ -62,11 +69,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+      <body className="min-h-full flex flex-col bg-(--color-ivory) text-(--color-ink)">
+        <Providers>
+          {children}
+          <CartDrawer />
+        </Providers>
+        <CookieBanner />
       </body>
     </html>
   );

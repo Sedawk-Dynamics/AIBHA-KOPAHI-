@@ -1,18 +1,16 @@
 "use client";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import DashboardShell from "../../components/DashboardShell";
 
-/* ============================================================
-   CUSTOMER ACCOUNT
-   File: app/dashboard/account/page.tsx
-============================================================ */
+import { useEffect, useState } from "react";
+import EditorialShell from "../../components/dashboard/EditorialShell";
+import { DashCard } from "../../components/dashboard/DashPrimitives";
+import { useAuth } from "../../context/AuthContext";
 
 export default function AccountPage() {
+  const { user } = useAuth();
   const [profile, setProfile] = useState({
-    name: "Rahul Sharma",
-    email: "rahul@example.com",
-    phone: "+91 98765 43210",
+    name: user?.name ?? "",
+    email: user?.email ?? "",
+    phone: "",
     dob: "",
     gender: "",
   });
@@ -25,195 +23,236 @@ export default function AccountPage() {
   const [original, setOriginal] = useState({ profile, prefs });
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [twoFA, setTwoFA] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+
+  useEffect(() => {
+    // user is hydrated asynchronously from /api/auth/me; the standard pattern
+    // is to seed the form once the user lands.
+    if (user) {
+      const fresh = { name: user.name ?? "", email: user.email ?? "", phone: "", dob: "", gender: "" };
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setProfile(fresh);
+      setOriginal((o) => ({ ...o, profile: fresh }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 3000);
+    return () => window.clearTimeout(t);
+  }, [toast]);
 
   const hasChanges = JSON.stringify({ profile, prefs }) !== JSON.stringify(original);
 
-  useEffect(() => {
-    if (toast) {
-      const t = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(t);
-    }
-  }, [toast]);
-
-  const handleSave = () => {
+  const save = () => {
     setSaving(true);
-    setTimeout(() => {
+    window.setTimeout(() => {
       setOriginal({ profile, prefs });
       setSaving(false);
-      setToast("Changes saved successfully");
-    }, 800);
+      setToast("Changes saved.");
+    }, 600);
   };
 
   return (
-    <DashboardShell role="Customer" userName="Rahul Sharma" userEmail="rahul@example.com">
-      <div className="mb-6 md:mb-8">
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-          <Link href="/dashboard" className="hover:text-green-700">Dashboard</Link>
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          <span className="text-gray-900 font-medium">Account</span>
+    <EditorialShell
+      eyebrow="→ Account settings"
+      title={
+        <>
+          Your details, <span className="accent-italic">remembered.</span>
+        </>
+      }
+      actions={
+        hasChanges ? (
+          <button
+            type="button"
+            onClick={save}
+            disabled={saving}
+            className="inline-flex items-center gap-2 px-5 py-3 bg-(--color-gold) text-(--color-moss-dark) text-[12px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors disabled:opacity-60"
+          >
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        ) : null
+      }
+    >
+      {toast && (
+        <div role="status" className="mb-8 border border-(--color-gold)/40 bg-(--color-gold)/10 px-5 py-4 text-sm text-(--color-moss)">
+          {toast}
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">My Account</h1>
-        <p className="text-sm md:text-base text-gray-600 mt-1">Manage your profile, preferences, and security.</p>
-      </div>
-
-      {/* Loyalty banner */}
-      <div className="mb-6 bg-gradient-to-br from-green-700 to-green-900 text-white p-5 md:p-6 rounded-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-green-400/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-green-200 mb-1">Loyalty Status</p>
-            <p className="text-2xl md:text-3xl font-bold">1,245 points</p>
-            <p className="text-sm text-green-100 mt-1">Worth ₹1,245 off your next order. 🎉</p>
-          </div>
-          <button className="bg-white text-green-800 hover:bg-green-50 px-4 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap">Redeem now</button>
-        </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Personal Info */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-            <div className="p-5 md:p-6 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">Personal Information</h2>
-              <p className="text-xs text-gray-500 mt-1">Used on receipts and order communications.</p>
+          <DashCard title="Profile">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Field id="name" label="Full name">
+                <input
+                  id="name"
+                  value={profile.name}
+                  onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                  className="kp-input"
+                />
+              </Field>
+              <Field id="email" label="Email">
+                <input
+                  id="email"
+                  type="email"
+                  value={profile.email}
+                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                  className="kp-input"
+                />
+              </Field>
+              <Field id="phone" label="Phone">
+                <input
+                  id="phone"
+                  type="tel"
+                  value={profile.phone}
+                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                  className="kp-input"
+                />
+              </Field>
+              <Field id="dob" label="Date of birth">
+                <input
+                  id="dob"
+                  type="date"
+                  value={profile.dob}
+                  onChange={(e) => setProfile({ ...profile, dob: e.target.value })}
+                  className="kp-input"
+                />
+              </Field>
             </div>
-            <div className="p-5 md:p-6 space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">Full Name</label>
-                <input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" />
-              </div>
-              <div className="grid md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-1.5">Email</label>
-                  <input type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-1.5">Phone</label>
-                  <input type="tel" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-1.5">Date of Birth <span className="text-gray-400 font-normal">(optional)</span></label>
-                  <input type="date" value={profile.dob} onChange={(e) => setProfile({ ...profile, dob: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-1.5">Gender <span className="text-gray-400 font-normal">(optional)</span></label>
-                  <select value={profile.gender} onChange={(e) => setProfile({ ...profile, gender: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-green-600 focus:ring-4 focus:ring-green-100 cursor-pointer">
-                    <option value="">Prefer not to say</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
+          </DashCard>
 
-          {/* Notifications */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-            <div className="p-5 md:p-6 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">Notifications</h2>
-              <p className="text-xs text-gray-500 mt-1">Choose what we email or text you about.</p>
-            </div>
-            <div className="p-5 md:p-6 space-y-1">
-              <Toggle label="Order updates" desc="Shipping, delivery, and refund notifications." checked={prefs.orderUpdates} onChange={(v) => setPrefs({ ...prefs, orderUpdates: v })} />
-              <Toggle label="Promotions & sales" desc="Be the first to know about flash sales." checked={prefs.promotions} onChange={(v) => setPrefs({ ...prefs, promotions: v })} />
-              <Toggle label="Newsletter" desc="Farmer stories and seasonal collections monthly." checked={prefs.newsletter} onChange={(v) => setPrefs({ ...prefs, newsletter: v })} />
-              <Toggle label="SMS alerts" desc="Critical order updates via text." checked={prefs.smsAlerts} onChange={(v) => setPrefs({ ...prefs, smsAlerts: v })} />
-            </div>
-          </div>
+          <DashCard title="Communication preferences">
+            <ul className="divide-y divide-(--color-bamboo)/15">
+              {(
+                [
+                  { key: "orderUpdates", label: "Order updates", body: "Shipping, tracking, delivery confirmations." },
+                  { key: "promotions", label: "Seasonal promotions", body: "Occasional notes when a new origin lands or a flush is ready." },
+                  { key: "newsletter", label: "The Kopahi Journal", body: "Slow writing about heritage, recipes, and the people we work with." },
+                  { key: "smsAlerts", label: "SMS alerts", body: "Critical-only — delivery windows and OTPs." },
+                ] as { key: keyof typeof prefs; label: string; body: string }[]
+              ).map((p) => (
+                <li key={p.key} className="py-4 flex items-start justify-between gap-6">
+                  <div>
+                    <p className="font-display text-(--color-ink)">{p.label}</p>
+                    <p className="text-sm text-(--color-ink)/65 mt-1 max-w-md leading-relaxed">{p.body}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPrefs((cur) => ({ ...cur, [p.key]: !cur[p.key] }))}
+                    aria-pressed={prefs[p.key]}
+                    className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${
+                      prefs[p.key] ? "bg-(--color-gold)" : "bg-(--color-bamboo)/30"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`absolute top-0.5 h-5 w-5 rounded-full bg-(--color-ivory) shadow transition-transform ${
+                        prefs[p.key] ? "translate-x-5" : "translate-x-0.5"
+                      }`}
+                    />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </DashCard>
 
-          {/* Security */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-            <div className="p-5 md:p-6 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">Security</h2>
-              <p className="text-xs text-gray-500 mt-1">Keep your account safe.</p>
-            </div>
-            <div className="p-5 md:p-6 space-y-3">
-              <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+          <DashCard title="Security">
+            <div className="space-y-5">
+              <a
+                href="/forgot-password"
+                className="block py-3 border-b border-(--color-bamboo)/20 text-(--color-ink) hover:text-(--color-moss) transition-colors"
+              >
+                <span className="font-display">Change password</span>
+                <span className="float-right text-xs uppercase tracking-[0.22em] text-(--color-gold-dark) mt-0.5">Update →</span>
+              </a>
+              <div className="flex items-start justify-between gap-6">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Password</p>
-                  <p className="text-xs text-gray-500">Last changed 3 months ago</p>
+                  <p className="font-display text-(--color-ink)">Two-factor authentication</p>
+                  <p className="text-sm text-(--color-ink)/65 mt-1 max-w-md leading-relaxed">
+                    Adds a one-time code at sign-in, on top of your password.
+                  </p>
                 </div>
-                <button className="text-sm font-medium text-green-700 hover:text-green-800">Change</button>
-              </div>
-              <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">Two-factor authentication</p>
-                  <p className="text-xs text-gray-500">Extra security via OTP</p>
-                </div>
-                <button className="text-sm font-medium text-green-700 hover:text-green-800">Enable</button>
+                <button
+                  type="button"
+                  onClick={() => setTwoFA((v) => !v)}
+                  aria-pressed={twoFA}
+                  className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${
+                    twoFA ? "bg-(--color-gold)" : "bg-(--color-bamboo)/30"
+                  }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-(--color-ivory) shadow transition-transform ${
+                      twoFA ? "translate-x-5" : "translate-x-0.5"
+                    }`}
+                  />
+                </button>
               </div>
             </div>
-          </div>
+          </DashCard>
         </div>
 
-        <div className="space-y-6">
-          {/* Save action */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 md:p-6 lg:sticky lg:top-24">
-            <h3 className="font-semibold text-gray-900 mb-1">Save changes</h3>
-            <p className="text-xs text-gray-500 mb-4">{hasChanges ? "You have unsaved changes." : "Everything is up to date."}</p>
+        <aside className="space-y-6">
+          <DashCard title="Loyalty">
+            <p className="font-display text-3xl text-(--color-moss)">1,245 pts</p>
+            <p className="mt-2 text-sm text-(--color-ink)/65">
+              Each point is a rupee toward your next basket. Earned on every delivered order.
+            </p>
+          </DashCard>
+
+          <DashCard title="Danger zone">
+            <p className="text-sm text-(--color-ink)/70 leading-relaxed">
+              Closing your account removes your profile, addresses, and saved origins. Order history is retained per
+              our retention policy.
+            </p>
+            <label htmlFor="confirm" className="block mt-5 eyebrow mb-2">
+              Type <span className="font-display italic text-(--color-chilli)">delete</span> to confirm
+            </label>
+            <input
+              id="confirm"
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder="delete"
+              className="kp-input"
+            />
             <button
-              onClick={handleSave}
-              disabled={!hasChanges || saving}
-              className="w-full bg-green-700 hover:bg-green-800 disabled:bg-green-700/50 disabled:cursor-not-allowed text-white py-2.5 rounded-lg text-sm font-semibold transition-colors inline-flex items-center justify-center gap-2"
+              type="button"
+              disabled={deleteConfirm !== "delete"}
+              className="mt-5 w-full inline-flex items-center justify-center gap-3 px-6 py-3 border border-(--color-chilli)/50 text-(--color-chilli) text-[12px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-chilli) hover:text-(--color-ivory) transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {saving ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Saving...
-                </>
-              ) : "Save changes"}
+              Close account
             </button>
-          </div>
-
-          {/* Danger zone */}
-          <div className="bg-white rounded-2xl border border-red-200 shadow-sm">
-            <div className="p-5 md:p-6 border-b border-red-100">
-              <h2 className="font-semibold text-red-900">Danger Zone</h2>
-              <p className="text-xs text-red-600 mt-1">These actions cannot be undone.</p>
-            </div>
-            <div className="p-5 md:p-6 space-y-2">
-              <button className="w-full text-left px-3 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50 rounded-lg transition-colors">Download my data</button>
-              <button className="w-full text-left px-3 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50 rounded-lg transition-colors">Delete my account</button>
-            </div>
-          </div>
-        </div>
+          </DashCard>
+        </aside>
       </div>
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border border-green-200 bg-white">
-            <div className="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-            </div>
-            <p className="text-sm font-medium text-gray-900 pr-2">{toast}</p>
-          </div>
-        </div>
-      )}
-    </DashboardShell>
+      <style jsx>{`
+        :global(.kp-input) {
+          width: 100%;
+          background: transparent;
+          border-bottom: 1px solid color-mix(in srgb, var(--color-bamboo) 45%, transparent);
+          padding: 0.75rem 0;
+          color: var(--color-ink);
+          outline: none;
+          transition: border-color 0.2s;
+        }
+        :global(.kp-input:focus) {
+          border-color: var(--color-gold);
+        }
+      `}</style>
+    </EditorialShell>
   );
 }
 
-function Toggle({ label, desc, checked, onChange }: { label: string; desc: string; checked: boolean; onChange: (v: boolean) => void }) {
+function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
   return (
-    <label className="flex items-start justify-between gap-4 py-3 cursor-pointer hover:bg-gray-50 -mx-3 px-3 rounded-lg transition-colors">
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-900">{label}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
-      </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={(e) => { e.preventDefault(); onChange(!checked); }}
-        className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-green-100 mt-0.5 ${checked ? "bg-green-600" : "bg-gray-300"}`}
-      >
-        <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform ${checked ? "translate-x-6" : "translate-x-1"}`} />
-      </button>
-    </label>
+    <div>
+      <label htmlFor={id} className="block eyebrow mb-2">
+        {label}
+      </label>
+      {children}
+    </div>
   );
 }
