@@ -703,41 +703,45 @@ export const JOURNAL: JournalPost[] = [
 
 export const FOUNDERS = [
   {
-    name: "Barsha Saikia",
-    role: "Co-Founder · Strategy",
-    email: "barsha@kopahi.com",
+    name: "Barsha Prakash Choudhury",
+    role: "Founder",
+    email: "mgmt@kopahi.com",
+    phone: "+91 97406 72727",
     quote:
       "Heritage isn't a marketing word. It's a contract with the people who grew this knowledge before us.",
-    bio: "Barsha leads brand and partnerships at Kopahi, bringing a decade of work in regional sourcing and consumer storytelling. Her north star is making Northeast craftsmanship legible to a global audience without flattening it.",
+    bio: "Barsha leads brand and partnerships, drawing on a decade in regional sourcing and consumer storytelling. Her aim: make Northeast craftsmanship legible globally — without flattening it.",
     anecdote:
-      "Grew up in Jorhat, three streets from a tea garden she has yet to stop visiting on weekends.",
+      "Grew up three streets from a Jorhat tea garden she still visits on weekends.",
   },
   {
-    name: "Ashreeta Borah",
-    role: "Co-Founder · Sourcing",
-    email: "ashreeta@kopahi.com",
+    name: "Ashreeta Gogoi",
+    role: "Founder",
+    email: "mgmt@kopahi.com",
+    phone: "+91 98540 75705",
     quote: "Every leaf has a name. Every name has a face.",
-    bio: "Ashreeta has spent years on the ground with grower cooperatives across Assam, Meghalaya and Nagaland. She designs the farmer-first protocols that keep Kopahi traceable end-to-end.",
+    bio: "Ashreeta works on the ground with grower cooperatives across Assam, Meghalaya and Nagaland. She designs the farmer-first protocols that keep Kopahi traceable end-to-end.",
     anecdote:
-      "Carries two notebooks at all times — one for harvest data, one for the names of every child she has been introduced to in a village.",
+      "Carries two notebooks — one for harvest data, one for the names of every village child she meets.",
   },
   {
-    name: "Trideep Mahanta",
-    role: "Co-Founder · Operations",
+    name: "Trideep Khanikar",
+    role: "Director · Operations",
     email: "trideep@kopahi.com",
+    phone: "+91 93654 72113",
     quote: "Quality is not what we promise on a label — it's what we refuse to ship.",
     bio: "Trideep runs processing, logistics and export readiness. His obsession with the unglamorous middle of the value chain is what lets Kopahi stand behind every shipment.",
     anecdote:
-      "Will, given any provocation, walk you through the difference between FSSAI compliance and FSSAI excellence.",
+      "Will, given any provocation, explain the difference between FSSAI compliance and FSSAI excellence.",
   },
   {
-    name: "Prakash Borah",
-    role: "Co-Founder · Markets",
+    name: "Prakash Natarajan",
+    role: "Director · Sales & Marketing",
     email: "prakash@kopahi.com",
+    phone: "+91 99019 72727",
     quote: "We are not here to sell more. We are here to sell better.",
     bio: "Prakash leads B2B and international markets. He chooses partners the way a tea-taster chooses a flush — slowly, carefully, with a long memory.",
     anecdote:
-      "Keeps a small tin of first-flush in his desk drawer and refuses to brew it during meetings he doesn't want to extend.",
+      "Keeps a tin of first-flush in his desk drawer; refuses to brew it during meetings he wants to keep short.",
   },
 ];
 
