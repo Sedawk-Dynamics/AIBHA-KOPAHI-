@@ -69,22 +69,22 @@ const FEATURED = getFeaturedHomepageProducts().map((p) => ({
 
 const FARMERS = [
   {
-    name: "Bipul Hazarika",
-    village: "Naharani, Jorhat",
-    crop: "First-flush tea",
-    years: 14,
+    name: "Bireswar Hazarika",
+    village: "Diphu cluster, Karbi Anglong",
+    crop: "Keteki Joha rice",
+    years: 17,
   },
   {
-    name: "Rinki Daimary",
-    village: "Kokrajhar, Assam",
-    crop: "Joha rice",
-    years: 9,
+    name: "Rina Borah",
+    village: "Dibrugarh garden cluster",
+    crop: "First-flush Assam tea",
+    years: 19,
   },
   {
-    name: "Banjop Lyngdoh",
-    village: "Laskein, Meghalaya",
-    crop: "Lakadong turmeric",
-    years: 12,
+    name: "Khrieliezo Dawhuo",
+    village: "Khonoma cluster, Kohima",
+    crop: "Bhoot Jolokia",
+    years: 11,
   },
 ];
 

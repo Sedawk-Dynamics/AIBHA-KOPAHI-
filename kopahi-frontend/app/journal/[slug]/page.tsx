@@ -194,8 +194,8 @@ export default async function JournalArticle({
               Continue with us in <span className="text-(--color-gold)">the field.</span>
             </p>
             <p className="mt-6 text-(--color-ivory)/80 leading-relaxed max-w-2xl mx-auto">
-              We write slowly. If you'd like to know when the next essay lands — and when a new origin joins the
-              catalogue — leave us your email.
+              We write slowly. If you&apos;d like to know when the next essay lands — and when a new origin joins
+              the catalogue — leave us your email.
             </p>
             <Link
               href="/contact"

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { JOURNAL, JOURNAL_CATEGORIES, type JournalCategory, type JournalEssay } from "../lib/journal";
+import { JOURNAL, JOURNAL_CATEGORIES, type JournalEssay } from "../lib/journal";
 
 const TABS: { label: string; match: (e: JournalEssay) => boolean }[] = [
   { label: "All", match: () => true },
@@ -39,8 +39,18 @@ export default function JournalListing() {
   const filtered = useMemo(() => JOURNAL.filter(TABS[active].match), [active]);
   const counts = useMemo(() => TABS.map((t) => JOURNAL.filter(t.match).length), []);
 
-  const featured = filtered.find((e) => e.isFeatured) ?? null;
-  const rest = filtered.filter((e) => e !== featured);
+  // Every tab shows the full set that matches: featured piece (if any in
+  // this category) first, then the rest sorted most-recent.
+  const sorted = useMemo(() => {
+    const featuredEssay = filtered.find((e) => e.isFeatured);
+    const others = [...filtered]
+      .filter((e) => e !== featuredEssay)
+      .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt));
+    return featuredEssay ? [featuredEssay, ...others] : others;
+  }, [filtered]);
+
+  const featured = sorted.find((e) => e.isFeatured) ?? null;
+  const rest = sorted.filter((e) => e !== featured);
 
   return (
     <>
@@ -71,10 +81,10 @@ export default function JournalListing() {
       </div>
 
       <p className="eyebrow mb-10">
-        → Showing {filtered.length} {filtered.length === 1 ? "essay" : "essays"}
+        → Showing {sorted.length} {sorted.length === 1 ? "essay" : "essays"}
       </p>
 
-      {filtered.length === 0 ? (
+      {sorted.length === 0 ? (
         <p className="py-16 text-center font-display italic text-(--color-bamboo)">
           Nothing in this category yet.
         </p>

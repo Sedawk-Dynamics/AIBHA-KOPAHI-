@@ -50,47 +50,9 @@ export type JournalEssay = {
 // THE NINE ESSAYS
 // =============================================================
 export const JOURNAL: JournalEssay[] = [
+  
   // -------------------------------------------------------------
-  // 1 · FEATURED — Heritage Stories
-  // -------------------------------------------------------------
-  {
-    slug: "muga-silk-quiet-economy",
-    title: "The quiet economy of Muga",
-    titleAccent: "Muga",
-    dek: "Why the only silk that brightens with age is also the most patient supply chain in India.",
-    category: "Heritage Stories",
-    author: "Barsha Prakash Choudhury",
-    authorRole: "Founder · Brand & Partnerships",
-    publishedAt: "2026-03-12",
-    coverImage: "/products/muga-silk-stole.jpg",
-    readingMinutes: 6,
-    isFeatured: true,
-    inlineFarmerSlugs: ["phulmoni-devi"],
-    body: [
-      { type: "paragraph", text: "Sualkuchi is a forty-minute drive west of Guwahati, but in the way it tells time, it could be sixty years away. The looms here have been working since long before the road was paved. Some of them are still working on the same beams." },
-      { type: "paragraph", text: "Muga is the silk that only Assam can produce — not because the technology is secret, but because the silkworm that yields it, Antheraea assamensis, will not eat the leaves of any tree except the som and the soalu, and those trees, in any number that matters, grow nowhere else. The silk that results is a deep, ambered gold, and it has the rare and slightly miraculous property of brightening with washing. Most silks dull. Muga deepens. A Mekhela Chador that came into a family at a wedding will, fifty years on, be the most luminous thing in the house." },
-      { type: "paragraph", text: "Phulmoni Devi has run a single loom in her family home in Sualkuchi for thirty-one years. She is forty-eight. Do the arithmetic and you arrive at the right answer — she began at seventeen, six months after she married. One stole takes her eight days of weaving, working four hours a morning and three again in the late afternoon when the light is forgiving. The thread she uses comes from her sister's sericulture farm twenty kilometres away. The cocoons are reeled by a third cousin. The dye, when she dyes — which is rarely, because the natural gold is what the customer pays for — is mixed by her mother-in-law." },
-      { type: "paragraph", text: "A single Muga stole, in other words, is the visible end of a network of perhaps eight households. It cannot be sped up. It cannot be franchised. It can only be paid fairly, or unfairly." },
-      { type: "divider" },
-      { type: "paragraph", text: "The trouble is that the fair price has never been the easy one to find. For most of the last twenty years, traders from outside the state bought finished Muga at a fraction of its weave-rate and resold it on Delhi shop floors at four to six times what they paid. The weaver who sat for eight days got a rupee per minute, sometimes less. The middleman who drove a van to Sualkuchi once a fortnight got the difference." },
-      { type: "paragraph", text: "Muga earned a Geographical Indication in 2007. The tag protects the name, which means the rest of the country can no longer legally sell Bangalore-spun silk as “Muga”. But the GI does not protect the price, and the price is what the weaver actually lives on. That has had to be rebuilt — slowly, one buying relationship at a time." },
-      { type: "farmerInset", slug: "phulmoni-devi" },
-      { type: "paragraph", text: "When we began working with Phulmoni Devi in 2024, our first conversation was not about volume. It was about the calendar. Could she comfortably make a stole every ten days, allowing for festivals, illness, and the days her grandchildren needed her? She thought for a long minute and said yes. We took that number — thirty-six stoles a year — and built the order book around it. We did not ask her to produce more. We asked the buyers to wait longer." },
-      { type: "paragraph", text: "This is not, by the management-school definition, a scalable supply chain. It is the only kind of supply chain that produces real Muga." },
-      { type: "productInset", slug: "muga-silk-stole-placeholder", note: "Sualkuchi, Assam · Listing coming soon" },
-      { type: "divider" },
-      { type: "paragraph", text: "The economics work because the story the silk carries is part of what the buyer is paying for. A Sualkuchi Muga stole in a Tokyo concept store sells for the equivalent of seventy thousand rupees. Of that, after retail margin, freight, brand markup, customs and our own thin operating cost, a meaningful share — roughly fifteen times what a traditional middleman ever paid — reaches Phulmoni's hand within seven days of dispatch. The buyer in Tokyo is, in the simplest possible sense, paying for the eight days." },
-      { type: "paragraph", text: "The reason we tell this in detail is that the alternative — “hand-loomed Indian silk, 100% authentic” — is the marketing language that has hollowed out craft economies across the country for two generations. The label says everything and tells you nothing. The eight days, the four hours each morning, the cousin who reels the cocoon, the trees that only grow here — that is the actual product. The silk is what it leaves behind." },
-      { type: "divider" },
-      { type: "paragraph", text: "We are not romantic about this. There are mornings when a loom in Sualkuchi sits idle because a power cut has spoiled a dye batch, or because a wedding in the next village means three weavers haven't shown up for two days. There are months when our order book gets ahead of what Phulmoni and her network can deliver, and we have to write apologetic emails to buyers in Mumbai and Singapore. Nothing about this is efficient." },
-      { type: "paragraph", text: "But the quiet part of the quiet economy is the part that makes it durable. Sualkuchi has been weaving Muga for at least six hundred years on the same banks of the Brahmaputra. The trees, the worms, the looms, the hands. If we hurry it — if anyone hurries it — it stops being Muga. It becomes silk that happens to be made in Assam." },
-      { type: "paragraph", text: "The world has plenty of silk. Muga, properly told, has only one shelf." },
-      { type: "authorNote", text: "Barsha Prakash Choudhury writes from the brand desk at Kopahi. She last visited Sualkuchi in February 2026." },
-    ],
-  },
-
-  // -------------------------------------------------------------
-  // 2 · Farmer Profiles — Bireswar & the Keteki seedbank
+  // 1 · Farmer Profiles — Bireswar & the Keteki seedbank
   // -------------------------------------------------------------
   {
     slug: "bireswar-and-the-keteki-seedbank",
@@ -129,7 +91,7 @@ export const JOURNAL: JournalEssay[] = [
   },
 
   // -------------------------------------------------------------
-  // 3 · Farmer Profiles — Khrieliezo & the mountain heat
+  // 2 · Farmer Profiles — Khrieliezo & the mountain heat
   // -------------------------------------------------------------
   {
     slug: "khrieliezo-and-the-mountain-heat",
@@ -140,7 +102,7 @@ export const JOURNAL: JournalEssay[] = [
     author: "Ashreeta Gogoi",
     authorRole: "Founder · Field & Cooperatives",
     publishedAt: "2026-02-11",
-    coverImage: "/products/bhut-jolokia.jpg",
+    coverImage: "/products/ghostpepper.jpg",
     readingMinutes: 5,
     inlineFarmerSlugs: ["khrieliezo-dawhuo"],
     inlineProductSlugs: ["gi-naga-chilli-bhoot-jolokia-powder", "kopahi-bhoot-jolokia-jam"],
@@ -169,7 +131,7 @@ export const JOURNAL: JournalEssay[] = [
   },
 
   // -------------------------------------------------------------
-  // 4 · Heritage Stories — Lakadong & the curcumin mountain
+  // 3 · Heritage Stories — Lakadong & the curcumin mountain
   // -------------------------------------------------------------
   {
     slug: "lakadong-curcumin-mountain",
@@ -180,7 +142,7 @@ export const JOURNAL: JournalEssay[] = [
     author: "Barsha Prakash Choudhury",
     authorRole: "Founder · Brand & Partnerships",
     publishedAt: "2026-02-04",
-    coverImage: "/products/gi-turmeric-powder.jpeg",
+    coverImage: "/products/ginj.jpg",
     readingMinutes: 5,
     inlineProductSlugs: ["gi-lakadong-turmeric-powder", "gi-karbi-anglong-ginger-powder"],
     body: [
@@ -208,7 +170,7 @@ export const JOURNAL: JournalEssay[] = [
   },
 
   // -------------------------------------------------------------
-  // 5 · Recipes — Khar with Joha
+  // 4 · Recipes — Khar with Joha
   // -------------------------------------------------------------
   {
     slug: "khar-with-joha-rice",
@@ -249,7 +211,7 @@ export const JOURNAL: JournalEssay[] = [
   },
 
   // -------------------------------------------------------------
-  // 6 · Recipes — Bhoot Jolokia jam on a cheese board
+  // 5 · Recipes — Bhoot Jolokia jam on a cheese board
   // -------------------------------------------------------------
   {
     slug: "bhoot-jolokia-jam-on-cheese-board",
@@ -260,7 +222,7 @@ export const JOURNAL: JournalEssay[] = [
     author: "Kopahi Kitchens",
     authorRole: "The Kopahi kitchen",
     publishedAt: "2025-12-22",
-    coverImage: "/products/bhootjholokiajam.jpeg",
+    coverImage: "/products/ghostjam.webp",
     readingMinutes: 4,
     inlineProductSlugs: ["kopahi-bhoot-jolokia-jam"],
     body: [
@@ -292,7 +254,7 @@ export const JOURNAL: JournalEssay[] = [
   },
 
   // -------------------------------------------------------------
-  // 7 · Export Insights — What GI actually protects
+  // 6 · Export Insights — What GI actually protects
   // -------------------------------------------------------------
   {
     slug: "what-gi-protects-and-what-it-doesnt",
@@ -303,7 +265,7 @@ export const JOURNAL: JournalEssay[] = [
     author: "Prakash Natarajan",
     authorRole: "Director · Sales & Marketing",
     publishedAt: "2026-04-22",
-    coverImage: "/products/gi-turmeric-powder.jpeg",
+    coverImage: "/products/gitag.webp",
     readingMinutes: 6,
     inlineProductSlugs: ["gi-lakadong-turmeric-powder", "gi-tripura-queen-dried-pineapple"],
     body: [
@@ -336,7 +298,7 @@ export const JOURNAL: JournalEssay[] = [
   },
 
   // -------------------------------------------------------------
-  // 8 · Export Insights — First-flush tasting window
+  // 7 · Export Insights — First-flush tasting window
   // -------------------------------------------------------------
   {
     slug: "first-flush-tasting-window-2026",
@@ -347,7 +309,7 @@ export const JOURNAL: JournalEssay[] = [
     author: "Trideep Khanikar",
     authorRole: "Director · Operations",
     publishedAt: "2026-03-30",
-    coverImage: "/products/tea-garden.jpg",
+    coverImage: "/products/assamese.jpg",
     readingMinutes: 5,
     inlineFarmerSlugs: ["rina-borah"],
     inlineProductSlugs: ["kopahi-tea-range"],
@@ -378,7 +340,7 @@ export const JOURNAL: JournalEssay[] = [
   },
 
   // -------------------------------------------------------------
-  // 9 · Heritage Stories — The cotton in the Kopahi logo
+  // 8 · Heritage Stories — The cotton in the Kopahi logo
   // -------------------------------------------------------------
   {
     slug: "the-cotton-in-the-kopahi-logo",
