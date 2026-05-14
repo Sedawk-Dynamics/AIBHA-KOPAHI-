@@ -16,7 +16,7 @@ import Marquee from "../components/marketing/Marquee";
 import B2BInquiryForm from "./B2BInquiryForm";
 
 export const metadata: Metadata = {
-  title: "Bulk Orders & B2B Partnerships",
+  title: "Bulk Orders And B2B Partnerships",
   description:
     "Wholesale, HoReCa and export partnerships for GI-tagged Northeast Indian produce. FSSAI certified, end-to-end logistics, 24-hour quote turnaround.",
 };
@@ -95,15 +95,20 @@ export default function B2BPage() {
       <main className="bg-(--color-ivory) text-(--color-ink)">
         {/* ============== 1 · HERO ============== */}
         <section className="relative bg-(--color-moss) text-(--color-ivory) overflow-hidden grain pt-32 sm:pt-40 pb-20 sm:pb-28">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-7">
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-stretch">
+            {/* ===== TEXT COLUMN ===== */}
+            <div>
               <Eyebrow tone="gold">→ Wholesale & Business</Eyebrow>
-              <Headline as="h1" tone="ivory" className="mt-6 max-w-3xl" accent="B2B Partnerships">
+              <Headline as="h1" tone="ivory" className="mt-7" accent="B2B Partnerships">
                 Bulk Orders &amp;
               </Headline>
-              <p className="mt-10 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-ivory)/85 leading-relaxed">
-                Source premium agricultural products directly from trusted vendors, farmers and regional producers
-                across North East India — wholesale rates, custom packaging, end-to-end logistics.
+              <span
+                aria-hidden="true"
+                className="mt-9 block h-px w-16 bg-(--color-gold)"
+              />
+              <p className="mt-8 font-display italic text-lg sm:text-xl text-(--color-ivory)/80 leading-relaxed">
+                Source premium agricultural produce directly from verified farmers and regional cooperatives across
+                Northeast India — wholesale rates, custom packaging, end-to-end logistics.
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
                 <Link
@@ -119,19 +124,34 @@ export default function B2BPage() {
                   See How It Works
                 </Link>
               </div>
+
+              {/* Inline trust mini-strip */}
+              <ul className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-3 pt-6 border-t border-(--color-ivory)/15">
+                {[
+                  { stat: "500+", label: "Verified farmers" },
+                  { stat: "12", label: "Export countries" },
+                  { stat: "24 h", label: "Quote turnaround" },
+                ].map((t) => (
+                  <li key={t.label} className="flex items-baseline gap-3">
+                    <span className="font-display text-(--color-gold) text-xl leading-none">{t.stat}</span>
+                    <span className="text-[11px] uppercase tracking-[0.22em] text-(--color-ivory)/70">
+                      {t.label}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="lg:col-span-5 relative">
-              <div className="relative aspect-[11/6] overflow-hidden border-2 border-(--color-bamboo)/40 mx-auto lg:ml-auto lg:mr-0">
-                <Image
-                  src="/products/youngs.webp"
-                  alt="A Northeast farm stand with spices, tea and produce, two partners reviewing them"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 40vw"
-                  className="object-cover"
-                  priority
-                />
-              </div>
+            {/* ===== IMAGE COLUMN ===== */}
+            <div className="relative aspect-[11/6] lg:aspect-auto lg:h-full min-h-[320px] overflow-hidden border border-(--color-bamboo)/30">
+              <Image
+                src="/products/b2bbulk.webp"
+                alt="A Northeast farm stand with spices, tea and produce, two partners reviewing the harvest"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover object-center"
+                priority
+              />
             </div>
           </div>
         </section>
