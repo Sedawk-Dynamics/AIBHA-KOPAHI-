@@ -138,7 +138,7 @@ export default function SustainabilityPage() {
             &ldquo;A geography is a long argument between rain, soil and people. We are not trying to win it. We are
             trying not to break it.&rdquo;
             <footer className="mt-8 text-base not-italic text-(--color-bamboo) font-body uppercase tracking-[0.22em]">
-              — Ashreeta Borah · Co-Founder, Sourcing
+              — Ashreeta Gogoi · Founder
             </footer>
           </blockquote>
         </Section>
