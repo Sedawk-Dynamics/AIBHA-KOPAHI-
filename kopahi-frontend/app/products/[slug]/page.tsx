@@ -390,6 +390,41 @@ export default async function ProductDetailPage({
           </section>
         )}
 
+        {/* ============ FROM THE JOURNAL ============ */}
+        {essaysAboutThis.length > 0 && (
+          <section className="pb-24">
+            <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+              <Eyebrow>→ From the Journal</Eyebrow>
+              <h2 className="font-display font-light text-3xl sm:text-4xl mt-4 text-(--color-ink)">
+                Where this <span className="accent-italic">origin</span> appears in our writing
+              </h2>
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                {essaysAboutThis.slice(0, 3).map((e) => (
+                  <Link key={e.slug} href={`/journal/${e.slug}`} className="group block">
+                    <div className="relative aspect-[4/5] overflow-hidden bg-(--color-ivory-warm)">
+                      <Image
+                        src={e.coverImage}
+                        alt={e.title}
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-[1.4s] ease-out group-hover:scale-[1.04]"
+                      />
+                    </div>
+                    <p className="eyebrow mt-5">{e.category}</p>
+                    <h3 className="mt-3 font-display text-2xl text-(--color-ink) leading-tight group-hover:text-(--color-moss) transition-colors">
+                      {e.title}
+                    </h3>
+                    <p className="mt-3 text-(--color-ink)/75 leading-relaxed text-sm">{e.dek}</p>
+                    <p className="mt-3 text-xs uppercase tracking-[0.22em] text-(--color-ink)/55">
+                      {e.author} · {e.readingMinutes} min read
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         <MarketingFooter />
       </main>
 
