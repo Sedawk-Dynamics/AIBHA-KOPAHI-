@@ -94,65 +94,61 @@ export default function B2BPage() {
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         {/* ============== 1 · HERO ============== */}
-        <section className="relative bg-(--color-moss) text-(--color-ivory) overflow-hidden grain pt-32 sm:pt-40 pb-20 sm:pb-28">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-stretch">
-            {/* ===== TEXT COLUMN ===== */}
-            <div>
-              <Eyebrow tone="gold">→ Wholesale & Business</Eyebrow>
-              <Headline as="h1" tone="ivory" className="mt-7" accent="B2B Partnerships">
-                Bulk Orders &amp;
-              </Headline>
-              <span
-                aria-hidden="true"
-                className="mt-9 block h-px w-16 bg-(--color-gold)"
-              />
-              <p className="mt-8 font-display italic text-lg sm:text-xl text-(--color-ivory)/80 leading-relaxed">
-                Source premium agricultural produce directly from verified farmers and regional cooperatives across
-                Northeast India — wholesale rates, custom packaging, end-to-end logistics.
-              </p>
-              <div className="mt-10 flex flex-wrap gap-4">
-                <Link
-                  href="#quote"
-                  className="inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
-                >
-                  Request Quote <span aria-hidden="true">→</span>
-                </Link>
-                <Link
-                  href="#how"
-                  className="inline-flex items-center gap-3 px-7 py-4 border border-(--color-ivory)/60 text-(--color-ivory) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-ivory) hover:text-(--color-moss-dark) transition-colors"
-                >
-                  See How It Works
-                </Link>
-              </div>
-
-              {/* Inline trust mini-strip */}
-              <ul className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-3 pt-6 border-t border-(--color-ivory)/15">
-                {[
-                  { stat: "500+", label: "Verified farmers" },
-                  { stat: "12", label: "Export countries" },
-                  { stat: "24 h", label: "Quote turnaround" },
-                ].map((t) => (
-                  <li key={t.label} className="flex items-baseline gap-3">
-                    <span className="font-display text-(--color-gold) text-xl leading-none">{t.stat}</span>
-                    <span className="text-[11px] uppercase tracking-[0.22em] text-(--color-ivory)/70">
-                      {t.label}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+        <section className="relative bg-(--color-moss) text-(--color-ivory) grain pt-32 sm:pt-40 pb-20 sm:pb-28 overflow-hidden">
+          <div className="absolute inset-0 -z-10">
+            <Image
+              src="/products/youngs.webp"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover opacity-[0.18]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-(--color-moss) via-(--color-moss)/85 to-(--color-moss)" />
+          </div>
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+            <Eyebrow tone="gold">→ Wholesale & Business</Eyebrow>
+            <Headline as="h1" tone="ivory" className="mt-6 max-w-4xl" accent="B2B Partnerships">
+              Bulk Orders &amp;
+            </Headline>
+            <span
+              aria-hidden="true"
+              className="mt-9 block h-px w-16 bg-(--color-gold)"
+            />
+            <p className="mt-8 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-ivory)/80 leading-relaxed">
+              Source premium agricultural produce directly from verified farmers and regional cooperatives across
+              Northeast India — wholesale rates, custom packaging, end-to-end logistics.
+            </p>
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Link
+                href="#quote"
+                className="inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+              >
+                Request Quote <span aria-hidden="true">→</span>
+              </Link>
+              <Link
+                href="#how"
+                className="inline-flex items-center gap-3 px-7 py-4 border border-(--color-ivory)/60 text-(--color-ivory) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-ivory) hover:text-(--color-moss-dark) transition-colors"
+              >
+                See How It Works
+              </Link>
             </div>
 
-            {/* ===== IMAGE COLUMN ===== */}
-            <div className="relative aspect-[11/6] lg:aspect-auto lg:h-full min-h-[320px] overflow-hidden border border-(--color-bamboo)/30">
-              <Image
-                src="/products/b2bbulk.webp"
-                alt="A Northeast farm stand with spices, tea and produce, two partners reviewing the harvest"
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover object-center"
-                priority
-              />
-            </div>
+            {/* Inline trust mini-strip */}
+            <ul className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-3 pt-6 border-t border-(--color-ivory)/15 max-w-2xl">
+              {[
+                { stat: "500+", label: "Verified farmers" },
+                { stat: "12", label: "Export countries" },
+                { stat: "24 h", label: "Turnaround" },
+              ].map((t) => (
+                <li key={t.label} className="flex items-baseline gap-3">
+                  <span className="font-display text-(--color-gold) text-xl leading-none">{t.stat}</span>
+                  <span className="text-[11px] uppercase tracking-[0.22em] text-(--color-ivory)/70">
+                    {t.label}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
@@ -173,11 +169,12 @@ export default function B2BPage() {
 
         {/* ============== 3 · STATS BAND ============== */}
         <Section tone="ivory">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
-            <StatCallout value="500+" label="Verified farmers across seven states" />
-            <StatCallout value="1,200T" label="Annual sourced volume" />
-            <StatCallout value="80+" label="Active business partners" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-12 items-start">
+            <StatCallout value="500+" label="Verified farmers" />
+            <StatCallout value="80+" label="Business partners" />
             <StatCallout value="12" label="Export countries" />
+            <StatCallout value="1,200T" label="Annual volume" />
+
           </div>
         </Section>
 
