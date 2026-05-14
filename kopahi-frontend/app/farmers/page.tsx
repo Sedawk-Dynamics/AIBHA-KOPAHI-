@@ -12,6 +12,7 @@ import Headline from "../components/marketing/Headline";
 import OrganicDivider from "../components/marketing/OrganicDivider";
 import NEIndiaMap from "./NEIndiaMap";
 import { FARMERS } from "../lib/marketing";
+import { getEssaysByFarmerSlug } from "../lib/journal";
 
 export const metadata: Metadata = {
   title: "Farmers · Know who grew it",
@@ -68,38 +69,51 @@ export default function FarmersPage() {
           </Headline>
 
           <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {FARMERS.map((f) => (
-              <article
-                key={f.slug}
-                id={f.slug}
-                className="bg-(--color-ivory) border border-(--color-bamboo)/20 hover:border-(--color-gold) transition-colors"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  {f.image && (
-                    <Image
-                      src={f.image}
-                      alt={`Portrait of ${f.name}`}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover"
-                    />
-                  )}
-                </div>
-                <div className="p-7">
-                  <p className="eyebrow">{f.state}</p>
-                  <h3 className="font-display text-2xl text-(--color-ink) mt-3">{f.name}</h3>
-                  <p className="font-display italic text-(--color-bamboo) text-sm mt-1">
-                    {f.village} · {f.crop}
-                  </p>
-                  <p className="mt-5 font-display italic text-(--color-ink)/85 leading-snug">
-                    &ldquo;{f.quote}&rdquo;
-                  </p>
-                  <p className="mt-5 text-xs uppercase tracking-[0.22em] text-(--color-ink)/55">
-                    {f.years} years partnered
-                  </p>
-                </div>
-              </article>
-            ))}
+            {FARMERS.map((f) => {
+              const essays = getEssaysByFarmerSlug(f.slug);
+              const featuredEssay = essays[0];
+              return (
+                <article
+                  key={f.slug}
+                  id={f.slug}
+                  className="bg-(--color-ivory) border border-(--color-bamboo)/20 hover:border-(--color-gold) transition-colors flex flex-col"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    {f.image && (
+                      <Image
+                        src={f.image}
+                        alt={`Portrait of ${f.name}`}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="p-7 flex flex-col flex-1">
+                    <p className="eyebrow">{f.state}</p>
+                    <h3 className="font-display text-2xl text-(--color-ink) mt-3">{f.name}</h3>
+                    <p className="font-display italic text-(--color-bamboo) text-sm mt-1">
+                      {f.village} · {f.crop}
+                    </p>
+                    <p className="mt-5 font-display italic text-(--color-ink)/85 leading-snug">
+                      &ldquo;{f.quote}&rdquo;
+                    </p>
+                    <p className="mt-5 text-xs uppercase tracking-[0.22em] text-(--color-ink)/55">
+                      {f.years} years partnered
+                    </p>
+                    {featuredEssay && (
+                      <Link
+                        href={`/journal/${featuredEssay.slug}`}
+                        className="mt-5 pt-5 border-t border-(--color-bamboo)/20 inline-flex items-center justify-between gap-2 text-xs uppercase tracking-[0.22em] text-(--color-gold-dark) hover:text-(--color-gold) transition-colors"
+                      >
+                        <span>Read their story</span>
+                        <span aria-hidden="true">→</span>
+                      </Link>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </Section>
 
