@@ -15,6 +15,7 @@ import {
   getFarmerBySlug,
   type Product,
 } from "../../lib/marketing";
+import { getEssaysByProductSlug } from "../../lib/journal";
 
 export async function generateStaticParams() {
   return PRODUCTS.map((p) => ({ slug: p.slug }));
@@ -112,6 +113,7 @@ export default async function ProductDetailPage({
 
   const farmer = product.farmerSlug ? getFarmerBySlug(product.farmerSlug) : undefined;
   const related = getRelated(product);
+  const essaysAboutThis = getEssaysByProductSlug(product.slug);
   const savings =
     product.mrp && product.sellingPrice && product.mrp > product.sellingPrice
       ? Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)
@@ -302,7 +304,7 @@ export default async function ProductDetailPage({
                         This product is legally tied to its geographic origin.
                       </p>
                       <Link
-                        href="/journal/what-gi-actually-protects"
+                        href="/journal/what-gi-protects-and-what-it-doesnt"
                         className="mt-3 inline-block text-(--color-gold-dark) hover:text-(--color-gold) text-xs uppercase tracking-[0.2em]"
                       >
                         View certificate →

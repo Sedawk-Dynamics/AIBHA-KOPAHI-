@@ -26,31 +26,31 @@ const REASONS = [
     n: "01",
     title: "Direct from verified farmers",
     body: "Every batch is traceable to its origin farm — name, village, season.",
-    image: "/products/tea-garden.jpg",
+    image: "/products/directfromfarmers.webp",
   },
   {
     n: "02",
     title: "GI-tagged & premium regional catalogue",
     body: "Authenticated North East produce, including Assam Tea, Lakadong Turmeric, Bhut Jolokia.",
-    image: "/products/lakadong-turmeric.jpg",
+    image: "/products/gitagged.webp",
   },
   {
     n: "03",
     title: "Custom bulk pricing",
     body: "Volume-based tiers with annual contract discounts.",
-    image: "/products/black-rice.jpg",
+    image: "/products/bulk.jpg",
   },
   {
     n: "04",
     title: "End-to-end logistics",
     body: "Cold-chain, FSSAI documentation, customs paperwork — fully handled.",
-    image: "/products/judima.jpg",
+    image: "/products/logistic.jpg",
   },
   {
     n: "05",
     title: "Export & wholesale opportunities",
     body: "Active partners across HoReCa, retail and 12+ countries.",
-    image: "/products/muga-silk-thread.jpg",
+    image: "/products/wholesale.webp",
   },
 ];
 
@@ -122,16 +122,15 @@ export default function B2BPage() {
             </div>
 
             <div className="lg:col-span-5 relative">
-              <div className="grid grid-cols-12 gap-3 sm:gap-4 max-w-lg ml-auto">
-                <div className="col-span-7 aspect-[5/6] relative overflow-hidden border-2 border-(--color-bamboo)/40">
-                  <Image src="/products/tea-garden.jpg" alt="Warehouse interior" fill sizes="350px" className="object-cover" />
-                </div>
-                <div className="col-span-5 col-start-8 row-start-1 mt-10 aspect-[4/5] relative overflow-hidden border-2 border-(--color-bamboo)/40">
-                  <Image src="/products/cane-baskets.jpg" alt="Packed crate" fill sizes="200px" className="object-cover" />
-                </div>
-                <div className="col-span-7 col-start-3 aspect-[5/3] relative overflow-hidden border-2 border-(--color-bamboo)/40 -mt-4">
-                  <Image src="/products/lakadong-turmeric.jpg" alt="Cargo dock at sunrise" fill sizes="350px" className="object-cover" />
-                </div>
+              <div className="relative aspect-[11/6] overflow-hidden border-2 border-(--color-bamboo)/40 mx-auto lg:ml-auto lg:mr-0">
+                <Image
+                  src="/products/youngs.webp"
+                  alt="A Northeast farm stand with spices, tea and produce, two partners reviewing them"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  className="object-cover"
+                  priority
+                />
               </div>
             </div>
           </div>

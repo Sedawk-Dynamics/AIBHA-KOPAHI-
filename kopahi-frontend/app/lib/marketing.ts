@@ -150,6 +150,16 @@ export const FARMERS: Farmer[] = [
     quote: "Three weeks of curing. The hills know how long.",
     image: "/products/gi-turmeric-powder.jpeg",
   },
+  {
+    slug: "phulmoni-devi",
+    name: "Phulmoni Devi",
+    village: "Sualkuchi",
+    state: "Assam",
+    crop: "Muga silk (weaver)",
+    years: 31,
+    quote: "The eight days are the silk. The thread is what they leave behind.",
+    image: "/products/muga-silk-stole.jpg",
+  },
 ];
 
 // ============================================================
@@ -625,81 +635,7 @@ export function getFeaturedHomepageProducts(): Product[] {
     .filter((p): p is Product => Boolean(p));
 }
 
-// =============================================================
-// Journal posts (kept inline; ready to swap for MDX later)
-// =============================================================
-export type JournalPost = {
-  slug: string;
-  title: string;
-  category: "Heritage Stories" | "Farmer Profiles" | "Recipes" | "Export Insights";
-  excerpt: string;
-  image: string;
-  author: string;
-  date: string;
-};
-
-export const JOURNAL: JournalPost[] = [
-  {
-    slug: "the-quiet-economy-of-muga",
-    title: "The quiet economy of Muga",
-    category: "Heritage Stories",
-    excerpt:
-      "Why the only silk that brightens with age is also the most patient supply chain in India.",
-    image: "/products/muga-silk-stole.jpg",
-    author: "Barsha Saikia",
-    date: "2026-03-12",
-  },
-  {
-    slug: "anjali-of-mon",
-    title: "Anjali of Mon",
-    category: "Farmer Profiles",
-    excerpt:
-      "A morning on a Konyak chilli terrace, and a quiet argument for slow heat.",
-    image: "/products/bhut-jolokia.jpg",
-    author: "Ashreeta Borah",
-    date: "2026-02-04",
-  },
-  {
-    slug: "khar-with-joha",
-    title: "Khar with Joha",
-    category: "Recipes",
-    excerpt:
-      "The Assamese plate that uses the rice as the loudest ingredient. A recipe from Naharani.",
-    image: "/products/black-rice.jpg",
-    author: "Kopahi Kitchens",
-    date: "2026-01-18",
-  },
-  {
-    slug: "what-gi-actually-protects",
-    title: "What a GI tag actually protects",
-    category: "Export Insights",
-    excerpt:
-      "A working note for buyers and partners — what the certification means, and what it doesn't.",
-    image: "/products/lakadong-turmeric.jpg",
-    author: "Trideep Mahanta",
-    date: "2026-04-22",
-  },
-  {
-    slug: "judima-and-the-thembra-herb",
-    title: "Judima and the thembra herb",
-    category: "Heritage Stories",
-    excerpt:
-      "How an unassuming jungle herb anchors one of India's only GI-tagged rice wines.",
-    image: "/products/judima.jpg",
-    author: "Kopahi Editors",
-    date: "2026-04-02",
-  },
-  {
-    slug: "the-tasting-window",
-    title: "The first-flush tasting window",
-    category: "Heritage Stories",
-    excerpt:
-      "Why the Assam first flush has gone from a March affair to a calendar that needs watching.",
-    image: "/products/assam-tea.jpg",
-    author: "Bipul Hazarika",
-    date: "2026-03-30",
-  },
-];
+// Journal essays live in app/lib/journal.ts (typed-block schema, full bodies).
 
 export const FOUNDERS = [
   {

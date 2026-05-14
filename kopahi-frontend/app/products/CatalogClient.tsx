@@ -12,6 +12,17 @@ export default function CatalogClient() {
   const [state, setState] = useState<State | "All">("All");
   const [category, setCategory] = useState<Category | "All">("All");
   const [giOnly, setGiOnly] = useState(false);
+  const [nonGiOnly, setNonGiOnly] = useState(false);
+
+  // GI and Non-GI are mutually exclusive: turning one on turns the other off.
+  const toggleGi = (next: boolean) => {
+    setGiOnly(next);
+    if (next) setNonGiOnly(false);
+  };
+  const toggleNonGi = (next: boolean) => {
+    setNonGiOnly(next);
+    if (next) setGiOnly(false);
+  };
 
   const filtered = useMemo(
     () =>
@@ -19,9 +30,10 @@ export default function CatalogClient() {
         if (state !== "All" && p.state !== state) return false;
         if (category !== "All" && p.category !== category) return false;
         if (giOnly && !p.gi) return false;
+        if (nonGiOnly && p.gi) return false;
         return true;
       }),
-    [state, category, giOnly]
+    [state, category, giOnly, nonGiOnly]
   );
 
   return (
@@ -88,27 +100,25 @@ export default function CatalogClient() {
           </ul>
         </div>
 
-        <label className="flex items-center gap-3 cursor-pointer select-none">
-          <span
-            className={`relative inline-block h-5 w-9 rounded-full transition-colors ${
-              giOnly ? "bg-(--color-gold)" : "bg-(--color-bamboo)/30"
-            }`}
-            aria-hidden="true"
-          >
-            <span
-              className={`absolute top-0.5 h-4 w-4 rounded-full bg-(--color-ivory) shadow transition-transform ${
-                giOnly ? "translate-x-4" : "translate-x-0.5"
-              }`}
-            />
-          </span>
-          <input
-            type="checkbox"
-            checked={giOnly}
-            onChange={(e) => setGiOnly(e.target.checked)}
-            className="sr-only"
-          />
-          <span className="text-[15px] text-(--color-ink)/85">GI-tagged only</span>
-        </label>
+        <div>
+          <p className="eyebrow">Tag</p>
+          <ul className="mt-4 space-y-3">
+            <li>
+              <FilterToggle
+                label="GI-tagged only"
+                active={giOnly}
+                onChange={toggleGi}
+              />
+            </li>
+            <li>
+              <FilterToggle
+                label="Non-GI only"
+                active={nonGiOnly}
+                onChange={toggleNonGi}
+              />
+            </li>
+          </ul>
+        </div>
       </aside>
 
       {/* ============ RESULTS GRID ============ */}
@@ -117,13 +127,14 @@ export default function CatalogClient() {
           <p className="text-(--color-ink)/60 text-sm uppercase tracking-[0.2em]">
             {filtered.length} {filtered.length === 1 ? "origin" : "origins"}
           </p>
-          {(state !== "All" || category !== "All" || giOnly) && (
+          {(state !== "All" || category !== "All" || giOnly || nonGiOnly) && (
             <button
               type="button"
               onClick={() => {
                 setState("All");
                 setCategory("All");
                 setGiOnly(false);
+                setNonGiOnly(false);
               }}
               className="text-(--color-gold-dark) hover:text-(--color-gold) text-sm uppercase tracking-[0.2em]"
             >
@@ -178,5 +189,39 @@ export default function CatalogClient() {
         )}
       </div>
     </div>
+  );
+}
+
+function FilterToggle({
+  label,
+  active,
+  onChange,
+}: {
+  label: string;
+  active: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center gap-3 cursor-pointer select-none">
+      <span
+        className={`relative inline-block h-5 w-9 rounded-full transition-colors ${
+          active ? "bg-(--color-gold)" : "bg-(--color-bamboo)/30"
+        }`}
+        aria-hidden="true"
+      >
+        <span
+          className={`absolute top-0.5 h-4 w-4 rounded-full bg-(--color-ivory) shadow transition-transform ${
+            active ? "translate-x-4" : "translate-x-0.5"
+          }`}
+        />
+      </span>
+      <input
+        type="checkbox"
+        checked={active}
+        onChange={(e) => onChange(e.target.checked)}
+        className="sr-only"
+      />
+      <span className="text-[15px] text-(--color-ink)/85">{label}</span>
+    </label>
   );
 }

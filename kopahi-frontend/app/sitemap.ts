@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
-import { PRODUCTS, JOURNAL } from "./lib/marketing";
+import { PRODUCTS } from "./lib/marketing";
+import { JOURNAL } from "./lib/journal";
 
 const SITE = "https://kopahi.com";
 
@@ -29,7 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const journalRoutes = JOURNAL.map((p) => ({
     url: `${SITE}/journal/${p.slug}`,
-    lastModified: new Date(p.date),
+    lastModified: new Date(p.publishedAt),
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
