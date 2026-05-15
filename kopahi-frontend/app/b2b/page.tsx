@@ -26,19 +26,19 @@ const REASONS = [
     n: "01",
     title: "Direct from verified farmers",
     body: "Every batch is traceable to its origin farm — name, village, season.",
-    image: "/products/directfromfarmers.webp",
+    image: "/products/directfromfarmers2.webp",
   },
   {
     n: "02",
     title: "GI-tagged & premium regional catalogue",
     body: "Authenticated North East produce, including Assam Tea, Lakadong Turmeric, Bhut Jolokia.",
-    image: "/products/gitagged.webp",
+    image: "/products/gitaggedandpremium.webp",
   },
   {
     n: "03",
     title: "Custom bulk pricing",
     body: "Volume-based tiers with annual contract discounts.",
-    image: "/products/bulk.jpg",
+    image: "/products/custombulkpricing.webp",
   },
   {
     n: "04",
@@ -62,9 +62,9 @@ const STEPS = [
 ];
 
 const INDUSTRIES = [
-  { title: "HoReCa & Restaurants", image: "/products/assam-tea.jpg", body: "Curated origin selections, consistent supply." },
-  { title: "Modern Retail", image: "/products/lakadong-turmeric.jpg", body: "Retail-ready packaging, private-label options." },
-  { title: "Export & Global Trade", image: "/products/muga-silk-thread.jpg", body: "FSSAI-compliant, export-documented, lab-tested." },
+  { title: "HoReCa & Restaurants", image: "/products/HoReCa.webp", body: "Curated origin selections, consistent supply." },
+  { title: "Modern Retail", image: "/products/ModernRetail.webp", body: "Retail-ready packaging, private-label options." },
+  { title: "Export & Global Trade", image: "/products/Export&GlobalTrade.webp", body: "FSSAI-compliant, export-documented, lab-tested." },
 ];
 
 const PARTNERS = [
