@@ -12,12 +12,13 @@ export default function StatCallout({
   const labelClass =
     tone === "ivory" ? "text-(--color-ivory)/70" : "text-(--color-ink)/60";
   return (
-    <div className="flex flex-col items-start gap-3">
-      <span className={`font-display font-light leading-none text-[clamp(3rem,8vw,6rem)] ${numberClass}`}>
+    <div className="flex flex-col items-start gap-2">
+      {/* v7 density — number caps at 4rem (~64px), down from 6rem (~96px). */}
+      <span className={`font-display font-light leading-none text-[clamp(2.5rem,4.2vw,4rem)] ${numberClass}`}>
         {value}
       </span>
-      <span className="h-px w-12 bg-(--color-gold)" aria-hidden="true" />
-      <span className={`text-sm sm:text-base leading-snug max-w-[18ch] ${labelClass}`}>{label}</span>
+      <span className="h-px w-8 bg-(--color-gold)" aria-hidden="true" />
+      <span className={`text-[0.8125rem] leading-snug max-w-[14ch] uppercase tracking-[0.18em] ${labelClass}`}>{label}</span>
     </div>
   );
 }

@@ -134,45 +134,44 @@ export default function MarketingHeader() {
           : "bg-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 h-20 flex items-center justify-between gap-4">
-        <Link href="/" aria-label="Kopahi home" className="flex items-center gap-3">
-          <div className="relative h-10 w-10 sm:h-12 sm:w-12">
-            <Image src="/Logo1.png" alt="" fill sizes="48px" className="object-contain" priority />
+      <div className={`mx-auto max-w-shell px-5 lg:px-8 flex items-center justify-between gap-4 transition-all duration-300 ${scrolled ? "h-16" : "h-16 lg:h-20"}`}>
+        <Link href="/" aria-label="Kopahi home" className="flex items-center gap-2.5">
+          <div className="relative h-11 w-11 sm:h-13 sm:w-13">
+            <Image src="/Logo1.png" alt="" fill sizes="52px" className="object-contain" priority />
           </div>
           <span
-            className={`font-display text-xl sm:text-2xl tracking-tight transition-colors ${
+            className={`font-display text-[1.25rem] lg:text-[1.5rem] leading-none tracking-tight transition-colors ${
               scrolled ? "text-(--color-moss)" : "text-(--color-ivory)"
             }`}
           >
-            Kopahi
-            <span className="text-(--color-gold)">.</span>
+            Kopahi<span className="text-(--color-gold)">.</span>
           </span>
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-9" aria-label="Primary">
+        <nav className="hidden lg:flex items-center gap-7" aria-label="Primary">
           {NAV.map((n) => (
             <Link
               key={n.href}
               href={n.href}
-              className={`relative text-[13px] uppercase tracking-[0.22em] font-medium transition-colors group ${navColor}`}
+              className={`relative font-body text-[0.8125rem] font-medium tracking-wide transition-colors group ${navColor}`}
             >
               {n.label}
-              <span className="absolute left-0 -bottom-1.5 h-px w-0 bg-(--color-gold) transition-all duration-500 group-hover:w-full" />
+              <span className="absolute left-1/2 -translate-x-1/2 -bottom-1 h-px w-0 bg-(--color-gold) transition-all duration-300 group-hover:w-full" />
             </Link>
           ))}
         </nav>
 
-        <div className="hidden lg:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-2.5">
           <Link
             href="/cart"
             aria-label={`Cart${count ? `, ${count} items` : ""}`}
-            className={`relative inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors ${
+            className={`relative inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
               scrolled
                 ? "border-(--color-bamboo)/30 text-(--color-moss) hover:border-(--color-gold)"
                 : "border-(--color-ivory)/40 text-(--color-ivory) hover:border-(--color-gold)"
             }`}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
                 d="M3 4h2l2.5 11h11L21 7H7"
                 stroke="currentColor"
@@ -184,7 +183,7 @@ export default function MarketingHeader() {
               <circle cx="17" cy="20" r="1.4" fill="currentColor" />
             </svg>
             {count > 0 && (
-              <span className="absolute -top-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-gold) text-(--color-moss-dark) text-[10px] font-medium px-1.5">
+              <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-gold) text-(--color-moss-dark) text-[10px] font-medium px-1">
                 {count}
               </span>
             )}
@@ -194,7 +193,7 @@ export default function MarketingHeader() {
             <>
               <Link
                 href="/dashboard"
-                className="text-[13px] uppercase tracking-[0.22em] font-medium px-5 py-2.5 rounded-sm bg-(--color-gold) text-(--color-moss-dark) hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+                className="text-[0.8125rem] font-medium px-3.5 py-1.5 rounded-sm bg-(--color-gold) text-(--color-moss-dark) hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
               >
                 Dashboard
               </Link>
@@ -207,15 +206,15 @@ export default function MarketingHeader() {
             </>
           ) : (
             <>
-              <Link href="/login" className={`text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-2 transition-colors ${navColor}`}>
+              <Link href="/login" className={`text-[0.8125rem] font-medium px-3 py-1.5 transition-colors ${navColor}`}>
                 Login
               </Link>
-              <Link href="/signup" className={`text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-2 transition-colors ${navColor}`}>
+              <Link href="/signup" className={`text-[0.8125rem] font-medium px-3 py-1.5 transition-colors ${navColor}`}>
                 Sign up
               </Link>
               <Link
                 href="/products"
-                className="text-[13px] uppercase tracking-[0.22em] font-medium px-5 py-2.5 rounded-sm bg-(--color-gold) text-(--color-moss-dark) hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+                className="text-[0.8125rem] font-medium px-3.5 py-1.5 rounded-sm bg-(--color-gold) text-(--color-moss-dark) hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
               >
                 Shop →
               </Link>
@@ -228,7 +227,7 @@ export default function MarketingHeader() {
           aria-label="Toggle navigation"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className={`lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-sm border ${
+          className={`lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-sm border ${
             scrolled ? "border-(--color-bamboo)/30 text-(--color-ink)" : "border-(--color-ivory)/40 text-(--color-ivory)"
           }`}
         >

@@ -46,7 +46,7 @@ export default function JournalPage() {
 
         {/* HERO */}
         <section className="pt-32 sm:pt-40 pb-12">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-shell px-5 lg:px-8">
             <Eyebrow>→ The Journal</Eyebrow>
             <Headline as="h1" className="mt-6 max-w-5xl" accent="Letters From The Field.">
               Slow Writing.

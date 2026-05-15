@@ -81,7 +81,7 @@ export default function AboutPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-b from-(--color-ivory) via-(--color-ivory)/85 to-(--color-ivory)" />
           </div>
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-shell px-5 lg:px-8">
             <Eyebrow>About Kopahi</Eyebrow>
             <Headline as="h1" className="mt-6 max-w-4xl" accent="Reaching For The World.">
               Rooted In Seven States.

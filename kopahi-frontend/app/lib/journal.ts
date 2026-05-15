@@ -589,7 +589,7 @@ export const JOURNAL: JournalEssay[] = [
     author: "Trideep Khanikar",
     authorRole: "Director · Operations",
     publishedAt: "2026-03-30",
-    coverImage: "/products/assamese.jpg",
+    coverImage: "/products/asaamesefarm.webp",
     readingMinutes: 5,
     inlineFarmerSlugs: ["rina-borah"],
     inlineProductSlugs: ["kopahi-tea-range"],
