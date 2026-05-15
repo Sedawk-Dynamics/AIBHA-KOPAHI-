@@ -210,7 +210,7 @@ export default function Home() {
            ============================================================ */}
         <section className="relative min-h-[100svh] flex items-end pb-24 sm:pb-32 overflow-hidden">
           <HeroVideo />
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="relative z-10 mx-auto w-full max-w-shell px-5 lg:px-8">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 28 }}
               animate={reduce ? undefined : { opacity: 1, y: 0 }}
@@ -433,7 +433,7 @@ export default function Home() {
             05 · FEATURED PRODUCTS — horizontal scroll
            ============================================================ */}
         <Section tone="ivory" padded={false} className="py-24 sm:py-28">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-shell px-5 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
               <div className="max-w-2xl">
                 <Eyebrow>Featured Origins</Eyebrow>

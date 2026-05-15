@@ -106,7 +106,7 @@ export default function B2BPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-b from-(--color-moss) via-(--color-moss)/85 to-(--color-moss)" />
           </div>
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-shell px-5 lg:px-8">
             <Eyebrow tone="gold">→ Wholesale & Business</Eyebrow>
             <Headline as="h1" tone="ivory" className="mt-6 max-w-4xl" accent="B2B Partnerships">
               Bulk Orders &amp;
@@ -154,7 +154,7 @@ export default function B2BPage() {
 
         {/* ============== 2 · TRUST STRIP ============== */}
         <div className="bg-(--color-moss-dark) text-(--color-ivory)/80 border-t border-(--color-gold)/20">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 py-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          <div className="mx-auto max-w-shell px-5 lg:px-8 py-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
             {["FSSAI Certified", "GI-Tagged Catalogue", "Pan-India Logistics", "Export Ready"].map((chip, i, arr) => (
               <span key={chip} className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.22em]">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-(--color-gold)">
@@ -272,7 +272,7 @@ export default function B2BPage() {
 
         {/* ============== 7 · TRUSTED BY ============== */}
         <section className="bg-(--color-ivory) py-16 sm:py-20">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 mb-10 text-center">
+          <div className="mx-auto max-w-shell px-5 lg:px-8 mb-10 text-center">
             <Eyebrow>→ Trusted by buyers across India &amp; beyond</Eyebrow>
           </div>
           <Marquee items={PARTNERS} />

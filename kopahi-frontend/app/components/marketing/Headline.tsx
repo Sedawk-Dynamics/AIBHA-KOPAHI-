@@ -35,12 +35,15 @@ export default function Headline({
   const accentWords = splitWords(accent);
 
   const baseColor = tone === "ivory" ? "text-(--color-ivory)" : "text-(--color-ink)";
+  // v7 density patch — tighter clamp values. Display caps at 4.75rem (~76px),
+  // h1 at 3.25rem (~52px), h2 at 2.25rem (~36px). Mobile floors lowered so
+  // hero headlines no longer wrap awkwardly at 375px.
   const size =
     as === "h1"
-      ? "text-[clamp(3rem,8vw,7rem)] leading-[0.95]"
+      ? "text-[clamp(2.25rem,5.2vw,4.75rem)] leading-[1.05]"
       : as === "h2"
-      ? "text-[clamp(2.25rem,5.5vw,4.5rem)] leading-[1.02]"
-      : "text-[clamp(1.5rem,3vw,2.5rem)] leading-tight";
+      ? "text-[clamp(1.75rem,3.6vw,3.25rem)] leading-[1.08]"
+      : "text-[clamp(1.375rem,2.4vw,2.25rem)] leading-[1.15]";
 
   const renderWords = (arr: string[], italic = false) =>
     arr.map((w, i) =>
