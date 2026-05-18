@@ -388,7 +388,7 @@ export default function Home() {
           <figure className="mt-14 relative w-full max-w-6xl mx-auto">
             <div className="relative w-full aspect-[3/2] overflow-hidden rounded-sm bg-(--color-ivory-warm)">
               <Image
-                src="/products/sevensisters.jpeg"
+                src="/products/mapsimage.webp"
                 alt="Kopahi's ingredient sourcing network — eight origins mapped across Assam and the seven sister states of Northeast India"
                 fill
                 sizes="(max-width: 1024px) 100vw, 1152px"
