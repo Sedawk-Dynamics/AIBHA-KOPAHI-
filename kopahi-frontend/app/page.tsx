@@ -313,7 +313,7 @@ export default function Home() {
             <div className="lg:col-span-5">
               <div className="relative aspect-[4/5] overflow-hidden rounded-sm">
                 <Image
-                  src="/products/story.jpeg"
+                  src="/products/story.webp"
                   alt="Hands of a Muga silk weaver in Sualkuchi"
                   fill
                   sizes="(max-width:1024px) 100vw, 40vw"
