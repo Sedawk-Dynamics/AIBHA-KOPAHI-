@@ -57,7 +57,7 @@ export const JOURNAL: JournalEssay[] = [
     slug: "bireswar-and-the-keteki-seedbank",
     title: "Bireswar and the Keteki seedbank",
     titleAccent: "Keteki seedbank",
-    dek: "In a four-acre paddy at Karbi Anglong, a farmer's grandfather's notebook is doing what no government scheme has managed.",
+    dek: "In a four-acre paddy at Karbi Anglong, a farmer's grandfather's notebook has quietly preserved a landrace the wider seed market had let cross away.",
     category: "Farmer Profiles",
     author: "Ashreeta Gogoi",
     authorRole: "Founder · Field & Cooperatives",
@@ -148,7 +148,7 @@ export const JOURNAL: JournalEssay[] = [
     inlineFarmerSlugs: ["khrieliezo-dawhuo"],
     inlineProductSlugs: [
       "gi-naga-chilli-bhoot-jolokia-powder",
-      "kopahi-bhoot-jolokia-jam",
+      "kopahi-bhoot-jolokia-paste",
     ],
     body: [
       {
@@ -194,7 +194,7 @@ export const JOURNAL: JournalEssay[] = [
       },
       {
         type: "productInset",
-        slug: "kopahi-bhoot-jolokia-jam",
+        slug: "kopahi-bhoot-jolokia-paste",
         note: "made in Jorhat with Khonoma chillies",
       },
       { type: "divider" },
@@ -314,7 +314,7 @@ export const JOURNAL: JournalEssay[] = [
     author: "Kopahi Kitchens",
     authorRole: "The Kopahi kitchen",
     publishedAt: "2026-01-18",
-    coverImage: "/products/ketekirice.webp",
+    coverImage: "/products/kharwithjora.webp",
     readingMinutes: 4,
     inlineProductSlugs: [
       "gi-keteki-joha-rice",
@@ -402,7 +402,7 @@ export const JOURNAL: JournalEssay[] = [
     publishedAt: "2025-12-22",
     coverImage: "/products/ghostjam.webp",
     readingMinutes: 4,
-    inlineProductSlugs: ["kopahi-bhoot-jolokia-jam"],
+    inlineProductSlugs: ["kopahi-bhoot-jolokia-paste"],
     body: [
       {
         type: "paragraph",
@@ -440,7 +440,7 @@ export const JOURNAL: JournalEssay[] = [
       },
       {
         type: "productInset",
-        slug: "kopahi-bhoot-jolokia-jam",
+        slug: "kopahi-bhoot-jolokia-paste",
         note: "made in Jorhat with chillies from Kohima",
       },
       { type: "divider" },

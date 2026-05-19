@@ -237,40 +237,67 @@ export const PRODUCTS: Product[] = [
     hsnCode: "0910",
     gstRate: 5,
   },
+
   {
-    slug: "gi-naga-chilli-bhoot-jolokia-powder",
-    name: "GI Naga Chilli (Bhoot Jolokia) Powder",
-    origin: "Kohima, Nagaland",
-    state: "Nagaland",
-    district: "Kohima",
-    village: "Khonoma cluster",
-    category: "Spices",
-    subcategory: "Chilli",
-    gi: true,
-    giYear: 2008,
-    giIdentifier: "GI-110",
-    image: "/products/bhootjholokiajam.jpeg",
-    shortDesc:
-      "One of the world's hottest chillies — deep smoky heat that builds before it bites. Use sparingly; respect always.",
-    longDesc:
-      "Sourced from the hills of Northeast India, this GI-certified Naga Chilli (Bhoot Jolokia) is one of the world's hottest chillies. Carefully sun-dried and finely ground, it delivers intense heat, deep flavour and authentic origin purity.",
-    story:
-      "Bhoot Jolokia translates to \"ghost chilli\" — and the name is a warning. At over one million Scoville units, a single pod can perfume an entire dish. Our partner farmer Khrieliezo Dawhuo grows it on terraced plots above 1,200 metres outside Kohima. He pickles, smokes, and sun-dries each batch the way his grandmother taught him. Open the pack with the windows open. A pinch is plenty. The first hit is smoky, almost sweet. Then it arrives.",
-    notes: ["Curries & Gravies", "Marinades & Rubs", "Sauces & Dips", "Spice Blends"],
-    tags: ["GI-Tagged", "Nagaland", "Extreme Heat", "Sun-Dried", "Heritage"],
-    warningLabel: "HEAT LEVEL: EXTREME · Handle with care.",
-    farmerSlug: "khrieliezo-dawhuo",
-    farmerName: "Khrieliezo Dawhuo",
-    sourcingMethod: "Direct",
-    mrp: 499,
-    sellingPrice: 399,
-    stock: 60,
-    unit: "g",
-    netWeight: "200 g",
-    sku: "KOP-SPC-BHUT-200G",
-    hsnCode: "0904",
-    gstRate: 5,
-  },
+  slug: "gi-naga-chilli-bhoot-jolokia-paste",
+  name: "GI Naga Chilli (Bhoot Jolokia) Paste",
+  origin: "Kohima, Nagaland",
+  state: "Nagaland",
+  district: "Kohima",
+  village: "Khonoma cluster",
+
+  category: "Specialty",
+  subcategory: "Chilli Paste",
+
+  gi: true,
+  giYear: 2008,
+  giIdentifier: "GI-110",
+
+  image: "/products/BHOOTJOLOKIAPASTE.webp",
+
+  shortDesc:
+    "One of the world's hottest chillies transformed into a smoky, savoury paste with slow-building heat.",
+
+  longDesc:
+    "Made using GI-certified Naga Chilli (Bhoot Jolokia) sourced from the hills of Northeast India, this small-batch paste delivers intense heat balanced by smokiness, natural sweetness and deep savoury flavour. Carefully blended to preserve the chilli's authentic regional character.",
+
+  story:
+    "Bhoot Jolokia translates to \"ghost chilli\" — and the name is earned. Grown on terraced plots above 1,200 metres outside Kohima, these chillies come from farmer Khrieliezo Dawhuo, who still follows traditional cultivation methods passed down through generations. The chillies are slowly sun-dried, then blended into a rich paste that captures both their smoky aroma and creeping heat. The flavour arrives first — earthy, savoury, almost fruity — then the fire follows.",
+
+  notes: [
+    "Curries & Gravies",
+    "Marinades & Rubs",
+    "Rice & Khichdi",
+    "Sauces & Dips"
+  ],
+
+  tags: [
+    "GI-Tagged",
+    "Nagaland",
+    "Extreme Heat",
+    "Small Batch",
+    "Heritage"
+  ],
+
+  warningLabel:
+    "HEAT LEVEL: EXTREME · Start with a small spoonful and handle with care.",
+
+  farmerSlug: "khrieliezo-dawhuo",
+  farmerName: "Khrieliezo Dawhuo",
+
+  sourcingMethod: "Direct",
+
+  mrp: 499,
+  sellingPrice: 399,
+  stock: 60,
+
+  unit: "g",
+  netWeight: "200 g",
+
+  sku: "KOP-SPC-BHUT-200G",
+  hsnCode: "2103",
+  gstRate: 12,
+},
   {
     slug: "gi-karbi-anglong-ginger-powder",
     name: "GI Karbi Anglong Ginger Powder",
@@ -578,38 +605,72 @@ export const PRODUCTS: Product[] = [
     gstRate: 5,
     nutritionPer100g: { energy: "312 kcal", protein: "19.6g", carbs: "53.1g", fat: "5.1g", fibre: "28.0g" },
   },
+
   {
-    slug: "kopahi-bhoot-jolokia-jam",
-    name: "Bhoot Jolokia Jam",
-    origin: "Jorhat, Assam · chillies from Kohima",
-    state: "Assam",
-    district: "Jorhat",
-    category: "Specialty",
-    subcategory: "Preserves",
-    gi: false,
-    image: "/products/bhootjholokiajam.jpeg",
-    shortDesc:
-      "A slow-cooked preserve made with GI Naga Chilli — smoky, sweet, with a heat that lingers.",
-    longDesc:
-      "Our small-batch preserve marries the GI-tagged Bhoot Jolokia with cane sugar and a whisper of vinegar. The result is a jam that swings between sweet and ferocious — a finishing condiment for cheese boards, grilled meats, and anyone who likes their breakfast toast to wake them up.",
-    story:
-      "A house experiment that escaped the kitchen. We started making this for our own toast and ended up making batches for friends, then friends-of-friends, then the website. The chilli comes from the same GI-certified Naga Chilli supply as our powder — Khrieliezo Dawhuo's terraces above Kohima. Every jar carries his name on the back.",
-    notes: ["Cheese Boards", "Grilled Meats", "Toast & Crackers", "Glazes"],
-    tags: ["Specialty", "Small Batch", "Made with GI Bhoot Jolokia", "Limited Stock"],
-    warningLabel: "Made with one of the world's hottest chillies. A little goes a long way.",
-    farmerSlug: "khrieliezo-dawhuo",
-    farmerName: "Khrieliezo Dawhuo (chilli source)",
-    sourcingMethod: "Direct",
-    mrp: 599,
-    sellingPrice: 449,
-    stock: 40,
-    unit: "g",
-    netWeight: "200 g",
-    sku: "KOP-SPL-BJJM-200G",
-    hsnCode: "2007",
-    gstRate: 12,
-    nutritionPer100g: { energy: "240 kcal", protein: "0.6g", carbs: "58.0g", fat: "0.2g", fibre: "0.9g" },
+  slug: "kopahi-bhoot-jolokia-paste",
+  name: "Bhoot Jolokia Paste",
+  origin: "Jorhat, Assam · chillies from Kohima",
+  state: "Assam",
+  district: "Jorhat",
+
+  category: "Specialty",
+  subcategory: "Chilli Paste",
+
+  gi: false,
+
+  image: "/products/BHOOTJOLOKIAPASTE.webp",
+
+  shortDesc:
+    "A small-batch chilli paste made with GI Naga Chilli — smoky, savoury and dangerously addictive.",
+
+  longDesc:
+    "Made in small batches using GI-tagged Bhoot Jolokia chillies, this savoury paste blends smoky heat with mustard oil, garlic and salt for a deeply flavourful condiment. Stir it into curries, spread it under grilled meats or add a small spoonful to rice and khichdi for a slow-building fire.",
+
+  story:
+    "This paste began as a kitchen staple at our own table — inspired by the fiery chilli condiments found across Northeast India. What started as a homemade batch for friends slowly became one of our most requested jars. The chillies are sourced directly from Khrieliezo Dawhuo's terraced farms outside Kohima, then carefully blended in small batches to preserve both flavour and heat. Smoky, savoury and intensely warming, it is a condiment meant to be used carefully and remembered immediately.",
+
+  notes: [
+    "Stir into curries",
+    "Spread under grilled meats",
+    "Serve with rice & khichdi",
+    "Marinades & dipping sauces"
+  ],
+
+  tags: [
+    "Specialty",
+    "Small Batch",
+    "Made with GI Bhoot Jolokia",
+    "Limited Stock"
+  ],
+
+  warningLabel:
+    "Made with one of the world's hottest chillies. Start with a quarter teaspoon.",
+
+  farmerSlug: "khrieliezo-dawhuo",
+  farmerName: "Khrieliezo Dawhuo (chilli source)",
+
+  sourcingMethod: "Direct",
+
+  mrp: 599,
+  sellingPrice: 449,
+  stock: 40,
+
+  unit: "g",
+  netWeight: "200 g",
+
+  sku: "KOP-SPL-BJPS-200G",
+  hsnCode: "2103",
+  gstRate: 12,
+
+  nutritionPer100g: {
+    energy: "180 kcal",
+    protein: "3.2g",
+    carbs: "8.4g",
+    fat: "14.6g",
+    fibre: "4.1g"
   },
+},
+
 ];
 
 export function getProductBySlug(slug: string): Product | undefined {
