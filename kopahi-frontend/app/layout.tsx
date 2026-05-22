@@ -55,10 +55,8 @@ export const metadata: Metadata = {
     description:
       "GI-certified heritage of Northeast India — farm to story, soil to export.",
   },
-  icons: {
-    icon: "/Logo1.png",
-    apple: "/Logo1.png",
-  },
+  // Favicons are picked up from app/icon.png and app/apple-icon.png — no
+  // explicit `icons` block needed (Next.js auto-injects the link tags).
 };
 
 export default function RootLayout({
