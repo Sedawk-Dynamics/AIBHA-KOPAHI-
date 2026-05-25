@@ -16,6 +16,7 @@ import {
   type JournalEssay,
 } from "../../lib/journal";
 import { getProductBySlug, getFarmerBySlug } from "../../lib/marketing";
+import { SITE, buildMetadata, breadcrumbJsonLd, ldScript } from "../../lib/seo";
 
 export async function generateStaticParams() {
   return JOURNAL.map((p) => ({ slug: p.slug }));
@@ -29,18 +30,15 @@ export async function generateMetadata({
   const { slug } = await params;
   const essay = getEssayBySlug(slug);
   if (!essay) return { title: "Essay not found" };
-  return {
-    title: `${essay.title} · Kopahi Journal`,
-    description: essay.dek.slice(0, 155),
-    openGraph: {
-      title: essay.title,
-      description: essay.dek,
-      images: [essay.coverImage],
-      type: "article",
-      publishedTime: essay.publishedAt,
-      authors: [essay.author],
-    },
-  };
+  return buildMetadata({
+    title: `${essay.title} — Kopahi Journal`,
+    description: essay.dek.slice(0, 155).replace(/\s+\S*$/, ""),
+    path: `/journal/${essay.slug}`,
+    image: essay.coverImage,
+    type: "article",
+    publishedTime: essay.publishedAt,
+    author: essay.author,
+  });
 }
 
 function formatDate(iso: string) {
@@ -68,9 +66,10 @@ function buildArticleJsonLd(essay: JournalEssay) {
   return {
     "@context": "https://schema.org",
     "@type": "Article",
+    "@id": `${SITE}/journal/${essay.slug}#article`,
     headline: essay.title,
     description: essay.dek,
-    image: [`https://kopahi.com${essay.coverImage}`],
+    image: `${SITE}${essay.coverImage}`,
     datePublished: essay.publishedAt,
     dateModified: essay.publishedAt,
     author: {
@@ -78,18 +77,10 @@ function buildArticleJsonLd(essay: JournalEssay) {
       name: essay.author,
       jobTitle: essay.authorRole,
     },
-    publisher: {
-      "@type": "Organization",
-      name: "Kopahi · AIBA AGRI NE LLP",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://kopahi.com/Logo1.png",
-      },
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `https://kopahi.com/journal/${essay.slug}`,
-    },
+    publisher: { "@id": `${SITE}/#organization` },
+    mainEntityOfPage: `${SITE}/journal/${essay.slug}`,
+    articleSection: essay.category,
+    inLanguage: "en-IN",
   };
 }
 
@@ -104,15 +95,20 @@ export default async function JournalArticle({
 
   const related = getRelatedEssays(essay.slug, essay.category, 3, essay.author);
 
+  const articleLd = buildArticleJsonLd(essay);
+  const crumbsLd = breadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Journal", path: "/journal" },
+    { name: essay.title },
+  ]);
+
   return (
     <LenisProvider>
       <MarketingHeader />
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildArticleJsonLd(essay)) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(articleLd)} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
 
         {/* HERO STRIP */}
         <article>

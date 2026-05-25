@@ -10,39 +10,44 @@ import Headline from "../components/marketing/Headline";
 import OrganicDivider from "../components/marketing/OrganicDivider";
 import JournalListing from "./JournalListing";
 import { JOURNAL } from "../lib/journal";
+import { SITE, buildMetadata, breadcrumbJsonLd, ldScript } from "../lib/seo";
 
-export const metadata: Metadata = {
-  title: "The Journal · Slow writing from the field",
+export const metadata: Metadata = buildMetadata({
+  title: "The Journal — Slow Writing from the Field · Kopahi",
   description:
-    "Heritage stories, farmer profiles, recipes and export notes from Kopahi — slow writing about the Northeast we work in.",
-};
+    "Field essays, farmer profiles, recipes and export notes from the Kopahi team in Jorhat, Assam — published when the piece earns its place.",
+  path: "/journal",
+});
 
 export default function JournalPage() {
   const blogLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
     name: "Kopahi Journal",
-    url: "https://kopahi.com/journal",
-    publisher: { "@type": "Organization", name: "Kopahi · AIBA AGRI NE LLP" },
+    url: `${SITE}/journal`,
+    publisher: { "@id": `${SITE}/#organization` },
     blogPost: JOURNAL.map((e) => ({
       "@type": "BlogPosting",
       headline: e.title,
       datePublished: e.publishedAt,
       author: { "@type": "Person", name: e.author },
-      image: `https://kopahi.com${e.coverImage}`,
-      url: `https://kopahi.com/journal/${e.slug}`,
+      image: `${SITE}${e.coverImage}`,
+      url: `${SITE}/journal/${e.slug}`,
     })),
   };
+
+  const crumbsLd = breadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Journal", path: "/journal" },
+  ]);
 
   return (
     <LenisProvider>
       <MarketingHeader />
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(blogLd) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(blogLd)} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
 
         {/* HERO */}
         <section className="pt-32 sm:pt-40 pb-12">

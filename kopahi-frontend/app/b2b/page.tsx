@@ -14,12 +14,50 @@ import OrganicDivider from "../components/marketing/OrganicDivider";
 import StatCallout from "../components/marketing/StatCallout";
 import Marquee from "../components/marketing/Marquee";
 import B2BInquiryForm from "./B2BInquiryForm";
+import { buildMetadata, breadcrumbJsonLd, faqJsonLd, ldScript } from "../lib/seo";
 
-export const metadata: Metadata = {
-  title: "Bulk Orders And B2B Partnerships",
+export const metadata: Metadata = buildMetadata({
+  title: "Bulk Orders & B2B — Northeast India GI Supplier · Kopahi",
   description:
-    "Wholesale, HoReCa and export partnerships for GI-tagged Northeast Indian produce. FSSAI certified, end-to-end logistics, 24-hour quote turnaround.",
-};
+    "FSSAI-certified bulk supply of GI Lakadong turmeric, Assam tea, Naga chilli and 14+ Northeast Indian products. Pan-India logistics, 12 export countries.",
+  path: "/b2b",
+  keywords: [
+    "GI products wholesale",
+    "Lakadong turmeric wholesale",
+    "Assam tea supplier",
+    "Northeast India agri exporter",
+    "FSSAI certified bulk supplier",
+    "Bhut Jolokia wholesale",
+  ],
+});
+
+const B2B_FAQS = [
+  {
+    question: "What is the minimum order quantity for bulk purchases?",
+    answer:
+      "MOQs vary by product. Spice powders and Lakadong typically start at 25 kg per SKU; tea starts at 50 kg; rice and ginger start at 100 kg. We can quote smaller pilot orders for new partners — write to us via the /b2b form.",
+  },
+  {
+    question: "Do you provide FSSAI and export documentation?",
+    answer:
+      "Yes. Every export consignment ships with FSSAI compliance, Certificate of Analysis, phytosanitary documentation (where applicable), and GI authorised-user proof for the five GI-tagged SKUs. Sample COAs available on request.",
+  },
+  {
+    question: "Do you offer private-label or white-label packaging?",
+    answer:
+      "Yes — private-label packaging is available above MOQ thresholds (typically 200 kg / 500 units depending on format). We supply blank, semi-branded or fully custom packaging through our Jorhat processing line.",
+  },
+  {
+    question: "What are your typical lead times for export orders?",
+    answer:
+      "7–10 days for domestic dispatch from confirmed PO; 14–28 days for export consignments depending on destination, documentation and current harvest cycle for the SKU. First-flush tea and fresh-harvest GIs are seasonally constrained.",
+  },
+  {
+    question: "Which countries do you currently export to?",
+    answer:
+      "Active B2B and HoReCa partners in 12 countries across the EU, UK, Middle East, Southeast Asia and Japan. We can quote new geographies on request, subject to import-licence compatibility.",
+  },
+];
 
 const REASONS = [
   {
@@ -88,11 +126,19 @@ const BENEFITS = [
 ];
 
 export default function B2BPage() {
+  const crumbsLd = breadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "B2B", path: "/b2b" },
+  ]);
+  const faqLd = faqJsonLd(B2B_FAQS);
+
   return (
     <LenisProvider>
       <MarketingHeader />
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(faqLd)} />
         {/* ============== 1 · HERO ============== */}
         <section className="relative bg-(--color-moss) text-(--color-ivory) grain pt-32 sm:pt-40 pb-20 sm:pb-28 overflow-hidden">
           <div className="absolute inset-0 -z-10">
@@ -361,6 +407,24 @@ export default function B2BPage() {
                 Schedule A Call
               </a>
             </div>
+          </div>
+        </Section>
+
+        {/* ============== FAQ ============== */}
+        <Section tone="ivory">
+          <div className="mx-auto max-w-3xl">
+            <Eyebrow>→ Frequently Asked</Eyebrow>
+            <Headline as="h2" className="mt-6" accent="Buyers Ask Us.">
+              The Questions
+            </Headline>
+            <dl className="mt-12 divide-y divide-(--color-bamboo)/25 border-y border-(--color-bamboo)/25">
+              {B2B_FAQS.map((q) => (
+                <div key={q.question} className="py-8">
+                  <dt className="font-display text-xl text-(--color-ink)">{q.question}</dt>
+                  <dd className="mt-3 text-(--color-ink)/75 leading-relaxed">{q.answer}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </Section>
 

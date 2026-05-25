@@ -10,12 +10,14 @@ import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
 import OrganicDivider from "../components/marketing/OrganicDivider";
 import ContactForm from "./ContactForm";
+import { buildMetadata } from "../lib/seo";
 
-export const metadata: Metadata = {
-  title: "Contact · Jorhat, Assam",
+export const metadata: Metadata = buildMetadata({
+  title: "Contact Kopahi — Jorhat, Assam",
   description:
-    "Talk to Kopahi about partnership, export, sourcing or stockist inquiries. Based in Jorhat, Assam. We answer within one working day.",
-};
+    "Reach Kopahi for orders, partnerships, exports or vendor signup. Jorhat office, Mon–Sat 9 am–6 pm IST. info@kopahi.com · +91 91810 16660.",
+  path: "/contact",
+});
 
 const CONTACTS = [
   { label: "General", phone: "+91 91810 16660", email: "inquiry@kopahi.com" },

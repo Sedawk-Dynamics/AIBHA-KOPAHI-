@@ -11,12 +11,37 @@ import Headline from "../components/marketing/Headline";
 import OrganicDivider from "../components/marketing/OrganicDivider";
 import FounderCard from "../components/marketing/FounderCard";
 import { TIMELINE, FOUNDERS } from "../lib/marketing";
+import { buildMetadata, breadcrumbJsonLd, faqJsonLd, ldScript } from "../lib/seo";
 
-export const metadata: Metadata = {
-  title: "Our Story · Rooted in Seven States",
+export const metadata: Metadata = buildMetadata({
+  title: "Our Story — Rooted in Seven States · Kopahi",
   description:
-    "Kopahi is an AIBA Agri NE LLP brand sourcing, processing and exporting GI-tagged heritage from across Northeast India. Built in Jorhat, accountable to the field.",
-};
+    "Kopahi is an AIBA Agri NE LLP brand sourcing GI-tagged produce from Assam, Meghalaya, Arunachal, Nagaland, Manipur, Sikkim and Mizoram. Our story.",
+  path: "/about",
+});
+
+const ABOUT_FAQS = [
+  {
+    question: "Who owns Kopahi?",
+    answer:
+      "Kopahi is a brand of AIBA AGRI NE LLP, a Limited Liability Partnership registered in India. The leadership team is Barsha Prakash Choudhury and Ashreeta Gogoi (Founders), Trideep Khanikar (Director, Operations) and Prakash Natarajan (Director, Sales & Marketing).",
+  },
+  {
+    question: "Where is Kopahi based?",
+    answer:
+      "Our principal place of business is Bye Lane 2, Suraj Nagar, NA Ali, Jorhat, Assam — 785001. Sourcing, processing and dispatch run from this office; the farmer network spans all seven Northeast states.",
+  },
+  {
+    question: "Which Northeast states does Kopahi source from?",
+    answer:
+      "We source from Assam, Meghalaya, Arunachal Pradesh, Nagaland, Manipur, Sikkim and Mizoram — the seven sister states. Active partnerships span tea, GI Lakadong turmeric, Keteki Joha rice, Bhoot Jolokia, Karbi Anglong ginger, Tripura Queen pineapple, Muga silk and a curated pantry range.",
+  },
+  {
+    question: "Is Kopahi an exporter?",
+    answer:
+      "Yes. We hold an IEC and currently work with B2B and HoReCa partners across 12 countries. Export-grade documentation (FSSAI, COA, GI authorised-user proof) is provided on request via the /b2b portal.",
+  },
+];
 
 const VALUES = [
   {
@@ -63,11 +88,19 @@ const VALUES = [
 ];
 
 export default function AboutPage() {
+  const crumbsLd = breadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+  ]);
+  const faqLd = faqJsonLd(ABOUT_FAQS);
+
   return (
     <LenisProvider>
       <MarketingHeader />
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(faqLd)} />
         {/* ============== HERO ============== */}
         <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 overflow-hidden">
           <div className="absolute inset-0 -z-10">
@@ -177,6 +210,25 @@ export default function AboutPage() {
             {FOUNDERS.map((f) => (
               <FounderCard key={f.name} {...f} />
             ))}
+          </div>
+        </Section>
+
+        <OrganicDivider />
+
+        <Section tone="ivory">
+          <div className="mx-auto max-w-3xl">
+            <Eyebrow>→ Frequently Asked</Eyebrow>
+            <Headline as="h2" className="mt-6" accent="About Kopahi.">
+              The Questions, Answered.
+            </Headline>
+            <dl className="mt-12 divide-y divide-(--color-bamboo)/25 border-y border-(--color-bamboo)/25">
+              {ABOUT_FAQS.map((q) => (
+                <div key={q.question} className="py-8">
+                  <dt className="font-display text-xl text-(--color-ink)">{q.question}</dt>
+                  <dd className="mt-3 text-(--color-ink)/75 leading-relaxed">{q.answer}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </Section>
 

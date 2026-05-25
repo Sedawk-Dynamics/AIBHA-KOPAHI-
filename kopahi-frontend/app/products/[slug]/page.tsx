@@ -16,6 +16,13 @@ import {
   type Product,
 } from "../../lib/marketing";
 import { getEssaysByProductSlug } from "../../lib/journal";
+import {
+  SITE,
+  buildMetadata,
+  breadcrumbJsonLd,
+  faqJsonLd,
+  ldScript,
+} from "../../lib/seo";
 
 export async function generateStaticParams() {
   return PRODUCTS.map((p) => ({ slug: p.slug }));
@@ -29,15 +36,15 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = getProductBySlug(slug);
   if (!product) return { title: "Origin not found" };
-  return {
-    title: `${product.name} · ${product.origin}`,
-    description: (product.shortDesc || product.story).slice(0, 160).replace(/\s+\S*$/, "") + "…",
-    openGraph: {
-      title: `${product.name} · Kopahi`,
-      description: product.shortDesc || product.story.slice(0, 200),
-      images: [product.image],
-    },
-  };
+  const giSegment = product.gi ? " · GI-Tagged" : "";
+  const title = `${product.name} — ${product.origin}${giSegment} · Kopahi`;
+  const desc = (product.shortDesc || product.story).slice(0, 155).replace(/\s+\S*$/, "");
+  return buildMetadata({
+    title,
+    description: desc,
+    path: `/products/${product.slug}`,
+    image: product.image,
+  });
 }
 
 function inr(n: number) {
@@ -73,33 +80,87 @@ function getRelated(current: Product): Product[] {
   return dedup;
 }
 
-function buildJsonLd(product: Product) {
-  const url = `https://kopahi.com/products/${product.slug}`;
+function buildProductJsonLd(product: Product) {
+  const url = `${SITE}/products/${product.slug}`;
   const offers: Record<string, unknown> = {
     "@type": "Offer",
     url,
     priceCurrency: "INR",
     price: product.sellingPrice ?? 0,
-    availability: (product.stock ?? 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    availability:
+      (product.stock ?? 0) > 0
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+    priceValidUntil: "2026-12-31",
+    seller: { "@id": `${SITE}/#organization` },
+    shippingDetails: {
+      "@type": "OfferShippingDetails",
+      shippingRate: { "@type": "MonetaryAmount", value: 0, currency: "INR" },
+      shippingDestination: { "@type": "DefinedRegion", addressCountry: "IN" },
+    },
+    hasMerchantReturnPolicy: {
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "IN",
+      returnPolicyCategory:
+        "https://schema.org/MerchantReturnFiniteReturnWindow",
+      merchantReturnDays: 7,
+    },
   };
   const ld: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
+    "@id": `${url}#product`,
     name: product.name,
-    image: [`https://kopahi.com${product.image}`],
+    image: [`${SITE}${product.image}`],
     description: product.shortDesc,
     sku: product.sku,
+    category: product.category,
     brand: { "@type": "Brand", name: "Kopahi" },
     offers,
   };
   if (product.gi && product.giIdentifier && product.giYear) {
-    ld.additionalProperty = {
-      "@type": "PropertyValue",
-      name: "Geographical Indication",
-      value: `${product.giIdentifier} · ${product.giYear}`,
-    };
+    ld.additionalProperty = [
+      {
+        "@type": "PropertyValue",
+        name: "Geographical Indication",
+        value: `GI Tag · ${product.giIdentifier} · ${product.giYear}`,
+        propertyID: "https://en.wikipedia.org/wiki/Geographical_indication",
+      },
+      {
+        "@type": "PropertyValue",
+        name: "Origin Region",
+        value: `${product.village || product.district}, ${product.state}`,
+      },
+    ];
   }
   return ld;
+}
+
+function buildProductFaqs(product: Product) {
+  const items: { question: string; answer: string }[] = [];
+  if (product.gi) {
+    items.push({
+      question: `Why is ${product.name} different from regular ${product.category.toLowerCase()}?`,
+      answer: `${product.name} carries a Geographical Indication tied to ${product.village || product.district}, ${product.state}. The terroir — soil, altitude, climate — is what the GI protects. ${product.shortDesc}`,
+    });
+    items.push({
+      question: `Is Kopahi an authorised user of the ${product.giIdentifier || "GI"}?`,
+      answer:
+        "Yes. Kopahi sources only from registered authorised users inside the gazetted region. The GI registration year and identifier are published on this page; batch certification is available on request for B2B buyers.",
+    });
+  } else {
+    items.push({
+      question: `Where is Kopahi's ${product.name} sourced from?`,
+      answer: `Kopahi's ${product.name} is sourced from ${product.village || product.district}, ${product.state}. ${product.shortDesc}`,
+    });
+  }
+  if (product.farmerName) {
+    items.push({
+      question: `Who grew this batch?`,
+      answer: `This batch was grown by ${product.farmerName} as part of Kopahi's farmer-first sourcing programme. You can read the farmer's story on the linked profile.`,
+    });
+  }
+  return items;
 }
 
 export default async function ProductDetailPage({
@@ -123,16 +184,26 @@ export default async function ProductDetailPage({
     ? { href: "/products/gi-tagged", label: "GI-Tagged" }
     : { href: "/products/non-gi-tagged", label: "Non-GI Products" };
 
+  const productLd = buildProductJsonLd(product);
+  const crumbsLd = breadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Products", path: "/products" },
+    { name: breadcrumbParent.label, path: breadcrumbParent.href },
+    { name: product.name },
+  ]);
+  const productFaqs = buildProductFaqs(product);
+  const faqLd = productFaqs.length ? faqJsonLd(productFaqs) : null;
+
   return (
     <LenisProvider>
       <MarketingHeader />
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
-        {/* Structured data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(product)) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(productLd)} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
+        {faqLd && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(faqLd)} />
+        )}
 
         <div className="pt-28 sm:pt-32">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
@@ -142,7 +213,7 @@ export default async function ProductDetailPage({
                 <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-(--color-ivory-warm)">
                   <Image
                     src={product.image}
-                    alt={product.name}
+                    alt={`${product.name} — ${product.gi ? "GI-tagged · " : ""}${product.origin}`}
                     fill
                     priority
                     sizes="(max-width: 1024px) 100vw, 50vw"
@@ -320,7 +391,13 @@ export default async function ProductDetailPage({
                   <div className="mt-5 flex items-start gap-5">
                     <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden bg-(--color-ivory-warm) shrink-0">
                       {farmer.image && (
-                        <Image src={farmer.image} alt={farmer.name} fill sizes="96px" className="object-cover" />
+                        <Image
+                          src={farmer.image}
+                          alt={`${farmer.name}, ${product.category.toLowerCase()} grower in ${farmer.village}, ${farmer.state}`}
+                          fill
+                          sizes="96px"
+                          className="object-cover"
+                        />
                       )}
                     </div>
                     <div>
@@ -354,6 +431,26 @@ export default async function ProductDetailPage({
           </div>
         </div>
 
+        {/* ============ FREQUENTLY ASKED ============ */}
+        {productFaqs.length > 0 && (
+          <section className="mt-32">
+            <div className="mx-auto max-w-3xl px-6 sm:px-8 lg:px-12">
+              <Eyebrow>→ Frequently Asked</Eyebrow>
+              <h2 className="font-display font-light text-3xl sm:text-4xl mt-4 text-(--color-ink)">
+                About this <span className="accent-italic">origin</span>.
+              </h2>
+              <dl className="mt-10 divide-y divide-(--color-bamboo)/25 border-y border-(--color-bamboo)/25">
+                {productFaqs.map((q) => (
+                  <div key={q.question} className="py-7">
+                    <dt className="font-display text-lg text-(--color-ink)">{q.question}</dt>
+                    <dd className="mt-3 text-(--color-ink)/75 leading-relaxed">{q.answer}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </section>
+        )}
+
         {/* ============ RELATED ============ */}
         {related.length > 0 && (
           <section className="mt-32 pb-28">
@@ -368,7 +465,7 @@ export default async function ProductDetailPage({
                     <div className="relative aspect-square overflow-hidden rounded-sm bg-(--color-ivory-warm)">
                       <Image
                         src={p.image}
-                        alt={p.name}
+                        alt={`${p.name} — ${p.origin}`}
                         fill
                         sizes="(max-width: 1024px) 50vw, 33vw"
                         className="object-cover transition-transform duration-[1.4s] ease-out group-hover:scale-[1.05]"

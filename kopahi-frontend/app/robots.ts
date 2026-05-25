@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-
-const SITE = "https://kopahi.com";
+import { SITE } from "./lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,7 +7,19 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/dashboard/", "/admin/"],
+        disallow: [
+          "/api/",
+          "/dashboard/",
+          "/admin/",
+          "/checkout/",
+          "/cart",
+          "/login",
+          "/signup",
+          "/forgot-password",
+          "/reset-password",
+          "/verify-email",
+          "/_next/",
+        ],
       },
     ],
     sitemap: `${SITE}/sitemap.xml`,

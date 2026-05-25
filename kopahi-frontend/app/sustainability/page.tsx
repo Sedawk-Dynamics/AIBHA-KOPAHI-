@@ -8,12 +8,14 @@ import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
 import OrganicDivider from "../components/marketing/OrganicDivider";
+import { buildMetadata } from "../lib/seo";
 
-export const metadata: Metadata = {
-  title: "Impact · A way of life, protected",
+export const metadata: Metadata = buildMetadata({
+  title: "Impact — A Way of Life, Protected · Kopahi",
   description:
     "Kopahi's farmer-first model: fair income, reduced post-harvest loss, GI formalisation and capacity building across Northeast India.",
-};
+  path: "/sustainability",
+});
 
 const PILLARS = [
   {
