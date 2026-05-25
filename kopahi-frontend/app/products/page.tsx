@@ -9,12 +9,14 @@ import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
 import OrganicDivider from "../components/marketing/OrganicDivider";
 import CatalogClient from "./CatalogClient";
+import { buildMetadata } from "../lib/seo";
 
-export const metadata: Metadata = {
-  title: "Origins · GI-tagged catalog",
+export const metadata: Metadata = buildMetadata({
+  title: "Shop Authentic Northeast Indian Produce · Kopahi",
   description:
-    "Browse Kopahi's catalog of GI-tagged tea, spices, silk, rice, beverages and craft from across the seven sister states of Northeast India.",
-};
+    "Buy GI-tagged Lakadong turmeric, Keteki Joha rice, Bhoot Jolokia, Assam tea and more — sourced direct from Northeast India farmers. FSSAI certified.",
+  path: "/products",
+});
 
 export default function ProductsPage() {
   return (

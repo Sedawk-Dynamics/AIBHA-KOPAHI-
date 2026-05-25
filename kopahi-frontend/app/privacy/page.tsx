@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import LegalShell, { LegalList, LegalQuote, type LegalSection } from "../components/marketing/LegalShell";
+import { buildMetadata } from "../lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Notice",
+export const metadata: Metadata = buildMetadata({
+  title: "Privacy Notice · Kopahi",
   description:
     "How Kopahi (AIBA AGRI NE LLP) collects, uses and protects your information when you shop or partner with us.",
-};
+  path: "/privacy",
+});
 
 const LAST_UPDATED = "April 2026";
 

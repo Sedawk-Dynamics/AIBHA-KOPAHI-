@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "./providers";
 import CookieBanner from "./components/marketing/CookieBanner";
 import CartDrawer from "./components/marketing/CartDrawer";
+import { SITE, organizationJsonLd, ldScript } from "./lib/seo";
 
 const fraunces = Fraunces({
   variable: "--font-display",
@@ -22,15 +23,15 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Kopahi — Authentic by Geography, Pure by Nature",
+    default: "Kopahi — GI-Tagged Heritage of Northeast India",
     template: "%s · Kopahi",
   },
   description:
-    "Kopahi sources, processes, brands and exports the GI-tagged heritage of Northeast India — tea, silk, spices, rice, honey and handcraft from seven sister states.",
+    "Authentic, GI-certified produce and craft from Assam, Meghalaya, Nagaland, and four more Northeast states. Sourced direct from farmers. Shipped pan-India.",
   keywords: [
     "Kopahi",
     "AIBA AGRI NE LLP",
-    "GI tagged",
+    "GI tagged products India",
     "Northeast India",
     "Assam tea",
     "Muga silk",
@@ -39,24 +40,24 @@ export const metadata: Metadata = {
     "Joha rice",
     "heritage agri export",
   ],
-  metadataBase: new URL("https://kopahi.com"),
+  metadataBase: new URL(SITE),
+  alternates: { canonical: SITE },
   openGraph: {
-    title: "Kopahi — Authentic by Geography, Pure by Nature",
+    title: "Kopahi — GI-Tagged Heritage of Northeast India",
     description:
       "GI-certified heritage of Northeast India — farm to story, soil to export.",
-    url: "https://kopahi.com",
+    url: SITE,
     siteName: "Kopahi",
     locale: "en_IN",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kopahi — Authentic by Geography, Pure by Nature",
+    title: "Kopahi — GI-Tagged Heritage of Northeast India",
     description:
       "GI-certified heritage of Northeast India — farm to story, soil to export.",
   },
-  // Favicons are picked up from app/icon.png and app/apple-icon.png — no
-  // explicit `icons` block needed (Next.js auto-injects the link tags).
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -70,6 +71,10 @@ export default function RootLayout({
       className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-(--color-ivory) text-(--color-ink)">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={ldScript(organizationJsonLd())}
+        />
         <Providers>
           {children}
           <CartDrawer />

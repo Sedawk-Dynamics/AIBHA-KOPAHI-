@@ -13,12 +13,14 @@ import OrganicDivider from "../components/marketing/OrganicDivider";
 import NEIndiaMap from "./NEIndiaMap";
 import { FARMERS } from "../lib/marketing";
 import { getEssaysByFarmerSlug } from "../lib/journal";
+import { buildMetadata } from "../lib/seo";
 
-export const metadata: Metadata = {
-  title: "Farmers · Know who grew it",
+export const metadata: Metadata = buildMetadata({
+  title: "Meet Our Farmers — Northeast India · Kopahi",
   description:
-    "Kopahi's grower network across the seven sister states. Every name, every village, every year partnered — published.",
-};
+    "The growers behind every Kopahi product — from Sualkuchi weavers to Karbi Anglong rice farmers to Kohima chilli partners. Names, villages, payouts.",
+  path: "/farmers",
+});
 
 const PROMISES = [
   {

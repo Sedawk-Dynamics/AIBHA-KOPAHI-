@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import LegalShell, { LegalList, LegalQuote, type LegalSection } from "../components/marketing/LegalShell";
+import { buildMetadata } from "../lib/seo";
 
-export const metadata: Metadata = {
-  title: "Terms of Use",
+export const metadata: Metadata = buildMetadata({
+  title: "Terms of Use · Kopahi",
   description:
     "Terms governing use of kopahi.com and the Kopahi marketplace, operated by AIBA AGRI NE LLP.",
-};
+  path: "/terms",
+});
 
 const LAST_UPDATED = "April 2026";
 

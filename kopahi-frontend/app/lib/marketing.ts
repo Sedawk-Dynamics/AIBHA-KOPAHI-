@@ -704,6 +704,7 @@ export const FOUNDERS = [
     role: "Founder",
     email: "mgmt@kopahi.com",
     phone: "+91 97406 72727",
+    image: "/Barsha Prakash Choudhury.jpeg",
     quote:
       "Heritage isn't a marketing word. It's a contract with the people who grew this knowledge before us.",
     bio: "Barsha leads brand and partnerships, drawing on a decade in regional sourcing and consumer storytelling. Her aim: make Northeast craftsmanship legible globally — without flattening it.",
@@ -715,6 +716,7 @@ export const FOUNDERS = [
     role: "Founder",
     email: "mgmt@kopahi.com",
     phone: "+91 98540 75705",
+    image: "/Ashreeta Gogoi.jpeg",
     quote: "Every leaf has a name. Every name has a face.",
     bio: "Ashreeta works on the ground with grower cooperatives across Assam, Meghalaya and Nagaland. She designs the farmer-first protocols that keep Kopahi traceable end-to-end.",
     anecdote:
@@ -725,6 +727,7 @@ export const FOUNDERS = [
     role: "Director · Operations",
     email: "trideep@kopahi.com",
     phone: "+91 93654 72113",
+    image: "/Trideep Khanikar.jpeg",
     quote: "Quality is not what we promise on a label — it's what we refuse to ship.",
     bio: "Trideep runs processing, logistics and export readiness. His obsession with the unglamorous middle of the value chain is what lets Kopahi stand behind every shipment.",
     anecdote:
@@ -735,6 +738,7 @@ export const FOUNDERS = [
     role: "Director · Sales & Marketing",
     email: "prakash@kopahi.com",
     phone: "+91 99019 72727",
+    image: "/Prakash Natarajan.jpeg",
     quote: "We are not here to sell more. We are here to sell better.",
     bio: "Prakash leads B2B and international markets. He chooses partners the way a tea-taster chooses a flush — slowly, carefully, with a long memory.",
     anecdote:
