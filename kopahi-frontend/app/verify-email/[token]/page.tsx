@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { api, ApiError } from "../../lib/api";
+import { authClient } from "../../lib/authClient";
 
 export default function VerifyEmailPage({
   params,
@@ -16,18 +16,16 @@ export default function VerifyEmailPage({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      try {
-        await api.post("/api/auth/verify-email", { token });
-        if (cancelled) return;
+      const res = await authClient.verifyEmail(token);
+      if (cancelled) return;
+      if (res.success) {
         setStatus("ok");
         setMessage("Your email is verified. You can close this tab or sign in.");
-      } catch (err) {
-        if (cancelled) return;
+      } else {
         setStatus("error");
         setMessage(
-          err instanceof ApiError
-            ? err.message
-            : "Could not verify your email — the link may have expired."
+          res.error?.message ??
+            "Could not verify your email — the link may have expired."
         );
       }
     })();

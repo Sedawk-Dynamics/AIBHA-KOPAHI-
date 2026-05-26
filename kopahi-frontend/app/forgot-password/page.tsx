@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { api, ApiError } from "../lib/api";
+import { authClient } from "../lib/authClient";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -19,19 +19,15 @@ export default function ForgotPasswordPage() {
     }
     setStatus("loading");
     setMessage("");
-    try {
-      await api.post<{ success: boolean; message: string }>("/api/auth/forgot-password", {
-        email: trimmed,
-      });
+    const res = await authClient.forgot(trimmed);
+    if (res.success) {
       setStatus("sent");
       setMessage(
         `If an account exists for ${trimmed}, you'll get a reset link within a minute. The link expires in 1 hour.`
       );
-    } catch (err) {
+    } else {
       setStatus("error");
-      setMessage(
-        err instanceof ApiError ? err.message : "Could not send reset email. Try again."
-      );
+      setMessage(res.error?.message ?? "Could not send reset email. Try again.");
     }
   };
 
