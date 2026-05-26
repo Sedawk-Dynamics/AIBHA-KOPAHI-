@@ -6,9 +6,9 @@ import { requireAuth } from "../../../lib/auth/guards";
 import { clearAuthCookies } from "../../../lib/auth/cookies";
 import { logAudit } from "../../../lib/auth/audit";
 import { sendPasswordChangedNotification } from "../../../lib/email/send";
-import { ok, fail } from "../../../lib/auth/response";
+import { ok, fail, withErrorHandling } from "../../../lib/auth/response";
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling("auth/change-password", async (req: NextRequest) => {
   const { user, error } = await requireAuth();
   if (error) return error;
 
@@ -67,4 +67,4 @@ export async function POST(req: NextRequest) {
   );
 
   return ok({ message: "Password changed. Please sign in again." });
-}
+});

@@ -12,7 +12,7 @@ import { checkRateLimit } from "../../../lib/auth/rate-limit";
 import { getRequestContext } from "../../../lib/auth/request-context";
 import { logAudit } from "../../../lib/auth/audit";
 import { fromDbRole } from "../../../lib/auth/roles";
-import { ok, fail } from "../../../lib/auth/response";
+import { ok, fail, withErrorHandling } from "../../../lib/auth/response";
 
 const LOCKOUT_THRESHOLD = 5;
 const LOCKOUT_MS = 15 * 60 * 1000;
@@ -28,7 +28,7 @@ const DEMO_EMAILS = new Set([
 const isDemoEmail = (email: string) =>
   process.env.ENABLE_DEMO === "true" && DEMO_EMAILS.has(email.toLowerCase());
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling("auth/login", async (req: NextRequest) => {
   const { ip, userAgent } = getRequestContext(req);
 
   const rl = checkRateLimit(`login:${ip}`, 5, 5 * 60 * 1000);
@@ -195,4 +195,4 @@ export async function POST(req: NextRequest) {
     },
     accessToken,
   });
-}
+});

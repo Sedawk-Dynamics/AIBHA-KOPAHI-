@@ -7,11 +7,11 @@ import { checkRateLimit } from "../../../../lib/auth/rate-limit";
 import { getRequestContext } from "../../../../lib/auth/request-context";
 import { logAudit } from "../../../../lib/auth/audit";
 import { sendVerificationEmail } from "../../../../lib/email/send";
-import { created, fail } from "../../../../lib/auth/response";
+import { created, fail, withErrorHandling } from "../../../../lib/auth/response";
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling("auth/signup/customer", async (req: NextRequest) => {
   const { ip, userAgent } = getRequestContext(req);
 
   // Rate limit: 3 signups per IP per 10 minutes.
@@ -79,4 +79,4 @@ export async function POST(req: NextRequest) {
   });
 
   return created(ack);
-}
+});

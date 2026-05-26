@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { ApiError } from "../lib/api";
 
 const TAGLINES = [
   "Where every leaf has a name.",
@@ -142,7 +141,13 @@ function SignupInner() {
           : `/verify-email?email=${encodeURIComponent(form.email)}`
       );
     } catch (err) {
-      setSubmitError(err instanceof ApiError ? err.message : "Signup failed. Please try again.");
+      // Surface the actual server message — AuthContext.register throws a
+      // plain Error whose message comes from the API response envelope.
+      const msg =
+        err instanceof Error && err.message
+          ? err.message
+          : "Signup failed. Please try again.";
+      setSubmitError(msg);
       setLoading(false);
     }
   };

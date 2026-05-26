@@ -2,9 +2,9 @@ import type { NextRequest } from "next/server";
 import { prisma } from "../../../lib/db";
 import { requireAuth } from "../../../lib/auth/guards";
 import { fromDbRole } from "../../../lib/auth/roles";
-import { ok, fail } from "../../../lib/auth/response";
+import { ok, fail, withErrorHandling } from "../../../lib/auth/response";
 
-export async function GET(_req: NextRequest) {
+export const GET = withErrorHandling("auth/me", async (_req: NextRequest) => {
   const { user, error } = await requireAuth();
   if (error) return error;
 
@@ -45,4 +45,4 @@ export async function GET(_req: NextRequest) {
       role: fromDbRole(fresh.role),
     },
   });
-}
+});

@@ -7,7 +7,7 @@ import { checkRateLimit } from "../../../../lib/auth/rate-limit";
 import { getRequestContext } from "../../../../lib/auth/request-context";
 import { logAudit } from "../../../../lib/auth/audit";
 import { sendVerificationEmail } from "../../../../lib/email/send";
-import { created, fail } from "../../../../lib/auth/response";
+import { created, fail, withErrorHandling } from "../../../../lib/auth/response";
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -29,7 +29,7 @@ async function generateUniqueStoreSlug(businessName: string): Promise<string> {
   return `${base}-${Date.now().toString(36)}`;
 }
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling("auth/signup/vendor", async (req: NextRequest) => {
   const { ip, userAgent } = getRequestContext(req);
 
   const rl = checkRateLimit(`signup:vendor:${ip}`, 3, 10 * 60 * 1000);
@@ -105,4 +105,4 @@ export async function POST(req: NextRequest) {
   });
 
   return created(ack);
-}
+});

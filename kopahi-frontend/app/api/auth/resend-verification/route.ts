@@ -5,11 +5,11 @@ import { generateOpaqueToken, hashToken } from "../../../lib/auth/tokens";
 import { checkRateLimit } from "../../../lib/auth/rate-limit";
 import { getRequestContext } from "../../../lib/auth/request-context";
 import { sendVerificationEmail } from "../../../lib/email/send";
-import { ok, fail } from "../../../lib/auth/response";
+import { ok, fail, withErrorHandling } from "../../../lib/auth/response";
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling("auth/resend-verification", async (req: NextRequest) => {
   const { ip } = getRequestContext(req);
 
   // 1 resend per 60 seconds per IP (v9-REST §16.1).
@@ -55,4 +55,4 @@ export async function POST(req: NextRequest) {
   }
 
   return ok({ message: "If the account exists and is unverified, a new link has been sent." });
-}
+});
