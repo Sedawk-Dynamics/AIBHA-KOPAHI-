@@ -3,7 +3,7 @@
 import { useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { api, ApiError } from "../../lib/api";
+import { authClient } from "../../lib/authClient";
 
 const policy = (pw: string): string | null => {
   if (pw.length < 12) return "Password must be at least 12 characters";
@@ -43,16 +43,14 @@ export default function ResetPasswordPage({
       return;
     }
     setStatus("loading");
-    try {
-      await api.post("/api/auth/reset-password", { token, password });
+    const res = await authClient.reset(token, password);
+    if (res.success) {
       setStatus("ok");
       setMessage("Password reset. Redirecting to login…");
       setTimeout(() => router.push("/login"), 1500);
-    } catch (err) {
+    } else {
       setStatus("error");
-      setMessage(
-        err instanceof ApiError ? err.message : "Could not reset password. Try again."
-      );
+      setMessage(res.error?.message ?? "Could not reset password. Try again.");
     }
   };
 

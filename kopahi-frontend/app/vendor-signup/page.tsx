@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { api, ApiError } from "../lib/api";
+import { authClient } from "../lib/authClient";
 
 /* ============================================================
    VENDOR SIGNUP — POST /api/auth/register-vendor
@@ -67,26 +67,35 @@ export default function VendorSignupPage() {
     if (!validate()) return;
     setLoading(true);
 
-    try {
-      await api.post("/api/auth/register-vendor", {
-        name: form.name,
-        email: form.email,
-        password: form.password,
-        phone: form.phone,
-        businessName: form.businessName,
-        // gstNumber is not yet a schema column but the backend captures it in the audit log.
-        gstNumber: form.gstNumber || undefined,
-      });
-      // Backend doesn't return a token — vendors must verify email first.
-      router.push(`/login?registered=vendor&email=${encodeURIComponent(form.email)}`);
-    } catch (err) {
-      const msg =
-        err instanceof ApiError
-          ? err.message
-          : "Could not create your vendor account. Please try again.";
-      setSubmitError(msg);
+    // Call same-origin v9-REST endpoint. The form doesn't yet collect
+    // `state` or `primaryCategory` — we send sensible defaults that the
+    // vendor can edit later from the dashboard. The single "agreed to
+    // terms" checkbox satisfies both v9-REST consents.
+    const res = await authClient.signupVendor({
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      phone: form.phone,
+      businessName: form.businessName,
+      state: "Assam",
+      primaryCategory: "Specialty",
+      acceptTerms: true,
+      acceptVendorAgreement: true,
+    });
+
+    if (!res.success) {
+      setSubmitError(
+        res.error?.message ??
+          "Could not create your vendor account. Please try again."
+      );
       setLoading(false);
+      return;
     }
+
+    // Anti-enumeration ack — no token returned. Vendor must verify email.
+    router.push(
+      `/login?registered=vendor&email=${encodeURIComponent(form.email)}`
+    );
   };
 
   const passwordStrength = () => {
