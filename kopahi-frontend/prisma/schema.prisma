@@ -1,0 +1,232 @@
+// Kopahi frontend Prisma schema — v9-REST auth implementation.
+//
+// COEXISTENCE STRATEGY
+// ────────────────────
+// This schema points at the SAME Postgres database as the kopahi-backend
+// Express server (single DATABASE_URL). Both Prisma clients read/write the
+// same `User` and `Role` types. To avoid SQL conflicts:
+//
+//   1. The `User` model below mirrors the backend's exact columns,
+//      including the lowercase `Role` enum values, the `password` column
+//      name, and the Boolean `emailVerified` column. v9-REST's field-name
+//      preferences (`passwordHash`, `lastLoginAt`) are application-level
+//      aliases applied via `@map`.
+//   2. The frontend ADDS new columns: `isSuperAdmin`, `onboardingComplete`,
+//      `status`, `emailVerifiedAt`. These are purely additive — the backend
+//      Prisma schema doesn't know about them but tolerates them at runtime.
+//   3. New tables (Vendor, RefreshToken, PasswordResetToken,
+//      EmailVerificationToken, AuthAuditLog) are entirely additive and the
+//      backend never touches them.
+//
+// The existing backend's `AuditLog` table is left untouched; this schema's
+// audit table is renamed to `AuthAuditLog` to avoid collision.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+//   ENUMS
+// ─────────────────────────────────────────────────────────────────────────
+
+// Lowercase to match the existing Postgres enum already created by the
+// backend's migration. Frontend TS code will use `Role.user`, `Role.vendor`,
+// `Role.admin`. v9-REST's UPPERCASE convention is normalized at the helper
+// boundary (see lib/auth/roles.ts).
+enum Role {
+  user
+  vendor
+  admin
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum VendorStatus {
+  PENDING_REVIEW
+  KYC_REQUIRED
+  APPROVED
+  SUSPENDED
+  REJECTED
+}
+
+enum AuditAction {
+  SIGN_UP
+  SIGN_IN
+  SIGN_IN_FAILED
+  SIGN_OUT
+  TOKEN_REFRESHED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
+  PASSWORD_CHANGED
+  EMAIL_VERIFIED
+  ACCOUNT_LOCKED
+  VENDOR_KYC_SUBMITTED
+  VENDOR_APPROVED
+  VENDOR_REJECTED
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+//   USER  (shared table with Express; columns mapped to existing names)
+// ─────────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  // Existing Express column is `password`; we expose it as `passwordHash`
+  // at the application level because it has always been a bcrypt hash.
+  passwordHash String     @map("password")
+  name         String
+  phone        String     @default("")
+  role         Role       @default(user)
+  status       UserStatus @default(ACTIVE)
+  isSuperAdmin Boolean    @default(false)
+
+  // Boolean for backward-compat with existing Express controllers + seed
+  // (e.g. `prisma.user.create({ data: { emailVerified: true } })`). The
+  // timestamp lives in a separate column.
+  emailVerified   Boolean   @default(false)
+  emailVerifiedAt DateTime?
+
+  onboardingComplete Boolean @default(false)
+
+  // Inline tokens used by the legacy Express auth flow. The v9-REST routes
+  // below use the separate token tables instead.
+  emailVerificationToken   String?
+  emailVerificationExpires DateTime?
+  passwordResetToken       String?
+  passwordResetExpires     DateTime?
+
+  // Phase 1 lockout columns (already shipped on Express).
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+
+  // Sign-in tracking — same SQL columns the backend already writes to
+  // (`lastSignInAt` / `lastSignInIp`); v9-REST documents them as
+  // `lastLoginAt` / `lastLoginIp` and we expose them under that name.
+  lastLoginAt DateTime? @map("lastSignInAt")
+  lastLoginIp String?   @map("lastSignInIp")
+
+  // Legacy Express-only fields. Kept here so frontend Prisma can read User
+  // rows without choking on unknown columns. Not used by v9-REST auth.
+  businessName String @default("")
+  gstNumber    String @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // v9-REST relations
+  vendor                  Vendor?
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  refreshTokens           RefreshToken[]
+  auditLogs               AuthAuditLog[]
+
+  @@index([email])
+  @@index([role])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+//   VENDOR — additive; Express never queries this table.
+// ─────────────────────────────────────────────────────────────────────────
+
+model Vendor {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  businessName String
+  storeSlug    String  @unique
+  state        String
+  district     String?
+  gstNumber    String?
+  panNumber    String?
+  fssaiNumber  String?
+
+  status          VendorStatus @default(PENDING_REVIEW)
+  approvedAt      DateTime?
+  approvedBy      String?
+  rejectionReason String?
+
+  kycSubmitted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+//   TOKENS — all stored as SHA-256 hashes (lib/auth/tokens.ts).
+// ─────────────────────────────────────────────────────────────────────────
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([tokenHash])
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  email     String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([tokenHash])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // The JWT carries this row's id as `jti`. The opaque secret is stored
+  // SHA-256 hashed so a DB leak doesn't expose live refresh tokens.
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+//   AUDIT — renamed to AuthAuditLog so we don't collide with the Express
+//   AuditLog table. Logs structured auth events with a typed enum action.
+// ─────────────────────────────────────────────────────────────────────────
+
+model AuthAuditLog {
+  id        String      @id @default(cuid())
+  userId    String?
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    AuditAction
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime    @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}

@@ -1,30 +1,74 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { ApiUser, api, tokenStore, userStore } from "../lib/api";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { ApiUser, tokenStore, userStore } from "../lib/api";
+import {
+  authClient,
+  type AuthClientUser,
+  type ApiResponse,
+} from "../lib/authClient";
 
 type LoginOpts = { remember?: boolean };
 
 type AuthState = {
   user: ApiUser | null;
   loading: boolean;
-  login: (email: string, password: string, opts?: LoginOpts) => Promise<ApiUser>;
-  register: (payload: RegisterPayload) => Promise<ApiUser>;
-  logout: () => void;
+  login: (
+    email: string,
+    password: string,
+    opts?: LoginOpts
+  ) => Promise<ApiUser>;
+  register: (payload: RegisterPayload) => Promise<ApiUser | null>;
+  logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
 
-// Customer-only — backend's POST /api/auth/register strips role and always
-// creates role: "user". Vendor signups go through the dedicated
-// POST /api/auth/register-vendor endpoint (handled in app/vendor-signup/).
 type RegisterPayload = {
   name: string;
   email: string;
   password: string;
   phone?: string;
+  acceptTerms?: boolean;
 };
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
+
+// v9-REST returns UPPERCASE roles; legacy dashboard code reads lowercase.
+// Translate at the boundary so downstream consumers don't need to change.
+function toLegacyRole(role: AuthClientUser["role"]): ApiUser["role"] {
+  switch (role) {
+    case "ADMIN":
+      return "admin";
+    case "VENDOR":
+      return "vendor";
+    default:
+      return "user";
+  }
+}
+
+function toApiUser(u: AuthClientUser): ApiUser {
+  return {
+    _id: u.id,
+    name: u.name,
+    email: u.email,
+    role: toLegacyRole(u.role),
+    phone: u.phone,
+  };
+}
+
+function unwrap<T>(res: ApiResponse<T>): T {
+  if (!res.success) {
+    throw new Error(res.error?.message ?? "Request failed.");
+  }
+  return res.data;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<ApiUser | null>(null);
@@ -34,65 +78,69 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const cached = userStore.get();
     if (cached) setUser(cached);
 
-    const token = tokenStore.get();
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
-    api
-      .get<{ success: boolean; user: ApiUser }>("/api/auth/me", { auth: true })
+    // Cookies handle session; always probe /me on mount. If unauthenticated
+    // it returns NOT_AUTHENTICATED and we just stay logged out.
+    authClient
+      .me()
       .then((res) => {
-        if (res?.user) {
-          setUser(res.user);
-          userStore.set(res.user);
+        if (res.success) {
+          const next = toApiUser(res.data.user);
+          setUser(next);
+          userStore.set(next);
+        } else if (!cached) {
+          // No session and no cached user — leave as null.
         }
       })
-      .catch(() => {
-        tokenStore.clear();
-        setUser(null);
-      })
+      .catch(() => undefined)
       .finally(() => setLoading(false));
   }, []);
 
-  const persist = (token: string, u: ApiUser) => {
-    tokenStore.set(token);
-    userStore.set(u);
-    setUser(u);
-  };
-
   const login = useCallback(
-    async (email: string, password: string, opts?: LoginOpts) => {
-      const res = await api.post<{ success: boolean; token: string; user: ApiUser }>(
-        "/api/auth/login",
-        { email, password, remember: !!opts?.remember }
-      );
-      persist(res.token, res.user);
-      return res.user;
+    async (email: string, password: string, _opts?: LoginOpts) => {
+      const res = await authClient.login(email, password);
+      const { user: u, accessToken } = unwrap(res);
+      // Mirror the access token into localStorage so the legacy
+      // Bearer-header callers in lib/api.ts (cart, orders, wishlist on the
+      // Express backend) keep working during the transition. The HttpOnly
+      // cookies are the canonical session — this is best-effort fallback.
+      tokenStore.set(accessToken);
+      const next = toApiUser(u);
+      userStore.set(next);
+      setUser(next);
+      return next;
     },
     []
   );
 
   const register = useCallback(async (payload: RegisterPayload) => {
-    const res = await api.post<{ success: boolean; token: string; user: ApiUser }>(
-      "/api/auth/register",
-      payload
-    );
-    persist(res.token, res.user);
-    return res.user;
+    // Anti-enumeration: signup endpoints always return ack-only. Caller
+    // must redirect to /verify-email and wait for the inbox link.
+    const res = await authClient.signupCustomer({
+      ...payload,
+      acceptTerms: payload.acceptTerms ?? true,
+    });
+    if (!res.success) {
+      throw new Error(res.error?.message ?? "Signup failed.");
+    }
+    return null;
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await authClient.logout();
+    } catch {
+      // Swallow — local state is the source of truth for the next render.
+    }
     tokenStore.clear();
     setUser(null);
   }, []);
 
   const refresh = useCallback(async () => {
-    if (!tokenStore.get()) return;
-    const res = await api.get<{ success: boolean; user: ApiUser }>("/api/auth/me", { auth: true });
-    if (res?.user) {
-      setUser(res.user);
-      userStore.set(res.user);
+    const res = await authClient.me();
+    if (res.success) {
+      const next = toApiUser(res.data.user);
+      setUser(next);
+      userStore.set(next);
     }
   }, []);
 

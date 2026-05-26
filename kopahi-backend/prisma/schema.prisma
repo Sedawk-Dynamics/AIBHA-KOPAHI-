@@ -48,6 +48,16 @@ model User {
   passwordResetToken       String?
   passwordResetExpires     DateTime?
 
+  // Account lockout — see authController.loginUser. 5 consecutive failed
+  // password attempts locks the account for 15 minutes; auto-unlocks on
+  // expiry. Demo seed accounts bypass this when ENABLE_DEMO=true.
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+
+  // Sign-in tracking (security signal + audit visibility).
+  lastSignInAt DateTime?
+  lastSignInIp String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

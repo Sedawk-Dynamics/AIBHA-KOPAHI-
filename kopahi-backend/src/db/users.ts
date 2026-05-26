@@ -179,6 +179,43 @@ const updatePassword = (id: string, hashed: string) =>
     select: { id: true },
   });
 
+/* Lockout + sign-in tracking — see authController.loginUser. */
+
+const incrementFailedAttempts = async (id: string): Promise<number> => {
+  const updated = await prisma.user.update({
+    where: { id: String(id) },
+    data: { failedLoginAttempts: { increment: 1 } },
+    select: { failedLoginAttempts: true },
+  });
+  return updated.failedLoginAttempts;
+};
+
+const lockAccount = (id: string, until: Date) =>
+  prisma.user.update({
+    where: { id: String(id) },
+    data: { lockedUntil: until },
+    select: { id: true },
+  });
+
+const clearLockAndAttempts = (id: string) =>
+  prisma.user.update({
+    where: { id: String(id) },
+    data: { failedLoginAttempts: 0, lockedUntil: null },
+    select: { id: true },
+  });
+
+const recordSuccessfulSignIn = (id: string, ip: string | null) =>
+  prisma.user.update({
+    where: { id: String(id) },
+    data: {
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      lastSignInAt: new Date(),
+      lastSignInIp: ip,
+    },
+    select: { id: true },
+  });
+
 /* Wishlist & cart — return shapes that mimic the old populated subdocuments. */
 
 const getWishlist = async (id: string) => {
@@ -266,6 +303,10 @@ export default {
   setEmailVerificationToken,
   markEmailVerified,
   updatePassword,
+  incrementFailedAttempts,
+  lockAccount,
+  clearLockAndAttempts,
+  recordSuccessfulSignIn,
   getWishlist,
   addToWishlist,
   removeFromWishlist,

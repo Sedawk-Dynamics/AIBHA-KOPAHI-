@@ -10,6 +10,25 @@ import { recordAudit } from "../utils/auditLogger";
 import logger from "../utils/logger";
 
 const HOUR = 60 * 60 * 1000;
+const MIN = 60 * 1000;
+
+// v9 hardening: bcrypt cost factor. 12 ≈ 250ms verify on a mid-tier server.
+// Lowered in test env so suites stay fast.
+const BCRYPT_COST = process.env.NODE_ENV === "test" ? 4 : 12;
+
+// Account lockout policy: 5 wrong-password attempts within the failed-attempts
+// counter window locks the account for LOCKOUT_DURATION_MS. The counter only
+// resets on successful sign-in OR password reset OR lockout expiry.
+const LOCKOUT_THRESHOLD = 5;
+const LOCKOUT_DURATION_MS = 15 * MIN;
+
+const DEMO_EMAILS = new Set([
+  "admin@kopahi.com",
+  "vendor@kopahi.com",
+  "customer@kopahi.com",
+]);
+const isDemoEmail = (email: string): boolean =>
+  process.env.ENABLE_DEMO === "true" && DEMO_EMAILS.has(email.toLowerCase());
 
 const hashToken = (token: string): string =>
   crypto.createHash("sha256").update(token).digest("hex");
@@ -57,14 +76,21 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
   const policy = validatePassword(password);
   if (!policy.ok) return res.status(400).json({ success: false, message: policy.reason });
 
+  // v9 anti-enumeration: identical response whether the email is new or
+  // already registered. Existing accounts don't get a verification email
+  // re-sent (would leak existence via mailbox inspection), and no audit log
+  // entry is written (would let an attacker probe via the admin audit view).
+  const ack = {
+    success: true,
+    message:
+      "Account created — please check your email for a verification link.",
+  };
   const exists = await db.users.findByEmail(email);
   if (exists) {
-    return res
-      .status(409)
-      .json({ success: false, message: "An account with this email already exists" });
+    return res.status(201).json(ack);
   }
 
-  const hashed = await bcrypt.hash(password, 10);
+  const hashed = await bcrypt.hash(password, BCRYPT_COST);
   const verificationToken = crypto.randomBytes(32).toString("hex");
 
   const user = await db.users.create({
@@ -94,12 +120,7 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
     metadata: { role: "user" },
   });
 
-  res.status(201).json({
-    success: true,
-    message: "Registered successfully — please check your email to verify",
-    token: generateToken({ id: String(user.id), role: user.role as string }, "30d"),
-    user,
-  });
+  res.status(201).json(ack);
 });
 
 export const registerVendor = asyncHandler(async (req: Request, res: Response) => {
@@ -115,14 +136,17 @@ export const registerVendor = asyncHandler(async (req: Request, res: Response) =
   const policy = validatePassword(password);
   if (!policy.ok) return res.status(400).json({ success: false, message: policy.reason });
 
+  const ack = {
+    success: true,
+    message:
+      "Vendor account created — please check your email for a verification link.",
+  };
   const exists = await db.users.findByEmail(email);
   if (exists) {
-    return res
-      .status(409)
-      .json({ success: false, message: "An account with this email already exists" });
+    return res.status(201).json(ack);
   }
 
-  const hashed = await bcrypt.hash(password, 10);
+  const hashed = await bcrypt.hash(password, BCRYPT_COST);
   const verificationToken = crypto.randomBytes(32).toString("hex");
 
   const user = await db.users.create({
@@ -154,12 +178,7 @@ export const registerVendor = asyncHandler(async (req: Request, res: Response) =
     metadata: { businessName, gstNumber: gstNumber || null },
   });
 
-  res.status(201).json({
-    success: true,
-    message:
-      "Vendor account created — please verify your email before signing in",
-    user,
-  });
+  res.status(201).json(ack);
 });
 
 export const loginUser = asyncHandler(async (req: Request, res: Response) => {
@@ -171,37 +190,122 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
       .json({ success: false, message: "Email and password are required" });
   }
 
-  const user = await db.users.findByEmailWithPassword(email);
-  if (!user || !(await bcrypt.compare(password, (user as { password: string }).password))) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Invalid email or password" });
+  // Generic credential error — never differentiates "user doesn't exist" vs
+  // "wrong password" vs other shapes. Same wording everywhere.
+  const GENERIC_INVALID = "Invalid email or password.";
+
+  const lowered = String(email).toLowerCase();
+  const user = (await db.users.findByEmailWithPassword(email)) as
+    | (Record<string, unknown> & {
+        id: string;
+        email: string;
+        role: string;
+        password: string;
+        emailVerified: boolean;
+        lockedUntil: Date | null;
+        failedLoginAttempts: number;
+      })
+    | null;
+
+  if (!user) {
+    await recordAudit(req, {
+      action: "auth.signin_failed",
+      metadata: { email: lowered, reason: "unknown_email" },
+    });
+    return res.status(401).json({ success: false, message: GENERIC_INVALID });
   }
 
-  // Vendors must verify email before they can sign in (per TASK).
-  // Customers and admins are not gated.
+  // 1. Lockout gate (skip for demo accounts when ENABLE_DEMO=true so the
+  //    three role chips on /login keep working without manual unlock).
   if (
-    (user as { role: string }).role === "vendor" &&
-    !(user as { emailVerified: boolean }).emailVerified
+    !isDemoEmail(user.email) &&
+    user.lockedUntil &&
+    user.lockedUntil > new Date()
   ) {
-    return res.status(403).json({
+    return res.status(423).json({
       success: false,
-      message: "Please verify your email before signing in. Check your inbox for the verification link.",
-      code: "EMAIL_NOT_VERIFIED",
+      code: "ACCOUNT_LOCKED",
+      message:
+        "Account temporarily locked due to too many failed attempts. Try again in a few minutes.",
     });
   }
 
+  // 2. Verify password.
+  const passwordValid = await bcrypt.compare(password, user.password);
+  if (!passwordValid) {
+    if (!isDemoEmail(user.email)) {
+      const attempts = await db.users.incrementFailedAttempts(user.id);
+      await recordAudit(req, {
+        action: "auth.signin_failed",
+        targetType: "User",
+        targetId: user.id,
+        metadata: { reason: "wrong_password", attempts },
+      });
+      if (attempts >= LOCKOUT_THRESHOLD) {
+        const until = new Date(Date.now() + LOCKOUT_DURATION_MS);
+        await db.users.lockAccount(user.id, until);
+        await recordAudit(req, {
+          action: "auth.account_locked",
+          targetType: "User",
+          targetId: user.id,
+          metadata: { until: until.toISOString(), attempts },
+        });
+        return res.status(423).json({
+          success: false,
+          code: "ACCOUNT_LOCKED",
+          message:
+            "Account locked for 15 minutes due to too many failed attempts.",
+        });
+      }
+    }
+    return res.status(401).json({ success: false, message: GENERIC_INVALID });
+  }
+
+  // 3. Email-verification gate for ALL roles (v9 §4.1 §17). Demo seed
+  //    accounts are pre-verified, so this does not break the chip flow.
+  if (!user.emailVerified) {
+    return res.status(403).json({
+      success: false,
+      code: "EMAIL_NOT_VERIFIED",
+      message:
+        "Please verify your email before signing in. Check your inbox for the verification link.",
+    });
+  }
+
+  // 4. Successful sign-in: clear lockout counters, stamp lastSignInAt/IP,
+  //    audit-log.
+  const clientIp =
+    typeof req.ip === "string" && req.ip.length > 0 ? req.ip : null;
+  await db.users.recordSuccessfulSignIn(user.id, clientIp);
+
+  await recordAudit(req, {
+    action: "auth.signin",
+    targetType: "User",
+    targetId: user.id,
+    metadata: { role: user.role, remember: !!remember },
+  });
+
   const tokenLifetime = remember ? "30d" : "12h";
 
-  // Strip the password before responding.
-  const { password: _omitted, ...publicUser } = user as { password: string } & Record<string, unknown>;
+  // Strip the password + lockout internals before responding.
+  const {
+    password: _omitted,
+    failedLoginAttempts: _attempts,
+    lockedUntil: _locked,
+    ...publicUser
+  } = user as typeof user & {
+    failedLoginAttempts: number;
+    lockedUntil: Date | null;
+  };
   void _omitted;
+  void _attempts;
+  void _locked;
 
   res.json({
     success: true,
     message: "Login successful",
     token: generateToken(
-      { id: String((user as { id: string }).id), role: (user as { role: string }).role },
+      { id: user.id, role: user.role },
       tokenLifetime
     ),
     expiresIn: tokenLifetime,
@@ -255,7 +359,7 @@ export const changePassword = asyncHandler(async (req: Request, res: Response) =
       .status(401)
       .json({ success: false, message: "Current password is incorrect" });
   }
-  const hashed = await bcrypt.hash(newPassword, 10);
+  const hashed = await bcrypt.hash(newPassword, BCRYPT_COST);
   await db.users.updatePassword(String((user as { id: string }).id), hashed);
   await recordAudit(req, {
     action: "user.password_change",
@@ -295,6 +399,12 @@ export const requestPasswordReset = asyncHandler(async (req: Request, res: Respo
   const expires = new Date(Date.now() + 1 * HOUR);
 
   await db.users.setPasswordResetToken(String((user as { id: string }).id), tokenHash, expires);
+
+  await recordAudit(req, {
+    action: "auth.password_reset_requested",
+    targetType: "User",
+    targetId: String((user as { id: string }).id),
+  });
 
   const resetUrl = `${FRONTEND_URL()}/reset-password/${token}`;
   try {
@@ -336,8 +446,19 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
       .json({ success: false, message: "Invalid or expired reset token" });
   }
 
-  const hashed = await bcrypt.hash(password, 10);
+  const hashed = await bcrypt.hash(password, BCRYPT_COST);
   await db.users.clearPasswordResetToken(String((user as { id: string }).id), hashed);
+
+  // A successful password reset clears any lockout — the new password makes
+  // the previous failed-attempt count irrelevant, and the user has now
+  // proven inbox control.
+  await db.users.clearLockAndAttempts(String((user as { id: string }).id));
+
+  await recordAudit(req, {
+    action: "auth.password_reset_completed",
+    targetType: "User",
+    targetId: String((user as { id: string }).id),
+  });
 
   res.json({ success: true, message: "Password reset successful — please sign in" });
 });
@@ -353,6 +474,11 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
       .json({ success: false, message: "Invalid or expired verification link" });
   }
   const updated = await db.users.markEmailVerified(String((user as { id: string }).id));
+  await recordAudit(req, {
+    action: "auth.email_verified",
+    targetType: "User",
+    targetId: String((user as { id: string }).id),
+  });
   res.json({ success: true, message: "Email verified", user: updated });
 });
 
