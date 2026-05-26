@@ -5,9 +5,9 @@ import { hashPassword } from "../../../lib/auth/password";
 import { hashToken } from "../../../lib/auth/tokens";
 import { logAudit } from "../../../lib/auth/audit";
 import { sendPasswordChangedNotification } from "../../../lib/email/send";
-import { ok, fail } from "../../../lib/auth/response";
+import { ok, fail, withErrorHandling } from "../../../lib/auth/response";
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling("auth/reset-password", async (req: NextRequest) => {
   let body: unknown;
   try {
     body = await req.json();
@@ -74,4 +74,4 @@ export async function POST(req: NextRequest) {
   );
 
   return ok({ message: "Password updated. Please sign in." });
-}
+});

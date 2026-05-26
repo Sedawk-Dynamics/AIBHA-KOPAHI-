@@ -4,9 +4,9 @@ import { verifyEmailSchema } from "../../../lib/auth/schemas";
 import { hashToken } from "../../../lib/auth/tokens";
 import { logAudit } from "../../../lib/auth/audit";
 import { fromDbRole } from "../../../lib/auth/roles";
-import { ok, fail } from "../../../lib/auth/response";
+import { ok, fail, withErrorHandling } from "../../../lib/auth/response";
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling("auth/verify-email", async (req: NextRequest) => {
   let body: unknown;
   try {
     body = await req.json();
@@ -51,4 +51,4 @@ export async function POST(req: NextRequest) {
     message: "Email verified. You can now sign in.",
     role: fromDbRole(record.user.role),
   });
-}
+});

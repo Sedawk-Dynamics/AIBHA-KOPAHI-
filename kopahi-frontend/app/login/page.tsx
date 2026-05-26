@@ -6,7 +6,6 @@ import { Suspense, useEffect, useState } from "react";
 // useEffect retained for the rotating tagline interval.
 import Image from "next/image";
 import { useAuth } from "../context/AuthContext";
-import { ApiError } from "../lib/api";
 
 const DEMO_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEMO === "true";
 const DEMO_PASSWORD = process.env.NEXT_PUBLIC_DEMO_PASSWORD || "DemoPass!2026";
@@ -58,7 +57,13 @@ function LoginInner() {
       await login(email, password, { remember });
       router.push(next || "/dashboard");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Login failed. Please try again.");
+      // Surface the actual server message — AuthContext.login throws a
+      // plain Error whose message comes from the API response envelope.
+      const msg =
+        err instanceof Error && err.message
+          ? err.message
+          : "Login failed. Please try again.";
+      setError(msg);
       setLoading(false);
     }
   };
@@ -76,11 +81,11 @@ function LoginInner() {
       await login(role.email, DEMO_PASSWORD, { remember: false });
       router.push(next || "/dashboard");
     } catch (err) {
-      setError(
-        err instanceof ApiError
+      const msg =
+        err instanceof Error && err.message
           ? err.message
-          : "Demo login failed. Seed the backend (npm run seed) and confirm NEXT_PUBLIC_ENABLE_DEMO=true."
-      );
+          : "Demo login failed. Seed the backend (npm run seed) and confirm NEXT_PUBLIC_ENABLE_DEMO=true.";
+      setError(msg);
       setLoadingRole(null);
     }
   };

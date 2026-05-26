@@ -7,9 +7,9 @@ import {
 } from "../../../lib/auth/cookies";
 import { getRequestContext } from "../../../lib/auth/request-context";
 import { logAudit } from "../../../lib/auth/audit";
-import { ok } from "../../../lib/auth/response";
+import { ok, withErrorHandling } from "../../../lib/auth/response";
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling("auth/logout", async (req: NextRequest) => {
   const { ip, userAgent } = getRequestContext(req);
   const refreshToken = await getRefreshTokenFromCookies();
 
@@ -32,4 +32,4 @@ export async function POST(req: NextRequest) {
 
   await clearAuthCookies();
   return ok({ message: "Logged out." });
-}
+});

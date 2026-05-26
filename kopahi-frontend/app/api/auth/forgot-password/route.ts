@@ -6,11 +6,11 @@ import { checkRateLimit } from "../../../lib/auth/rate-limit";
 import { getRequestContext } from "../../../lib/auth/request-context";
 import { logAudit } from "../../../lib/auth/audit";
 import { sendPasswordResetEmail } from "../../../lib/email/send";
-import { ok, fail } from "../../../lib/auth/response";
+import { ok, fail, withErrorHandling } from "../../../lib/auth/response";
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling("auth/forgot-password", async (req: NextRequest) => {
   const { ip, userAgent } = getRequestContext(req);
 
   const rl = checkRateLimit(`forgot:${ip}`, 3, 15 * 60 * 1000);
@@ -63,4 +63,4 @@ export async function POST(req: NextRequest) {
   }
 
   return ok({ message: "If an account exists, a reset email has been sent." });
-}
+});

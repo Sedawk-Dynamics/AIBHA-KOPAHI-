@@ -12,11 +12,11 @@ import {
 } from "../../../lib/auth/cookies";
 import { fromDbRole } from "../../../lib/auth/roles";
 import { logAudit } from "../../../lib/auth/audit";
-import { ok, fail } from "../../../lib/auth/response";
+import { ok, fail, withErrorHandling } from "../../../lib/auth/response";
 
 const REFRESH_MS = 30 * 24 * 60 * 60 * 1000;
 
-export async function POST(_req: NextRequest) {
+export const POST = withErrorHandling("auth/refresh", async (_req: NextRequest) => {
   const refreshToken = await getRefreshTokenFromCookies();
   if (!refreshToken) {
     return fail("NOT_AUTHENTICATED", "No refresh token.", 401);
@@ -73,4 +73,4 @@ export async function POST(_req: NextRequest) {
   await logAudit({ userId: user.id, action: "TOKEN_REFRESHED" });
 
   return ok({ refreshed: true, accessToken: newAccess });
-}
+});
