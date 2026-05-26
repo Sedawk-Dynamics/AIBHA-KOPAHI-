@@ -64,15 +64,34 @@ services:
     build:
       context: ./kopahi-frontend
       dockerfile: Dockerfile
-      # NEXT_PUBLIC_* vars are baked into the bundle at build time.
+      # NEXT_PUBLIC_* vars are baked into the bundle at build time. Anything
+      # the browser needs to see (toggles, public URLs) must be passed here.
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?NEXT_PUBLIC_API_URL must be set}
         NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL:?NEXT_PUBLIC_ADMIN_URL must be set}
+        NEXT_PUBLIC_ENABLE_DEMO: ${NEXT_PUBLIC_ENABLE_DEMO:-false}
+        NEXT_PUBLIC_DEMO_PASSWORD: ${NEXT_PUBLIC_DEMO_PASSWORD:-}
     restart: unless-stopped
     environment:
       NODE_ENV: production
       HOSTNAME: "0.0.0.0"
       PORT: "3000"
+      # ── v9-REST auth (Next.js route handlers + middleware) ────────────
+      # The frontend now owns auth — Prisma client + JWT + Resend live here.
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set (copy from Dokploy db service)}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET must be set (openssl rand -base64 64)}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET must be set (different from JWT_ACCESS_SECRET)}
+      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-30d}
+      # Fallback used by lib/auth/jwt.ts only if the two split secrets are absent.
+      JWT_SECRET: ${JWT_SECRET:-}
+      BCRYPT_COST: ${BCRYPT_COST:-12}
+      APP_URL: ${FRONTEND_URL:?FRONTEND_URL must be set}
+      ENABLE_DEMO: ${ENABLE_DEMO:-false}
+      # Resend transactional email.
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Kopahi <onboarding@resend.dev>}
+      EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-info@kopahi.com}
     expose:
       - "3000"
     depends_on:

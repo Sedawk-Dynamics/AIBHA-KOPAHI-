@@ -126,13 +126,21 @@ function SignupInner() {
     if (!validate()) return;
     setLoading(true);
     try {
-      await register({
+      const registered = await register({
         name: form.name,
         email: form.email,
         password: form.password,
         phone: form.phone,
       });
-      router.push("/dashboard");
+      // The hardened backend returns ack-only — no auto-login. Send the
+      // visitor to the "check your inbox" screen with their email pre-filled.
+      // If the backend kept legacy behavior and returned a session, we still
+      // land them on the dashboard.
+      router.push(
+        registered
+          ? "/dashboard"
+          : `/verify-email?email=${encodeURIComponent(form.email)}`
+      );
     } catch (err) {
       setSubmitError(err instanceof ApiError ? err.message : "Signup failed. Please try again.");
       setLoading(false);

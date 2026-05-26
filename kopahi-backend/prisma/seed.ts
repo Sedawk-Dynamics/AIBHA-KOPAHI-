@@ -167,7 +167,7 @@ async function main() {
   ]);
 
   const DEMO_PASSWORD = process.env.SEED_PASSWORD ?? "DemoPass!2026";
-  const password = await bcrypt.hash(DEMO_PASSWORD, 10);
+  const password = await bcrypt.hash(DEMO_PASSWORD, 12);
 
   const [, vendor] = await Promise.all([
     prisma.user.create({
