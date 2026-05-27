@@ -36,6 +36,9 @@ services:
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set (copy from Dokploy db service)}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-30d}
+      # v9-REST access tokens (signed by the Next.js frontend) — backend's
+      # protect middleware verifies these alongside legacy JWT_SECRET tokens.
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-}
       FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL must be set}
       ADMIN_URL: ${ADMIN_URL:?ADMIN_URL must be set}
       SMTP_HOST: ${SMTP_HOST:-}
