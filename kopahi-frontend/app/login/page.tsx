@@ -183,6 +183,16 @@ function LoginInner() {
             >
               {loading ? "Signing in…" : "Sign In"}
             </button>
+
+            <p className="mt-2 text-center text-sm text-(--color-ink)/70">
+              Forgot your password?{" "}
+              <Link
+                href="/forgot-password"
+                className="text-(--color-gold-dark) hover:text-(--color-gold) uppercase tracking-[0.22em] text-xs ml-1"
+              >
+                Reset it →
+              </Link>
+            </p>
           </form>
 
           {DEMO_ENABLED && (
