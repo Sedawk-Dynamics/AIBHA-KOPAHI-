@@ -1,13 +1,16 @@
-// Transactional email — Resend integration.
+// Transactional email — Nodemailer / SMTP integration.
 //
-// When RESEND_API_KEY is set, emails go through Resend. When it's unset
-// (typical local dev without keys), `deliver()` logs the message to the
-// server console instead — the rest of the auth flow keeps working and
-// you can copy verification links out of the dev console.
+// Used only for password recovery (forgot-password / reset-password). Signup
+// no longer sends email; that flow was removed when we dropped the email
+// verification gate.
+//
+// SMTP_HOST, SMTP_USER, SMTP_PASS must be configured at runtime. When any of
+// them are missing, `deliver()` logs the message to the server console
+// instead so local dev keeps working without real credentials.
 
-import { Resend } from "resend";
+import nodemailer, { type Transporter } from "nodemailer";
 
-const FROM = process.env.EMAIL_FROM || "Kopahi <onboarding@resend.dev>";
+const FROM = process.env.EMAIL_FROM || process.env.SMTP_USER || "";
 const REPLY_TO = process.env.EMAIL_REPLY_TO || "info@kopahi.com";
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
 
@@ -18,73 +21,53 @@ interface SendArgs {
   html?: string;
 }
 
-// Lazy-construct the Resend client so a missing key doesn't crash module
-// load — we only fail at send-time, and we fall back to the console logger.
-let resendClient: Resend | null = null;
-function getResend(): Resend | null {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return null;
-  if (!resendClient) resendClient = new Resend(apiKey);
-  return resendClient;
+let transporter: Transporter | null = null;
+function getTransporter(): Transporter | null {
+  if (transporter) return transporter;
+
+  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  const port = Number(process.env.SMTP_PORT) || 587;
+
+  if (!host || !user || !pass) return null;
+
+  transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // implicit TLS on 465; STARTTLS on 587/25
+    auth: { user, pass },
+  });
+
+  return transporter;
 }
 
 async function deliver({ to, subject, text, html }: SendArgs): Promise<void> {
-  const client = getResend();
+  const t = getTransporter();
 
-  if (!client) {
-    console.log("\n────── [email:stub] ──────");
+  if (!t) {
+    console.log("\n────── [email:stub — SMTP not configured] ──────");
     console.log(`To:      ${to}`);
-    console.log(`From:    ${FROM}`);
+    console.log(`From:    ${FROM || "(unset)"}`);
     console.log(`Subject: ${subject}`);
     console.log(text);
-    console.log("──────────────────────────\n");
+    console.log("─────────────────────────────────────────────────\n");
     return;
   }
 
   try {
-    const { data, error } = await client.emails.send({
-      from: FROM,
+    const info = await t.sendMail({
+      from: FROM || undefined,
       to,
       replyTo: REPLY_TO,
       subject,
       text,
       ...(html ? { html } : {}),
     });
-    if (error) {
-      console.error("[email] Resend returned error:", error);
-    } else if (data?.id) {
-      console.log(`[email] sent id=${data.id} to=${to} subject="${subject}"`);
-    }
+    console.log(`[email] sent id=${info.messageId} to=${to} subject="${subject}"`);
   } catch (e) {
-    console.error("[email] Resend send threw:", e);
+    console.error("[email] SMTP send failed:", e);
   }
-}
-
-export async function sendVerificationEmail({
-  to,
-  name,
-  token,
-}: {
-  to: string;
-  name: string;
-  token: string;
-}) {
-  const url = `${APP_URL}/verify-email?token=${token}`;
-  await deliver({
-    to,
-    subject: "Verify your Kopahi account",
-    text: [
-      `Hello ${name},`,
-      "",
-      "Welcome to Kopahi. Please verify your email by visiting:",
-      url,
-      "",
-      "This link expires in 24 hours.",
-      "",
-      "— Kopahi",
-    ].join("\n"),
-    html: verifyHtml({ name, url }),
-  });
 }
 
 export async function sendPasswordResetEmail({
@@ -176,18 +159,6 @@ function shell(preview: string, body: string): string {
 
 function ctaButton(href: string, label: string): string {
   return `<a href="${escapeAttr(href)}" style="display:inline-block;padding:12px 28px;background:${MOSS};color:${IVORY};text-decoration:none;font-family:Georgia,serif;font-size:14px;letter-spacing:1px;border-radius:2px;">${escapeHtml(label)}</a>`;
-}
-
-function verifyHtml({ name, url }: { name: string; url: string }) {
-  return shell(
-    "Welcome to Kopahi. Verify your inbox to continue.",
-    `<p>Hello ${escapeHtml(name)},</p>
-     <p>Welcome to Kopahi. To activate your account, please verify your email.</p>
-     <p style="margin:28px 0;">${ctaButton(url, "Verify email")}</p>
-     <p style="font-size:13px;color:#6B6F66;">Or paste this link into your browser:<br/><span style="color:${BAMBOO};word-break:break-all;">${escapeHtml(url)}</span></p>
-     <p style="font-size:13px;color:#6B6F66;">This link expires in 24 hours.</p>
-     <p style="font-family:Georgia,serif;font-style:italic;color:${BAMBOO};">— Kopahi</p>`
-  );
 }
 
 function passwordResetHtml({ name, url }: { name: string; url: string }) {
