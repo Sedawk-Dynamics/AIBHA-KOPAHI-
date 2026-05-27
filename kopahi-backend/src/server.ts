@@ -11,6 +11,7 @@ dotenv.config();
 
 import checkEnv from "./utils/envCheck";
 import logger from "./utils/logger";
+import bootstrapAdmin from "./utils/bootstrapAdmin";
 import requestId from "./middleware/requestId";
 import httpLogger from "./middleware/httpLogger";
 import { connectDB } from "./config/db";
@@ -116,7 +117,16 @@ app.use(errorHandler);
 const PORT = Number(process.env.PORT) || 5000;
 
 connectDB()
-  .then(() => {
+  .then(async () => {
+    // Run one-shot admin promotion if BOOTSTRAP_ADMIN_EMAIL is set. Logged
+    // but non-fatal — server still starts even if the bootstrap fails.
+    try {
+      await bootstrapAdmin();
+    } catch (err) {
+      logger.error("bootstrap_admin_failed", {
+        err: (err as Error).message,
+      });
+    }
     app.listen(PORT, () =>
       logger.info("server_started", { port: PORT, env: process.env.NODE_ENV || "development" })
     );
