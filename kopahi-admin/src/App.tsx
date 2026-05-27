@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import AdminOverview from "./pages/admin/Overview";
 import AdminOrders from "./pages/admin/Orders";
 import AdminProducts from "./pages/admin/Products";
+import AdminApprovals from "./pages/admin/Approvals";
 import AdminVendors from "./pages/admin/Vendors";
 import AdminCustomers from "./pages/admin/Customers";
 import AdminAnalytics from "./pages/admin/Analytics";
@@ -36,6 +37,7 @@ export default function App() {
       />
       <Route path="/admin/orders" element={<ProtectedRoute allow={["admin"]}><AdminOrders /></ProtectedRoute>} />
       <Route path="/admin/products" element={<ProtectedRoute allow={["admin"]}><AdminProducts /></ProtectedRoute>} />
+      <Route path="/admin/approvals" element={<ProtectedRoute allow={["admin"]}><AdminApprovals /></ProtectedRoute>} />
       <Route path="/admin/vendors" element={<ProtectedRoute allow={["admin"]}><AdminVendors /></ProtectedRoute>} />
       <Route path="/admin/customers" element={<ProtectedRoute allow={["admin"]}><AdminCustomers /></ProtectedRoute>} />
       <Route path="/admin/analytics" element={<ProtectedRoute allow={["admin"]}><AdminAnalytics /></ProtectedRoute>} />

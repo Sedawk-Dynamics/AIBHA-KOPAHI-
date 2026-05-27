@@ -127,13 +127,9 @@ export const POST = withErrorHandling("auth/login", async (req: NextRequest) => 
     return genericError();
   }
 
-  if (!user.emailVerified) {
-    return fail(
-      "EMAIL_NOT_VERIFIED",
-      "Please verify your email before signing in.",
-      403
-    );
-  }
+  // Email verification gate intentionally removed — accounts are usable
+  // immediately on signup. Password recovery is the only email-dependent
+  // flow that remains.
 
   // Successful sign-in: clear lockout counters, stamp tracking.
   await prisma.user.update({

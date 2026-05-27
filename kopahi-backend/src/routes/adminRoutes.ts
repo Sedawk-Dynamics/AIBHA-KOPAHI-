@@ -146,6 +146,82 @@ router.delete(
   })
 );
 
+/* ─────────────────────────────────────────────────────────────────────
+ *  PRODUCT APPROVAL WORKFLOW
+ *
+ *  Vendor-created products land in PENDING; admin approves/rejects from
+ *  the queue. Only APPROVED + isActive products show up on the customer
+ *  site (filter lives in productRoutes.ts).
+ * ────────────────────────────────────────────────────────────────────*/
+
+router.get(
+  "/products/pending",
+  asyncHandler(async (req, res) => {
+    const { count, page, pages, items } = await db.products.list(
+      { approvalStatus: "PENDING" },
+      {
+        page: req.query.page as string,
+        pageSize: req.query.pageSize as string,
+        includeVendor: true,
+      }
+    );
+    res.json({ success: true, page, pages, count, products: items });
+  })
+);
+
+router.post(
+  "/products/:id/approve",
+  asyncHandler(async (req, res) => {
+    const product = await db.products.findById(String(req.params.id));
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+    const updated = await db.products.updateById(String(req.params.id), {
+      approvalStatus: "APPROVED",
+      approvedBy: String(req.user.id),
+      approvedAt: new Date(),
+      rejectionReason: null,
+    });
+    await recordAudit(req, {
+      action: "admin.product_approve",
+      targetType: "Product",
+      targetId: String(req.params.id),
+      metadata: { name: product.name },
+    });
+    res.json({ success: true, message: "Product approved", product: updated });
+  })
+);
+
+router.post(
+  "/products/:id/reject",
+  asyncHandler(async (req, res) => {
+    const product = await db.products.findById(String(req.params.id));
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+    const reason = String(req.body?.reason || "").trim();
+    if (!reason) {
+      return res.status(400).json({
+        success: false,
+        message: "A rejection reason is required (body.reason).",
+      });
+    }
+    const updated = await db.products.updateById(String(req.params.id), {
+      approvalStatus: "REJECTED",
+      rejectionReason: reason,
+      approvedBy: null,
+      approvedAt: null,
+    });
+    await recordAudit(req, {
+      action: "admin.product_reject",
+      targetType: "Product",
+      targetId: String(req.params.id),
+      metadata: { name: product.name, reason },
+    });
+    res.json({ success: true, message: "Product rejected", product: updated });
+  })
+);
+
 /* Headline KPIs + categories + top products for the admin Analytics page. */
 router.get(
   "/analytics",

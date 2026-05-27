@@ -136,6 +136,59 @@ export const vendorProducts = async (): Promise<ApiProduct[]> => {
 };
 
 /**
+ * GET /api/admin/products/pending — list products awaiting admin approval.
+ * Includes the vendor relation so the admin queue can show who submitted.
+ */
+export const listPendingProducts = async (): Promise<ProductListResult> => {
+  try {
+    const res = await api.get<ApiPaginatedResponse<"products", ApiProduct>>(
+      "/api/admin/products/pending",
+      { params: { pageSize: 50 } }
+    );
+    return {
+      products: res.data.products,
+      page: res.data.page,
+      pages: res.data.pages,
+      count: res.data.count,
+    };
+  } catch (err) {
+    throw toApiError(err);
+  }
+};
+
+/**
+ * POST /api/admin/products/:id/approve — admin approves a pending product.
+ */
+export const approveProduct = async (id: string): Promise<ApiProduct> => {
+  try {
+    const res = await api.post<ApiResource<"product", ApiProduct>>(
+      `/api/admin/products/${id}/approve`
+    );
+    return res.data.product;
+  } catch (err) {
+    throw toApiError(err);
+  }
+};
+
+/**
+ * POST /api/admin/products/:id/reject — admin rejects with a reason.
+ */
+export const rejectProduct = async (
+  id: string,
+  reason: string
+): Promise<ApiProduct> => {
+  try {
+    const res = await api.post<ApiResource<"product", ApiProduct>>(
+      `/api/admin/products/${id}/reject`,
+      { reason }
+    );
+    return res.data.product;
+  } catch (err) {
+    throw toApiError(err);
+  }
+};
+
+/**
  * POST /api/products/upload — multipart upload of a single image. Backend
  * uses Cloudinary if configured, otherwise saves to /uploads/products.
  * Returns the public URL of the saved image.

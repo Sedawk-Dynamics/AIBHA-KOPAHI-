@@ -73,17 +73,17 @@ export async function authFetch<T>(
 
 export const authClient = {
   signupCustomer: (input: Record<string, unknown>) =>
-    authFetch<{ message: string; email: string }>(
+    authFetch<{ user: AuthClientUser; accessToken: string }>(
       "/api/auth/signup/customer",
       { method: "POST", body: JSON.stringify(input) }
     ),
   signupVendor: (input: Record<string, unknown>) =>
-    authFetch<{ message: string; email: string }>(
+    authFetch<{ user: AuthClientUser; accessToken: string }>(
       "/api/auth/signup/vendor",
       { method: "POST", body: JSON.stringify(input) }
     ),
   signupAdmin: (input: Record<string, unknown>) =>
-    authFetch<{ message: string; email: string }>(
+    authFetch<{ user: AuthClientUser; accessToken: string }>(
       "/api/auth/signup/admin",
       { method: "POST", body: JSON.stringify(input) }
     ),
@@ -110,16 +110,9 @@ export const authClient = {
       method: "POST",
       body: JSON.stringify({ token, password }),
     }),
-  verifyEmail: (token: string) =>
-    authFetch<{ message: string; role: string }>("/api/auth/verify-email", {
-      method: "POST",
-      body: JSON.stringify({ token }),
-    }),
-  resendVerification: (email: string) =>
-    authFetch<{ message: string }>("/api/auth/resend-verification", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    }),
+  // Email verification routes were removed — signup auto-logs the user
+  // in and emailVerified is set to true at creation time. Password recovery
+  // is the only remaining email-dependent flow.
   changePassword: (currentPassword: string, newPassword: string) =>
     authFetch<{ message: string }>("/api/auth/change-password", {
       method: "POST",
