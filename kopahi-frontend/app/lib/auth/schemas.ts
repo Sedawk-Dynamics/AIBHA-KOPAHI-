@@ -59,6 +59,18 @@ export const vendorSignupSchema = customerSignupSchema.extend({
   }),
 });
 
+// Admin signup is gated by a single-use, email-locked invite token issued
+// by another admin via POST /api/admin/invites. The submitted email must
+// match the invite's email; the server ignores any mismatch.
+export const adminSignupSchema = customerSignupSchema.extend({
+  token: z.string().length(64),
+  phone: phoneSchema, // required for admins
+});
+
+export const createAdminInviteSchema = z.object({
+  email: emailSchema,
+});
+
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1).max(128),

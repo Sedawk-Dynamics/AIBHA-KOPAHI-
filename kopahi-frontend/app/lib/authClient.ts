@@ -82,6 +82,16 @@ export const authClient = {
       "/api/auth/signup/vendor",
       { method: "POST", body: JSON.stringify(input) }
     ),
+  signupAdmin: (input: Record<string, unknown>) =>
+    authFetch<{ message: string; email: string }>(
+      "/api/auth/signup/admin",
+      { method: "POST", body: JSON.stringify(input) }
+    ),
+  createAdminInvite: (email: string) =>
+    authFetch<{ inviteUrl: string; email: string; expiresAt: string }>(
+      "/api/admin/invites",
+      { method: "POST", body: JSON.stringify({ email }) }
+    ),
   login: (email: string, password: string) =>
     authFetch<{ user: AuthClientUser; accessToken: string }>(
       "/api/auth/login",

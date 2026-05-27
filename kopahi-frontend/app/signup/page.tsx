@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { authClient } from "../lib/authClient";
 
 const TAGLINES = [
   "Where every leaf has a name.",
@@ -125,6 +126,30 @@ function SignupInner() {
     if (!validate()) return;
     setLoading(true);
     try {
+      if (role === "admin") {
+        if (!inviteParam) {
+          throw new Error(
+            "Admin signup requires a valid invite link. Ask another admin to issue one."
+          );
+        }
+        const res = await authClient.signupAdmin({
+          token: inviteParam,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          password: form.password,
+          acceptTerms: true,
+        });
+        if (!res.success) {
+          throw new Error(res.error?.message ?? "Admin signup failed.");
+        }
+        // Admin signup is invite-gated and bypasses email verification, so
+        // the new admin can sign in immediately.
+        router.push(
+          `/login?registered=admin&email=${encodeURIComponent(form.email)}`
+        );
+        return;
+      }
       const registered = await register({
         name: form.name,
         email: form.email,

@@ -130,9 +130,29 @@ model User {
   emailVerificationTokens EmailVerificationToken[]
   refreshTokens           RefreshToken[]
   auditLogs               AuthAuditLog[]
+  adminInvitesIssued      AdminInvite[]            @relation("AdminInvitesIssued")
 
   @@index([email])
   @@index([role])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+//   ADMIN INVITE — single-use, email-locked invite tokens for admin signup.
+//   Issued by an existing admin; consumed by POST /api/auth/signup/admin.
+// ─────────────────────────────────────────────────────────────────────────
+
+model AdminInvite {
+  id        String    @id @default(cuid())
+  email     String
+  tokenHash String    @unique
+  invitedBy String
+  inviter   User      @relation("AdminInvitesIssued", fields: [invitedBy], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+  @@index([tokenHash])
 }
 
 // ─────────────────────────────────────────────────────────────────────────
