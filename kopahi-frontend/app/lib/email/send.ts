@@ -96,7 +96,7 @@ export async function sendPasswordResetEmail({
   name: string;
   token: string;
 }) {
-  const url = `${APP_URL}/reset-password?token=${token}`;
+  const url = `${APP_URL}/reset-password/${token}`;
   await deliver({
     to,
     subject: "Reset your Kopahi password",
