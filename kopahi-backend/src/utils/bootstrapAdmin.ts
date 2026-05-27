@@ -37,6 +37,19 @@ export default async function bootstrapAdmin(): Promise<void> {
     return;
   }
 
+  // Singleton invariant — only one admin can exist. If a different user is
+  // already admin, refuse to promote a second one.
+  const otherAdmins = await prisma.$queryRaw<Array<{ email: string }>>`
+    SELECT email FROM "User" WHERE role = 'admin' AND id <> ${current.id}
+  `;
+  if (otherAdmins.length > 0) {
+    logger.error("bootstrap_admin_refused_singleton_violation", {
+      email,
+      existingAdminEmail: otherAdmins[0].email,
+    });
+    return;
+  }
+
   await prisma.$executeRaw`
     UPDATE "User"
     SET role = 'admin'::"Role",

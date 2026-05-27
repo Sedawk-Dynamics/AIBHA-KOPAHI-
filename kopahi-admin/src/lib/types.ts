@@ -22,6 +22,8 @@ export type OrderStatus =
 
 export type PaymentStatus = "Pending" | "Paid" | "Failed";
 
+export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED";
+
 /** Decimal columns come over the wire as strings; legacy code path may also send numbers. */
 export type Money = string | number;
 
@@ -71,6 +73,10 @@ export type ApiProduct = {
   vendor?: { id: string; _id: string; name: string; businessName?: string } | null;
   rating?: Money;
   numReviews?: number;
+  approvalStatus?: ApprovalStatus;
+  approvedAt?: string | null;
+  approvedBy?: string | null;
+  rejectionReason?: string | null;
 } & Timestamps;
 
 export type ApiOrderItem = {

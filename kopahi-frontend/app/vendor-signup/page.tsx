@@ -4,13 +4,13 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "../lib/authClient";
+import { useAuth } from "../context/AuthContext";
 
 /* ============================================================
-   VENDOR SIGNUP — POST /api/auth/register-vendor
-   Vendors must verify their email before they can sign in
-   (backend gate). On success we send them to /login with a
-   ?registered=vendor flag so the login page can show a notice.
-   File: app/vendor-signup/page.tsx
+   VENDOR SIGNUP — POST /api/auth/signup/vendor
+   Signup auto-logs the vendor in. The new vendor lands on
+   /dashboard immediately; their Vendor row starts in
+   PENDING_REVIEW status until an admin approves them.
 ============================================================ */
 
 const passwordPolicy = (pw: string): string | null => {
@@ -24,6 +24,7 @@ const passwordPolicy = (pw: string): string | null => {
 
 export default function VendorSignupPage() {
   const router = useRouter();
+  const { setSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -92,10 +93,9 @@ export default function VendorSignupPage() {
       return;
     }
 
-    // Anti-enumeration ack — no token returned. Vendor must verify email.
-    router.push(
-      `/login?registered=vendor&email=${encodeURIComponent(form.email)}`
-    );
+    // Auto-login the new vendor and land them on the dashboard.
+    setSession(res.data.user, res.data.accessToken);
+    router.push("/dashboard");
   };
 
   const passwordStrength = () => {

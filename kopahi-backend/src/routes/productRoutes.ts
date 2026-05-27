@@ -32,7 +32,10 @@ router.post("/upload", protect, vendorOrAdmin, upload.single("image"), (req: Req
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const filter: Record<string, unknown> = { isActive: true };
+    const filter: Record<string, unknown> = {
+      isActive: true,
+      approvalStatus: "APPROVED",
+    };
     if (req.query.keyword) {
       filter.name = { contains: escapeRegex(req.query.keyword), mode: "insensitive" };
     }
@@ -43,8 +46,16 @@ router.get(
     // Admin Products view passes ?includeVendor=true to populate the
     // vendor relation in the response.
     const includeVendor = req.query.includeVendor === "true";
-    // When listing for admin, also surface inactive products so the toggle is visible.
-    if (req.query.all === "true") delete filter.isActive;
+    // ?all=true drops both visibility filters so admin can see inactive and
+    // pending products in their management view.
+    if (req.query.all === "true") {
+      delete filter.isActive;
+      delete filter.approvalStatus;
+    }
+    // ?approvalStatus=PENDING|APPROVED|REJECTED — explicit override for admin queue views.
+    if (typeof req.query.approvalStatus === "string") {
+      filter.approvalStatus = req.query.approvalStatus;
+    }
 
     const { count, page, pages, items } = await db.products.list(filter, {
       page: req.query.page as string,
@@ -85,7 +96,19 @@ router.post(
   asyncHandler(async (req, res) => {
     const data = { ...req.body };
     if (!data.slug && data.name) data.slug = `${slugify(data.name)}-${Date.now()}`;
-    if (req.user.role === "vendor") data.vendorId = String(req.user.id);
+    if (req.user.role === "vendor") {
+      data.vendorId = String(req.user.id);
+      // Vendor-created products always start PENDING regardless of payload.
+      data.approvalStatus = "PENDING";
+      delete data.approvedAt;
+      delete data.approvedBy;
+      delete data.rejectionReason;
+    } else if (req.user.role === "admin") {
+      // Admin-created products are auto-approved — admin IS the approver.
+      data.approvalStatus = "APPROVED";
+      data.approvedBy = String(req.user.id);
+      data.approvedAt = new Date();
+    }
     // Map old `vendor` field name if frontend still sends it
     if (data.vendor && !data.vendorId) {
       data.vendorId = String(data.vendor);
@@ -99,7 +122,10 @@ router.post(
       action: "product.create",
       targetType: "Product",
       targetId: String(product.id),
-      metadata: { name: product.name },
+      metadata: {
+        name: product.name,
+        approvalStatus: (product as { approvalStatus?: string }).approvalStatus,
+      },
     });
     res.status(201).json({ success: true, message: "Product created", product });
   })
@@ -124,7 +150,22 @@ router.put(
         .json({ success: false, message: "You can only edit your own products" });
     }
     const updates = { ...req.body };
-    if (req.user.role === "vendor") delete updates.vendorId;
+    if (req.user.role === "vendor") {
+      delete updates.vendorId;
+      // Any vendor edit puts the product back into the review queue, even if
+      // it was previously approved. Vendors can't self-approve.
+      updates.approvalStatus = "PENDING";
+      updates.approvedAt = null;
+      updates.approvedBy = null;
+      updates.rejectionReason = null;
+    } else if (req.user.role === "admin") {
+      // Approval state changes go through dedicated approve/reject routes
+      // for the audit trail — strip them here so a generic PUT can't bypass.
+      delete updates.approvalStatus;
+      delete updates.approvedAt;
+      delete updates.approvedBy;
+      delete updates.rejectionReason;
+    }
     delete updates.vendor;
     const updated = await db.products.updateById(String(req.params.id), updates);
     await recordAudit(req, {

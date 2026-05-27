@@ -2,11 +2,15 @@ import type { NextRequest } from "next/server";
 import { prisma } from "../../../../lib/db";
 import { adminSignupSchema } from "../../../../lib/auth/schemas";
 import { hashPassword } from "../../../../lib/auth/password";
-import { hashToken } from "../../../../lib/auth/tokens";
+import { signAccessToken, signRefreshToken } from "../../../../lib/auth/jwt";
+import { generateOpaqueToken, hashToken } from "../../../../lib/auth/tokens";
+import { setAuthCookies } from "../../../../lib/auth/cookies";
 import { checkRateLimit } from "../../../../lib/auth/rate-limit";
 import { getRequestContext } from "../../../../lib/auth/request-context";
 import { logAudit } from "../../../../lib/auth/audit";
 import { created, fail, withErrorHandling } from "../../../../lib/auth/response";
+
+const REFRESH_MS = 30 * 24 * 60 * 60 * 1000;
 
 export const POST = withErrorHandling("auth/signup/admin", async (req: NextRequest) => {
   const { ip, userAgent } = getRequestContext(req);
@@ -27,6 +31,16 @@ export const POST = withErrorHandling("auth/signup/admin", async (req: NextReque
     return fail("VALIDATION_ERROR", parsed.error.issues[0]?.message ?? "Invalid input.", 400);
   }
   const { token, name, email, phone, password } = parsed.data;
+
+  // Singleton invariant — Kopahi runs with exactly one admin account.
+  const existingAdmin = await prisma.user.findFirst({ where: { role: "admin" } });
+  if (existingAdmin) {
+    return fail(
+      "FORBIDDEN",
+      "An admin account already exists. Kopahi allows only one admin.",
+      403
+    );
+  }
 
   const invite = await prisma.adminInvite.findUnique({
     where: { tokenHash: hashToken(token) },
@@ -67,10 +81,11 @@ export const POST = withErrorHandling("auth/signup/admin", async (req: NextReque
         phone,
         passwordHash,
         role: "admin",
-        // Invite-based signup is itself the verification step — the inviter
-        // vouched for this email by issuing the token.
+        isSuperAdmin: true,
         emailVerified: true,
         emailVerifiedAt: new Date(),
+        lastLoginAt: new Date(),
+        lastLoginIp: ip,
       },
     });
     await tx.adminInvite.update({
@@ -79,6 +94,28 @@ export const POST = withErrorHandling("auth/signup/admin", async (req: NextReque
     });
     return u;
   });
+
+  // Auto-login the new admin.
+  const accessToken = signAccessToken({
+    sub: user.id,
+    email: user.email,
+    role: "ADMIN",
+    isSuperAdmin: true,
+    vendorStatus: null,
+    onboardingComplete: user.onboardingComplete,
+  });
+  const refreshOpaque = generateOpaqueToken();
+  const refreshRow = await prisma.refreshToken.create({
+    data: {
+      userId: user.id,
+      tokenHash: hashToken(refreshOpaque),
+      expiresAt: new Date(Date.now() + REFRESH_MS),
+      userAgent,
+      ipAddress: ip,
+    },
+  });
+  const refreshToken = signRefreshToken(user.id, refreshRow.id);
+  await setAuthCookies(accessToken, refreshToken);
 
   await logAudit({
     userId: user.id,
@@ -89,7 +126,16 @@ export const POST = withErrorHandling("auth/signup/admin", async (req: NextReque
   });
 
   return created({
-    message: "Admin account created. You can sign in now.",
-    email,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: "ADMIN",
+      isSuperAdmin: true,
+      vendorStatus: null,
+      onboardingComplete: user.onboardingComplete,
+    },
+    accessToken,
   });
 });

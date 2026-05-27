@@ -25,7 +25,8 @@ type AuthState = {
     password: string,
     opts?: LoginOpts
   ) => Promise<ApiUser>;
-  register: (payload: RegisterPayload) => Promise<ApiUser | null>;
+  register: (payload: RegisterPayload) => Promise<ApiUser>;
+  setSession: (user: AuthClientUser, accessToken: string) => ApiUser;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -112,18 +113,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  const register = useCallback(async (payload: RegisterPayload) => {
-    // Anti-enumeration: signup endpoints always return ack-only. Caller
-    // must redirect to /verify-email and wait for the inbox link.
-    const res = await authClient.signupCustomer({
-      ...payload,
-      acceptTerms: payload.acceptTerms ?? true,
-    });
-    if (!res.success) {
-      throw new Error(res.error?.message ?? "Signup failed.");
-    }
-    return null;
-  }, []);
+  const setSession = useCallback(
+    (u: AuthClientUser, accessToken: string): ApiUser => {
+      tokenStore.set(accessToken);
+      const next = toApiUser(u);
+      userStore.set(next);
+      setUser(next);
+      return next;
+    },
+    []
+  );
+
+  const register = useCallback(
+    async (payload: RegisterPayload): Promise<ApiUser> => {
+      const res = await authClient.signupCustomer({
+        ...payload,
+        acceptTerms: payload.acceptTerms ?? true,
+      });
+      if (!res.success) {
+        throw new Error(res.error?.message ?? "Signup failed.");
+      }
+      // Signup auto-logs the user in. Mirror the access token into
+      // localStorage for the legacy Bearer-header callers (cart, orders).
+      const { user: u, accessToken } = res.data;
+      return setSession(u, accessToken);
+    },
+    [setSession]
+  );
 
   const logout = useCallback(async () => {
     try {
@@ -145,8 +161,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<AuthState>(
-    () => ({ user, loading, login, register, logout, refresh }),
-    [user, loading, login, register, logout, refresh]
+    () => ({ user, loading, login, register, setSession, logout, refresh }),
+    [user, loading, login, register, setSession, logout, refresh]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

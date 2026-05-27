@@ -2,14 +2,15 @@ import type { NextRequest } from "next/server";
 import { prisma } from "../../../../lib/db";
 import { customerSignupSchema } from "../../../../lib/auth/schemas";
 import { hashPassword } from "../../../../lib/auth/password";
+import { signAccessToken, signRefreshToken } from "../../../../lib/auth/jwt";
 import { generateOpaqueToken, hashToken } from "../../../../lib/auth/tokens";
+import { setAuthCookies } from "../../../../lib/auth/cookies";
 import { checkRateLimit } from "../../../../lib/auth/rate-limit";
 import { getRequestContext } from "../../../../lib/auth/request-context";
 import { logAudit } from "../../../../lib/auth/audit";
-import { sendVerificationEmail } from "../../../../lib/email/send";
 import { created, fail, withErrorHandling } from "../../../../lib/auth/response";
 
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const REFRESH_MS = 30 * 24 * 60 * 60 * 1000;
 
 export const POST = withErrorHandling("auth/signup/customer", async (req: NextRequest) => {
   const { ip, userAgent } = getRequestContext(req);
@@ -32,15 +33,13 @@ export const POST = withErrorHandling("auth/signup/customer", async (req: NextRe
   }
   const { name, email, phone, password } = parsed.data;
 
-  // Anti-enumeration: identical response whether email is new or existing.
-  const ack = {
-    message: "Account created. Check your email to verify.",
-    email,
-  };
-
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    return created(ack);
+    return fail(
+      "VALIDATION_ERROR",
+      "An account with this email already exists. Sign in instead.",
+      400
+    );
   }
 
   const passwordHash = await hashPassword(password);
@@ -51,24 +50,35 @@ export const POST = withErrorHandling("auth/signup/customer", async (req: NextRe
       name,
       phone: phone ?? "",
       passwordHash,
-      role: "user", // Postgres enum value
+      role: "user",
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
+      lastLoginAt: new Date(),
+      lastLoginIp: ip,
     },
   });
 
-  const rawToken = generateOpaqueToken();
-  await prisma.emailVerificationToken.create({
+  // Issue tokens + set cookies — signup auto-logs the user in.
+  const accessToken = signAccessToken({
+    sub: user.id,
+    email: user.email,
+    role: "CUSTOMER",
+    isSuperAdmin: false,
+    vendorStatus: null,
+    onboardingComplete: user.onboardingComplete,
+  });
+  const refreshOpaque = generateOpaqueToken();
+  const refreshRow = await prisma.refreshToken.create({
     data: {
       userId: user.id,
-      tokenHash: hashToken(rawToken),
-      email: user.email,
-      expiresAt: new Date(Date.now() + ONE_DAY_MS),
+      tokenHash: hashToken(refreshOpaque),
+      expiresAt: new Date(Date.now() + REFRESH_MS),
+      userAgent,
+      ipAddress: ip,
     },
   });
-
-  // Fire-and-forget email send.
-  sendVerificationEmail({ to: email, name, token: rawToken }).catch((e) =>
-    console.error("[auth/signup/customer] email send failed:", e)
-  );
+  const refreshToken = signRefreshToken(user.id, refreshRow.id);
+  await setAuthCookies(accessToken, refreshToken);
 
   await logAudit({
     userId: user.id,
@@ -78,5 +88,17 @@ export const POST = withErrorHandling("auth/signup/customer", async (req: NextRe
     userAgent,
   });
 
-  return created(ack);
+  return created({
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: "CUSTOMER",
+      isSuperAdmin: false,
+      vendorStatus: null,
+      onboardingComplete: user.onboardingComplete,
+    },
+    accessToken,
+  });
 });

@@ -2,14 +2,15 @@ import type { NextRequest } from "next/server";
 import { prisma } from "../../../../lib/db";
 import { vendorSignupSchema } from "../../../../lib/auth/schemas";
 import { hashPassword } from "../../../../lib/auth/password";
+import { signAccessToken, signRefreshToken } from "../../../../lib/auth/jwt";
 import { generateOpaqueToken, hashToken } from "../../../../lib/auth/tokens";
+import { setAuthCookies } from "../../../../lib/auth/cookies";
 import { checkRateLimit } from "../../../../lib/auth/rate-limit";
 import { getRequestContext } from "../../../../lib/auth/request-context";
 import { logAudit } from "../../../../lib/auth/audit";
-import { sendVerificationEmail } from "../../../../lib/email/send";
 import { created, fail, withErrorHandling } from "../../../../lib/auth/response";
 
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const REFRESH_MS = 30 * 24 * 60 * 60 * 1000;
 
 function slugify(input: string): string {
   return input
@@ -49,14 +50,13 @@ export const POST = withErrorHandling("auth/signup/vendor", async (req: NextRequ
   }
   const { name, email, phone, password, businessName, state } = parsed.data;
 
-  const ack = {
-    message: "Vendor account created. Check your email to verify, then complete onboarding.",
-    email,
-  };
-
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    return created(ack);
+    return fail(
+      "VALIDATION_ERROR",
+      "An account with this email already exists. Sign in instead.",
+      400
+    );
   }
 
   const passwordHash = await hashPassword(password);
@@ -69,7 +69,11 @@ export const POST = withErrorHandling("auth/signup/vendor", async (req: NextRequ
       phone,
       passwordHash,
       role: "vendor",
-      businessName, // also kept on User row for backward compat with Express
+      businessName,
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
+      lastLoginAt: new Date(),
+      lastLoginIp: ip,
       vendor: {
         create: {
           businessName,
@@ -82,19 +86,27 @@ export const POST = withErrorHandling("auth/signup/vendor", async (req: NextRequ
     include: { vendor: true },
   });
 
-  const rawToken = generateOpaqueToken();
-  await prisma.emailVerificationToken.create({
+  // Issue tokens + set cookies — signup auto-logs the vendor in.
+  const accessToken = signAccessToken({
+    sub: user.id,
+    email: user.email,
+    role: "VENDOR",
+    isSuperAdmin: false,
+    vendorStatus: user.vendor?.status ?? null,
+    onboardingComplete: user.onboardingComplete,
+  });
+  const refreshOpaque = generateOpaqueToken();
+  const refreshRow = await prisma.refreshToken.create({
     data: {
       userId: user.id,
-      tokenHash: hashToken(rawToken),
-      email: user.email,
-      expiresAt: new Date(Date.now() + ONE_DAY_MS),
+      tokenHash: hashToken(refreshOpaque),
+      expiresAt: new Date(Date.now() + REFRESH_MS),
+      userAgent,
+      ipAddress: ip,
     },
   });
-
-  sendVerificationEmail({ to: email, name, token: rawToken }).catch((e) =>
-    console.error("[auth/signup/vendor] email send failed:", e)
-  );
+  const refreshToken = signRefreshToken(user.id, refreshRow.id);
+  await setAuthCookies(accessToken, refreshToken);
 
   await logAudit({
     userId: user.id,
@@ -104,5 +116,17 @@ export const POST = withErrorHandling("auth/signup/vendor", async (req: NextRequ
     userAgent,
   });
 
-  return created(ack);
+  return created({
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: "VENDOR",
+      isSuperAdmin: false,
+      vendorStatus: user.vendor?.status ?? null,
+      onboardingComplete: user.onboardingComplete,
+    },
+    accessToken,
+  });
 });

@@ -63,7 +63,7 @@ export default function SignupPage() {
 function SignupInner() {
   const router = useRouter();
   const search = useSearchParams();
-  const { register } = useAuth();
+  const { register, setSession } = useAuth();
 
   const inviteParam = search?.get("invite");
   const adminInvite = !!inviteParam;
@@ -143,28 +143,20 @@ function SignupInner() {
         if (!res.success) {
           throw new Error(res.error?.message ?? "Admin signup failed.");
         }
-        // Admin signup is invite-gated and bypasses email verification, so
-        // the new admin can sign in immediately.
-        router.push(
-          `/login?registered=admin&email=${encodeURIComponent(form.email)}`
-        );
+        // Admin signup auto-logs the new admin in — land them on the dashboard.
+        setSession(res.data.user, res.data.accessToken);
+        router.push("/dashboard");
         return;
       }
-      const registered = await register({
+      // Customer signup also auto-logs in; AuthContext.register persists the
+      // session for us and returns the user.
+      await register({
         name: form.name,
         email: form.email,
         password: form.password,
         phone: form.phone,
       });
-      // The hardened backend returns ack-only — no auto-login. Send the
-      // visitor to the "check your inbox" screen with their email pre-filled.
-      // If the backend kept legacy behavior and returned a session, we still
-      // land them on the dashboard.
-      router.push(
-        registered
-          ? "/dashboard"
-          : `/verify-email?email=${encodeURIComponent(form.email)}`
-      );
+      router.push("/dashboard");
     } catch (err) {
       // Surface the actual server message — AuthContext.register throws a
       // plain Error whose message comes from the API response envelope.
