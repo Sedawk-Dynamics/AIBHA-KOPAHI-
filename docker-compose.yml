@@ -45,6 +45,13 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
+      # One-time admin bootstrap / recovery (src/utils/bootstrapAdmin.ts).
+      # Set BOOTSTRAP_ADMIN_EMAIL (+ optional BOOTSTRAP_ADMIN_PASSWORD) in the
+      # Dokploy env, redeploy, then REMOVE them. BCRYPT_COST controls the
+      # password hash cost when a bootstrap password reset is performed.
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      BCRYPT_COST: ${BCRYPT_COST:-12}
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
