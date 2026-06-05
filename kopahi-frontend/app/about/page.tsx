@@ -24,7 +24,7 @@ const ABOUT_FAQS = [
   {
     question: "Who owns Kopahi?",
     answer:
-      "Kopahi is a brand of AIBA AGRI NE LLP, a Limited Liability Partnership registered in India. The leadership team is Barsha Prakash Choudhury and Ashreeta Gogoi (Founders), Trideep Khanikar (Director, Operations) and Prakash Natarajan (Director, Sales & Marketing).",
+      "Kopahi is a brand of AIBA Agri NE LLP, a Limited Liability Partnership registered in India. The leadership team is Barsha Prakash Choudhury and Ashreeta Gogoi (Founders), Trideep Khanikar (Director, Operations) and Prakash Natarajan (Director, Sales & Marketing).",
   },
   {
     question: "Where is Kopahi based?",
@@ -43,48 +43,45 @@ const ABOUT_FAQS = [
   },
 ];
 
-const VALUES = [
-  {
-    title: "Empowerment",
-    body: "Fair-price, long-horizon partnerships with grower and weaver cooperatives. Margins loop back into the soil they came from.",
-    icon: (
-      <svg viewBox="0 0 48 48" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="1.25">
-        <path d="M10 36c4-6 8-9 14-9s10 3 14 9" />
-        <circle cx="24" cy="16" r="6" />
-        <path d="M24 22v14" />
-      </svg>
-    ),
-  },
-  {
-    title: "Authenticity",
-    body: "Only what the geography certifies. Only what the farmer signs off. Every claim is documented, never decorative.",
-    icon: (
-      <svg viewBox="0 0 48 48" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="1.25">
-        <path d="M24 6c8 6 14 12 14 22a14 14 0 0 1-28 0c0-10 6-16 14-22Z" />
-        <path d="M18 26c2 4 6 6 6 6s4-2 6-6" />
-      </svg>
-    ),
-  },
-  {
-    title: "Sustainability",
-    body: "Low-input agriculture, minimal-loss processing, and packaging built to be returned to the earth — not stored in it.",
-    icon: (
-      <svg viewBox="0 0 48 48" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="1.25">
-        <path d="M10 24c0-10 8-18 18-18 0 10-8 18-18 18Z" />
-        <path d="M10 24c0 10 8 18 18 18 0-10-8-18-18-18Z" />
-      </svg>
-    ),
-  },
-  {
-    title: "Traceability",
-    body: "Every SKU maps back to a name, a village, a season. We publish what we know — and admit what we don't yet.",
-    icon: (
-      <svg viewBox="0 0 48 48" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="1.25">
-        <circle cx="24" cy="24" r="16" />
-        <path d="M24 8v32M8 24h32M14 14c4 6 16 6 20 0M14 34c4-6 16-6 20 0" />
-      </svg>
-    ),
-  },
+// ── Canonical content (source of truth: AIBA Agri NE LLP brief) ──
+const ABOUT_US = [
+  "AIBA Agri NE LLP is focused on bringing Assam and Northeast India's GI-certified and indigenous agricultural and handloom products to global markets. We work closely with farmers and weavers to create ethical, transparent, and scalable value chains that respect the region's rich heritage while enabling sustainable growth. Our end-to-end model covers production, aggregation, processing, branding, and distribution, ensuring every product meets high standards of authenticity, quality, and responsible sourcing.",
+  "Through technology-driven traceability, strategic partnerships, and a strong export vision, we empower local communities with fair market access, better pricing, and long-term development opportunities while serving global demand for sustainable and culturally rich products.",
+];
+
+const OPPORTUNITY = [
+  "Global demand is rising for authentic GI-certified products across markets worldwide.",
+  "Consumers increasingly prefer ethnic, indigenous, organic, and responsibly produced and sourced products.",
+  "North East India can meet global demand with its GI offerings.",
+  "Government incentives are driving growth in agri processing and value chains.",
+];
+
+const GAP = [
+  "Limited domestic and global awareness of GI products from North East India.",
+  "Grassroots producers lack access to structured, reliable market platforms.",
+  "Absence of end-to-end market linkage between supply, demand, and distribution.",
+  "Quality standardization, traceability, and branding gaps restrict export readiness.",
+];
+
+const SOLUTION = [
+  "Building domestic and global visibility for North East GI products.",
+  "Providing an accessible aggregation platform that empowers farmers and weavers economically.",
+  "Enabling seamless end-to-end domestic and global market connectivity.",
+  "Enhancing quality, traceability, and value addition for export readiness.",
+];
+
+const WHY_INVESTOR = [
+  "Empowering grassroots communities through ethical value chains.",
+  "Converting agri waste into value.",
+  "Innovation drawn from indigenous resources.",
+  "Technology-driven, AI-enabled agri systems.",
+];
+
+const WHY_CUSTOMER = [
+  "Direct sourcing ensures quality and traceability.",
+  "Authentic GI indigenous product portfolio.",
+  "Experienced, promoter-led execution.",
+  "Mission-driven, agri-passionate team.",
 ];
 
 export default function AboutPage() {
@@ -130,6 +127,23 @@ export default function AboutPage() {
         </section>
 
 
+        {/* ============== WHO WE ARE ============== */}
+        <Section tone="ivory">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <div className="lg:col-span-4">
+              <Eyebrow>Who We Are</Eyebrow>
+              <Headline as="h2" className="mt-4" accent="GI Heritage, Globally.">
+                Northeast India&apos;s
+              </Headline>
+            </div>
+            <div className="lg:col-span-8 space-y-4 text-(--color-ink)/80 leading-relaxed text-base sm:text-lg max-w-prose">
+              {ABOUT_US.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
+          </div>
+        </Section>
+
         {/* ============== TIMELINE ============== */}
         <Section tone="ivory" padded={false} className="section-y" contained={false}>
           <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
@@ -150,41 +164,83 @@ export default function AboutPage() {
         </Section>
 
 
+        {/* ============== OPPORTUNITY · GAP · SOLUTION ============== */}
+        <Section tone="ivory">
+          <div className="max-w-3xl">
+            <Eyebrow>The Landscape</Eyebrow>
+            <Headline as="h2" className="mt-4" accent="A Real Solution.">
+              A Real Opportunity.
+            </Headline>
+          </div>
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { title: "Market Opportunity", items: OPPORTUNITY },
+              { title: "Market Gap", items: GAP },
+              { title: "Our Solution", items: SOLUTION },
+            ].map((col) => (
+              <div
+                key={col.title}
+                className="flex flex-col h-full bg-(--color-ivory-warm) border-x border-b border-(--color-bamboo)/15 border-t-2 border-t-(--color-gold)/55 rounded-sm p-6"
+              >
+                <h3 className="font-display text-xl text-(--color-ink)">{col.title}</h3>
+                <ul className="mt-4 space-y-3">
+                  {col.items.map((it) => (
+                    <li key={it} className="flex gap-3 text-small text-(--color-ink)/80 leading-relaxed">
+                      <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-(--color-gold)" />
+                      <span>{it}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Section>
+
         {/* ============== VISION / MISSION ============== */}
         <Section tone="ivory">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="relative bg-(--color-ivory-warm) p-10 sm:p-14 border border-(--color-bamboo)/15">
               <Eyebrow>Vision</Eyebrow>
               <p className="mt-6 font-display italic text-2xl sm:text-3xl text-(--color-moss) leading-snug">
-                A Northeast India whose heritage is known by name on the world&apos;s most considered shelves — and
-                whose growers are paid as if it always was.
+                Build global markets for Northeast GI produce.
               </p>
             </div>
             <div className="relative bg-(--color-moss) text-(--color-ivory) p-10 sm:p-14 grain">
               <Eyebrow tone="gold">Mission</Eyebrow>
               <p className="mt-6 font-display italic text-2xl sm:text-3xl leading-snug">
-                To source, process, brand and export the GI-certified produce and craft of seven states — under one
-                accountable spine, and at the price the people who grew it deserve.
+                To ethically produce, aggregate, process, brand, and export indigenous agri and weaver products —
+                ensuring quality, traceability, and scalability while empowering farmers and driving regional growth.
               </p>
             </div>
           </div>
         </Section>
 
-        {/* ============== VALUES ============== */}
+        {/* ============== WHY CHOOSE US ============== */}
         <Section tone="bamboo">
-          <Eyebrow>What We Hold</Eyebrow>
-          <Headline as="h2" className="mt-4 max-w-3xl" accent="Four Convictions.">
-            No Slogans.
+          <Eyebrow>Why Choose Us</Eyebrow>
+          <Headline as="h2" className="mt-4 max-w-3xl" accent="Two Perspectives.">
+            One Conviction.
           </Headline>
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {VALUES.map((v) => (
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { title: "Investor Perspective", items: WHY_INVESTOR },
+              { title: "Customer Perspective", items: WHY_CUSTOMER },
+            ].map((col) => (
               <div
-                key={v.title}
-                className="bg-(--color-ivory) p-8 sm:p-10 border border-(--color-bamboo)/20 hover:border-(--color-gold) transition-colors"
+                key={col.title}
+                className="bg-(--color-ivory) p-8 sm:p-10 border border-(--color-bamboo)/20"
               >
-                <span className="text-(--color-gold-dark)">{v.icon}</span>
-                <h3 className="mt-6 font-display text-2xl text-(--color-ink)">{v.title}</h3>
-                <p className="mt-3 text-(--color-ink)/75 leading-relaxed">{v.body}</p>
+                <p className="eyebrow text-(--color-bamboo)">{col.title}</p>
+                <ul className="mt-6 space-y-4">
+                  {col.items.map((it) => (
+                    <li key={it} className="flex gap-3 text-(--color-ink)/80 leading-relaxed">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-(--color-gold-dark) shrink-0 mt-1">
+                        <path d="M12 3c0 6 3 9 9 9-6 0-9 3-9 9 0-6-3-9-9-9 6 0 9-3 9-9z" fill="currentColor" />
+                      </svg>
+                      <span>{it}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
@@ -205,6 +261,28 @@ export default function AboutPage() {
           </div>
         </Section>
 
+
+        {/* ============== SUSTAINABLE FARMER-LED VALUE ============== */}
+        <Section tone="moss" grain>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            <div className="lg:col-span-5">
+              <Eyebrow tone="gold">Our Impact</Eyebrow>
+              <Headline as="h2" tone="ivory" className="mt-4" accent="Farmer-Led Value.">
+                Creating Sustainable
+              </Headline>
+            </div>
+            <div className="lg:col-span-7">
+              <p className="font-display italic text-(--color-gold) text-xl sm:text-2xl leading-snug">
+                Empowering fair farmer incomes while delivering traceable GI products from Northeast India globally.
+              </p>
+              <p className="mt-5 text-(--color-ivory)/80 leading-relaxed max-w-prose">
+                Kopahi empowers farmers with fair incomes, reduces post-harvest losses, and formalizes GI value chains —
+                delivering authentic, traceable agri products globally while positioning Northeast India as a trusted,
+                sustainable sourcing destination worldwide.
+              </p>
+            </div>
+          </div>
+        </Section>
 
         <Section tone="ivory">
           <div className="mx-auto max-w-3xl">
