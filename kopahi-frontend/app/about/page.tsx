@@ -8,7 +8,7 @@ import WhatsAppFab from "../components/marketing/WhatsAppFab";
 import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
-import Carousel from "../components/marketing/Carousel";
+import MilestoneTimeline from "../components/marketing/MilestoneTimeline";
 import FounderCard from "../components/marketing/FounderCard";
 import { TIMELINE, FOUNDERS } from "../lib/marketing";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, ldScript } from "../lib/seo";
@@ -102,27 +102,30 @@ export default function AboutPage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(faqLd)} />
         {/* ============== HERO ============== */}
-        <section className="relative pt-28 sm:pt-32 pb-12 sm:pb-16 overflow-hidden">
-          <div className="absolute inset-0 -z-10">
-            <Image
-              src="/products/tea-garden.jpg"
-              alt="A Jorhat tea garden at first light"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover opacity-[0.18]"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-(--color-ivory) via-(--color-ivory)/85 to-(--color-ivory)" />
-          </div>
-          <div className="mx-auto max-w-shell px-5 lg:px-8">
-            <Eyebrow>About Kopahi</Eyebrow>
-            <Headline as="h1" className="mt-4 max-w-4xl" accent="Reaching For The World.">
-              Rooted In Seven States.
-            </Headline>
-            <p className="mt-6 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
-              We are an AIBA Agri NE LLP brand. We work where the produce is grown, where the silk is woven, where the
-              tea is rolled — and only there.
-            </p>
+        <section className="pt-28 sm:pt-32 pb-12 sm:pb-16">
+          <div className="mx-auto max-w-shell px-5 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            <div className="lg:col-span-7">
+              <Eyebrow>About Kopahi</Eyebrow>
+              <Headline as="h1" className="mt-4" accent="Reaching For The World.">
+                Rooted In Seven States.
+              </Headline>
+              <p className="mt-6 max-w-xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
+                We are an AIBA Agri NE LLP brand. We work where the produce is grown, where the silk is woven, where the
+                tea is rolled — and only there.
+              </p>
+            </div>
+            <div className="lg:col-span-5">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-(--color-ivory-warm)">
+                <Image
+                  src="/products/tea-garden.jpg"
+                  alt="A Jorhat tea garden at first light"
+                  fill
+                  priority
+                  sizes="(max-width:1024px) 100vw, 40vw"
+                  className="object-cover"
+                />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -142,21 +145,7 @@ export default function AboutPage() {
           </div>
 
           <div className="mt-8">
-            <Carousel ariaLabel="company milestones" fade="ivory">
-              {TIMELINE.map((m, i) => (
-                <article
-                  key={i}
-                  className="flex flex-col w-[78vw] sm:w-[20rem] h-full bg-(--color-ivory-warm) border-x border-b border-(--color-bamboo)/15 border-t-2 border-t-(--color-gold)/60 rounded-sm p-6"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="h-2.5 w-2.5 rounded-full bg-(--color-gold)" aria-hidden="true" />
-                    <p className="eyebrow">{m.year}</p>
-                  </div>
-                  <h3 className="font-display text-xl sm:text-2xl text-(--color-ink) mt-3 leading-tight">{m.title}</h3>
-                  <p className="mt-3 text-small text-(--color-ink)/75 leading-relaxed">{m.body}</p>
-                </article>
-              ))}
-            </Carousel>
+            <MilestoneTimeline items={TIMELINE} />
           </div>
         </Section>
 
