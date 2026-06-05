@@ -10,8 +10,8 @@ import WhatsAppFab from "../components/marketing/WhatsAppFab";
 import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
-import OrganicDivider from "../components/marketing/OrganicDivider";
 import StatCallout from "../components/marketing/StatCallout";
+import Carousel from "../components/marketing/Carousel";
 import Marquee from "../components/marketing/Marquee";
 import B2BInquiryForm from "./B2BInquiryForm";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, ldScript } from "../lib/seo";
@@ -140,7 +140,7 @@ export default function B2BPage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(faqLd)} />
         {/* ============== 1 · HERO ============== */}
-        <section className="relative bg-(--color-moss) text-(--color-ivory) grain pt-32 sm:pt-40 pb-20 sm:pb-28 overflow-hidden">
+        <section className="relative bg-(--color-moss) text-(--color-ivory) grain pt-28 sm:pt-32 pb-12 sm:pb-16 overflow-hidden">
           <div className="absolute inset-0 -z-10">
             <Image
               src="/products/youngs.webp"
@@ -224,43 +224,45 @@ export default function B2BPage() {
           </div>
         </Section>
 
-        <OrganicDivider />
 
         {/* ============== 4 · WHY PARTNER ============== */}
-        <Section tone="ivory">
-          <div className="max-w-3xl">
-            <Eyebrow>→ 01 · Why Choose Us</Eyebrow>
-            <Headline as="h2" className="mt-6" accent="With Kopahi?">
-              Why Partner
-            </Headline>
-            <p className="mt-6 text-(--color-ink)/75 leading-relaxed max-w-prose text-lg">
-              From sourcing to shipping, we handle every step so you can focus on selling. Built for buyers who care
-              about authenticity, traceability, and consistency.
-            </p>
+        <Section tone="ivory" padded={false} className="section-y" contained={false}>
+          <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
+            <div className="max-w-3xl">
+              <Eyebrow>→ 01 · Why Choose Us</Eyebrow>
+              <Headline as="h2" className="mt-4" accent="With Kopahi?">
+                Why Partner
+              </Headline>
+              <p className="mt-4 text-(--color-ink)/75 leading-relaxed max-w-prose text-base sm:text-lg">
+                From sourcing to shipping, we handle every step so you can focus on selling. Built for buyers who care
+                about authenticity, traceability, and consistency.
+              </p>
+            </div>
           </div>
 
-          <div className="mt-20 flex flex-col gap-20">
-            {REASONS.map((r, i) => (
-              <div key={r.n} className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center">
-                <div className={`md:col-span-6 relative aspect-[5/4] overflow-hidden ${i % 2 ? "md:order-2" : ""}`}>
-                  <Image src={r.image} alt={r.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
-                </div>
-                <div className={`md:col-span-6 relative ${i % 2 ? "md:order-1 md:pr-4" : "md:pl-4"}`}>
-                  <span
-                    aria-hidden="true"
-                    className="font-display italic text-[clamp(5rem,10vw,9rem)] leading-none text-(--color-bamboo)/15 absolute -top-12 left-0 select-none pointer-events-none"
-                  >
-                    {r.n}.
-                  </span>
-                  <h3 className="font-display text-2xl sm:text-3xl text-(--color-ink) mt-4">{r.title}</h3>
-                  <p className="mt-4 text-(--color-ink)/75 leading-relaxed max-w-prose">{r.body}</p>
-                </div>
-              </div>
-            ))}
+          <div className="mt-8">
+            <Carousel ariaLabel="reasons to partner with Kopahi" fade="ivory">
+              {REASONS.map((r) => (
+                <article
+                  key={r.n}
+                  className="flex flex-col w-[80vw] sm:w-[21rem] h-full bg-(--color-ivory) border border-(--color-bamboo)/15 rounded-sm overflow-hidden"
+                >
+                  <div className="relative aspect-[5/4] overflow-hidden">
+                    <Image src={r.image} alt={r.title} fill sizes="(max-width: 640px) 80vw, 21rem" className="object-cover" />
+                    <span aria-hidden="true" className="absolute top-3 left-3 font-display italic text-2xl text-(--color-ivory) drop-shadow">
+                      {r.n}
+                    </span>
+                  </div>
+                  <div className="flex flex-col flex-1 p-5">
+                    <h3 className="font-display text-xl text-(--color-ink) leading-tight">{r.title}</h3>
+                    <p className="mt-2 text-small text-(--color-ink)/75 leading-relaxed">{r.body}</p>
+                  </div>
+                </article>
+              ))}
+            </Carousel>
           </div>
         </Section>
 
-        <OrganicDivider />
 
         {/* ============== 5 · HOW IT WORKS ============== */}
         <Section tone="ivory" id="how">
@@ -270,7 +272,7 @@ export default function B2BPage() {
               From Inquiry To Your Warehouse —
             </Headline>
           </div>
-          <ol className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-6 relative">
+          <ol className="mt-10 grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-6 relative">
             {STEPS.map((s, i) => (
               <li key={s.n} className="relative">
                 <span className="font-display italic text-(--color-gold) text-3xl">{s.n}</span>
@@ -292,7 +294,7 @@ export default function B2BPage() {
           <Headline as="h2" className="mt-6 max-w-3xl" accent="Solutions">
             Industry-Specific
           </Headline>
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
             {INDUSTRIES.map((ind) => (
               <article key={ind.title} className="group bg-(--color-ivory) border border-(--color-bamboo)/20 overflow-hidden">
                 <div className="relative aspect-[4/3] overflow-hidden">
@@ -340,7 +342,7 @@ export default function B2BPage() {
             </p>
           </div>
 
-          <div className="mt-16 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             <aside className="lg:col-span-5">
               <p className="eyebrow">Why partner with us</p>
               <ul className="mt-6 space-y-4">
@@ -374,7 +376,7 @@ export default function B2BPage() {
           <Headline as="h2" className="mt-6 max-w-3xl" accent="Growing Businesses">
             Built For
           </Headline>
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
             {BENEFITS.map((b, i) => (
               <article key={b.title} className="bg-(--color-ivory-warm) border border-(--color-bamboo)/20 p-10">
                 <span className="font-display italic text-(--color-bamboo)/45 text-4xl">0{i + 1}</span>
@@ -417,9 +419,9 @@ export default function B2BPage() {
             <Headline as="h2" className="mt-6" accent="Buyers Ask Us.">
               The Questions
             </Headline>
-            <dl className="mt-12 divide-y divide-(--color-bamboo)/25 border-y border-(--color-bamboo)/25">
+            <dl className="mt-8 divide-y divide-(--color-bamboo)/25 border-y border-(--color-bamboo)/25">
               {B2B_FAQS.map((q) => (
-                <div key={q.question} className="py-8">
+                <div key={q.question} className="py-6">
                   <dt className="font-display text-xl text-(--color-ink)">{q.question}</dt>
                   <dd className="mt-3 text-(--color-ink)/75 leading-relaxed">{q.answer}</dd>
                 </div>
