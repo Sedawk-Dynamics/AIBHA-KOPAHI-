@@ -410,9 +410,6 @@ export default function Home() {
                   className="object-cover ken-burns"
                 />
               </div>
-              <p className="mt-4 font-display italic text-(--color-bamboo) text-sm">
-                A Tea Picker· Sualkuchi, Assam{" "}
-              </p>
             </div>
           </div>
         </Section>

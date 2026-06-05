@@ -32,21 +32,20 @@ export default function ContactPage() {
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         {/* ============== HERO ============== */}
-        <section className="pt-28 sm:pt-32 pb-12">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+        <section className="pt-28 sm:pt-32 pb-12 sm:pb-16">
+          <div className="mx-auto max-w-shell px-5 lg:px-8">
             <Eyebrow>Contact</Eyebrow>
-            <Headline as="h1" className="mt-6 max-w-4xl" accent="A Working Day.">
+            <Headline as="h1" className="mt-4 max-w-4xl" accent="A Working Day.">
               We Answer Within
             </Headline>
-            <p className="mt-10 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
+            <p className="mt-6 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
               For partnership, export, stockist, sourcing or press — please use whichever route is closest to you.
             </p>
           </div>
         </section>
 
-
         <Section tone="ivory">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             {/* ============ FORM ============ */}
             <div className="lg:col-span-7">
               <Suspense fallback={null}>
