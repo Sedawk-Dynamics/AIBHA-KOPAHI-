@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
@@ -109,9 +110,17 @@ function MenuLink({ href, children, onClick }: { href: string; children: React.R
   );
 }
 
+/** Active when the path matches exactly, or (for non-root nav) is a nested route. */
+function isActivePath(pathname: string | null, href: string) {
+  if (!pathname) return false;
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export default function MarketingHeader() {
   const { user, logout } = useAuth();
   const { count } = useCart();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -130,7 +139,7 @@ export default function MarketingHeader() {
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-(--color-ivory)/90 backdrop-blur-md border-b border-(--color-bamboo)/15"
+          ? "bg-(--color-ivory)/90 backdrop-blur-md border-b border-(--color-bamboo)/15 shadow-[0_1px_12px_rgba(46,59,42,0.06)]"
           : "bg-transparent"
       }`}
     >
@@ -149,16 +158,30 @@ export default function MarketingHeader() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-7" aria-label="Primary">
-          {NAV.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className={`relative font-body text-[0.8125rem] font-medium tracking-wide transition-colors group ${navColor}`}
-            >
-              {n.label}
-              <span className="absolute left-1/2 -translate-x-1/2 -bottom-1 h-px w-0 bg-(--color-gold) transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
+          {NAV.map((n) => {
+            const active = isActivePath(pathname, n.href);
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                aria-current={active ? "page" : undefined}
+                className={`relative font-body text-[0.8125rem] font-medium tracking-wide transition-colors group ${
+                  active
+                    ? scrolled
+                      ? "text-(--color-moss)"
+                      : "text-(--color-ivory)"
+                    : navColor
+                }`}
+              >
+                {n.label}
+                <span
+                  className={`absolute left-1/2 -translate-x-1/2 -bottom-1 h-px bg-(--color-gold) transition-all duration-300 ${
+                    active ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                />
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="hidden lg:flex items-center gap-2.5">
@@ -248,16 +271,25 @@ export default function MarketingHeader() {
       {open && (
         <div className="lg:hidden bg-(--color-ivory) border-t border-(--color-bamboo)/15">
           <nav className="mx-auto max-w-7xl px-6 py-6 flex flex-col gap-4" aria-label="Mobile navigation">
-            {NAV.map((n) => (
-              <Link
-                key={n.href}
-                href={n.href}
-                onClick={() => setOpen(false)}
-                className="text-[14px] uppercase tracking-[0.22em] font-medium text-(--color-ink) py-2 border-b border-(--color-bamboo)/15"
-              >
-                {n.label}
-              </Link>
-            ))}
+            {NAV.map((n) => {
+              const active = isActivePath(pathname, n.href);
+              return (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  onClick={() => setOpen(false)}
+                  aria-current={active ? "page" : undefined}
+                  className={`text-[14px] uppercase tracking-[0.22em] font-medium py-2 border-b flex items-center justify-between ${
+                    active
+                      ? "text-(--color-moss) border-(--color-gold)"
+                      : "text-(--color-ink) border-(--color-bamboo)/15"
+                  }`}
+                >
+                  {n.label}
+                  {active && <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-(--color-gold)" />}
+                </Link>
+              );
+            })}
             <div className="mt-4 grid grid-cols-2 gap-3">
               <Link
                 href="/cart"
