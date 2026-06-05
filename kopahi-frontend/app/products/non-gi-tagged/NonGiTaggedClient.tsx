@@ -40,12 +40,12 @@ export default function NonGiTaggedClient() {
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         <section className="pt-28 sm:pt-32 pb-10">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-shell px-5 lg:px-8">
             <Eyebrow>→ Showing {allNonGi.length} Non-GI Products</Eyebrow>
-            <Headline as="h1" className="mt-6 max-w-4xl" accent="For Every Kitchen.">
+            <Headline as="h1" className="mt-4 max-w-4xl" accent="For Every Kitchen.">
               Curated.
             </Headline>
-            <p className="mt-8 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
+            <p className="mt-6 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
               Sun-dried spice powders, herbal blends, premium Assam tea, and small-batch specialty preserves — curated
               from the same farmer network as our GI catalogue.
             </p>

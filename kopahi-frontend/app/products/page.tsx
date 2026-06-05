@@ -24,12 +24,12 @@ export default function ProductsPage() {
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         <section className="pt-28 sm:pt-32 pb-12 sm:pb-16">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-shell px-5 lg:px-8">
             <Eyebrow>Origins</Eyebrow>
-            <Headline as="h1" className="mt-6 max-w-4xl" accent="Origin First.">
+            <Headline as="h1" className="mt-4 max-w-4xl" accent="Origin First.">
               Every Tile Is A Place.
             </Headline>
-            <p className="mt-10 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
+            <p className="mt-6 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
               We do not stock SKUs. We carry geographies — and the people, protocols and patience each one requires.
             </p>
           </div>

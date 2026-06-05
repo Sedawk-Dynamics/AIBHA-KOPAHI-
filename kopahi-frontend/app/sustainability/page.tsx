@@ -63,12 +63,12 @@ export default function SustainabilityPage() {
       <main className="bg-(--color-ivory) text-(--color-ink)">
         {/* ============== HERO ============== */}
         <section className="relative pt-28 sm:pt-32 pb-12 sm:pb-16">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-shell px-5 lg:px-8">
             <Eyebrow>Impact</Eyebrow>
-            <Headline as="h1" className="mt-6 max-w-4xl" accent="A Way Of Life.">
+            <Headline as="h1" className="mt-4 max-w-4xl" accent="A Way Of Life.">
               We Don&apos;t Just Source. We Protect
             </Headline>
-            <p className="mt-10 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
+            <p className="mt-6 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
               Sustainability is a thing you can audit. So we publish what we measure — and admit what we don&apos;t.
             </p>
           </div>
