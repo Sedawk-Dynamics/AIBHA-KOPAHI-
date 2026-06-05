@@ -8,7 +8,6 @@ import WhatsAppFab from "../components/marketing/WhatsAppFab";
 import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
-import OrganicDivider from "../components/marketing/OrganicDivider";
 import ContactForm from "./ContactForm";
 import { buildMetadata } from "../lib/seo";
 
@@ -33,7 +32,7 @@ export default function ContactPage() {
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         {/* ============== HERO ============== */}
-        <section className="pt-32 sm:pt-40 pb-12">
+        <section className="pt-28 sm:pt-32 pb-12">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
             <Eyebrow>Contact</Eyebrow>
             <Headline as="h1" className="mt-6 max-w-4xl" accent="A Working Day.">
@@ -45,7 +44,6 @@ export default function ContactPage() {
           </div>
         </section>
 
-        <OrganicDivider />
 
         <Section tone="ivory">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">

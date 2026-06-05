@@ -9,7 +9,6 @@ import WhatsAppFab from "../../components/marketing/WhatsAppFab";
 import Section from "../../components/marketing/Section";
 import Eyebrow from "../../components/marketing/Eyebrow";
 import Headline from "../../components/marketing/Headline";
-import OrganicDivider from "../../components/marketing/OrganicDivider";
 import { PRODUCTS } from "../../lib/marketing";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, ldScript } from "../../lib/seo";
 
@@ -74,7 +73,7 @@ export default function GiTaggedPage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(faqLd)} />
 
-        <section className="pt-32 sm:pt-40 pb-10">
+        <section className="pt-28 sm:pt-32 pb-10">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
             <Eyebrow>→ Showing {items.length} GI-Tagged Products</Eyebrow>
             <Headline as="h1" className="mt-6 max-w-4xl" accent="Legally Protected.">
@@ -102,7 +101,6 @@ export default function GiTaggedPage() {
           </div>
         </section>
 
-        <OrganicDivider />
 
         <Section tone="ivory">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
@@ -145,7 +143,6 @@ export default function GiTaggedPage() {
           </div>
         </Section>
 
-        <OrganicDivider />
 
         <Section tone="ivory">
           <div className="mx-auto max-w-3xl">

@@ -7,7 +7,6 @@ import WhatsAppFab from "../components/marketing/WhatsAppFab";
 import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
-import OrganicDivider from "../components/marketing/OrganicDivider";
 import CatalogClient from "./CatalogClient";
 import { buildMetadata } from "../lib/seo";
 
@@ -24,7 +23,7 @@ export default function ProductsPage() {
       <MarketingHeader />
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
-        <section className="pt-32 sm:pt-40 pb-12 sm:pb-16">
+        <section className="pt-28 sm:pt-32 pb-12 sm:pb-16">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
             <Eyebrow>Origins</Eyebrow>
             <Headline as="h1" className="mt-6 max-w-4xl" accent="Origin First.">
@@ -36,7 +35,6 @@ export default function ProductsPage() {
           </div>
         </section>
 
-        <OrganicDivider />
 
         <Section tone="ivory">
           <CatalogClient />

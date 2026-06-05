@@ -7,7 +7,6 @@ import MarketingHeader from "./MarketingHeader";
 import MarketingFooter from "./MarketingFooter";
 import WhatsAppFab from "./WhatsAppFab";
 import Eyebrow from "./Eyebrow";
-import OrganicDivider from "./OrganicDivider";
 
 export type LegalSection = {
   id: string;
@@ -53,7 +52,7 @@ export default function LegalShell({
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         {/* HERO — restrained ~45vh */}
-        <section className="pt-32 sm:pt-40 pb-10">
+        <section className="pt-28 sm:pt-32 pb-10">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 text-center">
             <Eyebrow>{eyebrow}</Eyebrow>
             <h1 className="mt-6 font-display font-light tracking-tight text-[clamp(3rem,7vw,5.5rem)] leading-[1.02] text-(--color-ink)">
@@ -65,7 +64,6 @@ export default function LegalShell({
           </div>
         </section>
 
-        <OrganicDivider />
 
         {/* BODY */}
         <section className="pb-28">

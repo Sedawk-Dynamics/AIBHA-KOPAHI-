@@ -9,7 +9,6 @@ import WhatsAppFab from "../components/marketing/WhatsAppFab";
 import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
-import OrganicDivider from "../components/marketing/OrganicDivider";
 import NEIndiaMap from "./NEIndiaMap";
 import { FARMERS } from "../lib/marketing";
 import { getEssaysByFarmerSlug } from "../lib/journal";
@@ -44,7 +43,7 @@ export default function FarmersPage() {
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         {/* ============== HERO ============== */}
-        <section className="pt-32 sm:pt-40 pb-12 sm:pb-16">
+        <section className="pt-28 sm:pt-32 pb-12 sm:pb-16">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
             <Eyebrow>Know Your Farmer</Eyebrow>
             <Headline as="h1" className="mt-6 max-w-4xl" accent="A Face.">
@@ -56,7 +55,6 @@ export default function FarmersPage() {
           </div>
         </section>
 
-        <OrganicDivider />
 
         {/* ============== MAP ============== */}
         <Section tone="ivory">
@@ -70,7 +68,7 @@ export default function FarmersPage() {
             Their Soil.
           </Headline>
 
-          <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {FARMERS.map((f) => {
               const essays = getEssaysByFarmerSlug(f.slug);
               const featuredEssay = essays[0];
@@ -125,7 +123,7 @@ export default function FarmersPage() {
           <Headline as="h2" tone="ivory" className="mt-6 max-w-3xl" accent="Three Commitments.">
             Documented.
           </Headline>
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             {PROMISES.map((p, i) => (
               <div key={p.title} className="relative">
                 <span className="font-display italic text-[clamp(3rem,5vw,4.5rem)] leading-none text-(--color-gold)/40">
@@ -138,7 +136,7 @@ export default function FarmersPage() {
           </div>
           <Link
             href="/contact?type=sourcing"
-            className="mt-16 inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+            className="mt-10 inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
           >
             Become a partner farmer <span aria-hidden="true">→</span>
           </Link>

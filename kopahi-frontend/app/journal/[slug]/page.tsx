@@ -112,7 +112,7 @@ export default async function JournalArticle({
 
         {/* HERO STRIP */}
         <article>
-          <header className="pt-32 sm:pt-40 pb-12">
+          <header className="pt-28 sm:pt-32 pb-12">
             <div className="mx-auto max-w-4xl px-6 sm:px-8 lg:px-12">
               <Eyebrow>→ {essay.category}</Eyebrow>
               <h1 className="mt-6 font-display font-light tracking-tight text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.02] text-(--color-ink)">

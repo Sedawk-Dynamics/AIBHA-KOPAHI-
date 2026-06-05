@@ -11,7 +11,6 @@ import WhatsAppFab from "../../components/marketing/WhatsAppFab";
 import Section from "../../components/marketing/Section";
 import Eyebrow from "../../components/marketing/Eyebrow";
 import Headline from "../../components/marketing/Headline";
-import OrganicDivider from "../../components/marketing/OrganicDivider";
 import { PRODUCTS, type Product } from "../../lib/marketing";
 
 const TAB_GROUPS: { label: string; filter: (p: Product) => boolean }[] = [
@@ -40,7 +39,7 @@ export default function NonGiTaggedClient() {
       <MarketingHeader />
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
-        <section className="pt-32 sm:pt-40 pb-10">
+        <section className="pt-28 sm:pt-32 pb-10">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
             <Eyebrow>→ Showing {allNonGi.length} Non-GI Products</Eyebrow>
             <Headline as="h1" className="mt-6 max-w-4xl" accent="For Every Kitchen.">
@@ -53,7 +52,6 @@ export default function NonGiTaggedClient() {
           </div>
         </section>
 
-        <OrganicDivider />
 
         <Section tone="ivory" padded={false} className="py-12 sm:py-16">
           {/* Category tabs */}
