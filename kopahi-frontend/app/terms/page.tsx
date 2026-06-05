@@ -5,7 +5,7 @@ import { buildMetadata } from "../lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Terms of Use · Kopahi",
   description:
-    "Terms governing use of kopahi.com and the Kopahi marketplace, operated by AIBA AGRI NE LLP.",
+    "Terms governing use of kopahi.com and the Kopahi marketplace, operated by AIBA Agri NE LLP.",
   path: "/terms",
 });
 
@@ -18,7 +18,7 @@ const SECTIONS: LegalSection[] = [
     body: (
       <p>
         Kopahi is a multi-vendor marketplace for GI-tagged and indigenous produce, handcraft and beverages from
-        Northeast India. It is operated by <strong>AIBA AGRI NE LLP</strong> from its registered office in Jorhat,
+        Northeast India. It is operated by <strong>AIBA Agri NE LLP</strong> from its registered office in Jorhat,
         Assam. Customers buy from us. Vendors list and sell through us. We hold the relationship together.
       </p>
     ),
@@ -121,7 +121,7 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          The Kopahi name, logo and editorial assets are the property of AIBA AGRI NE LLP. Vendor product images and
+          The Kopahi name, logo and editorial assets are the property of AIBA Agri NE LLP. Vendor product images and
           descriptions remain the vendor&apos;s property; by listing, vendors grant Kopahi a non-exclusive licence to
           host and display them on the platform.
         </p>
@@ -220,7 +220,7 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          AIBA AGRI NE LLP<br />
+          AIBA Agri NE LLP<br />
           Bye Lane 2, Suraj Nagar, NA Ali,<br />
           Jorhat, Assam — 785001
         </p>
@@ -243,7 +243,7 @@ export default function TermsPage() {
       lastUpdated={LAST_UPDATED}
       intro={
         <p>
-          These terms govern your use of kopahi.com and the Kopahi marketplace, operated by AIBA AGRI NE LLP. By
+          These terms govern your use of kopahi.com and the Kopahi marketplace, operated by AIBA Agri NE LLP. By
           using the site, or buying or selling on it, you agree to what follows. If you don&apos;t, please don&apos;t
           use the platform.
         </p>

@@ -147,7 +147,7 @@ function shell(preview: string, body: string): string {
           </td></tr>
           <tr><td style="border-top:1px solid ${BAMBOO};opacity:0.25;font-size:0;line-height:0;">&nbsp;</td></tr>
           <tr><td style="padding:20px 8px;font-family:Georgia,serif;font-size:12px;font-style:italic;color:#6B6F66;">
-            AIBA AGRI NE LLP &middot; Jorhat, Assam, India<br/>
+            AIBA Agri NE LLP &middot; Jorhat, Assam, India<br/>
             info@kopahi.com &middot; kopahi.com
           </td></tr>
         </table>

@@ -78,7 +78,7 @@ export default function MarketingFooter() {
               Kopahi<span className="text-(--color-gold)">.</span>
             </p>
             <p className="mt-4 text-(--color-ivory)/80 leading-relaxed">
-              An AIBA Agri NE LLP brand. Sourcing, processing, branding and exporting the GI-tagged heritage of seven Northeast Indian states.
+              An AIBA Agri NE LLP brand. Bringing Northeast India&apos;s GI-certified heritage products to global markets.
             </p>
             <ul className="mt-8 flex flex-wrap gap-3">
               {SOCIALS.map((s) => (
