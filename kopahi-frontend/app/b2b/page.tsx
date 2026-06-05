@@ -11,7 +11,6 @@ import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
 import StatCallout from "../components/marketing/StatCallout";
-import Carousel from "../components/marketing/Carousel";
 import Marquee from "../components/marketing/Marquee";
 import B2BInquiryForm from "./B2BInquiryForm";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, ldScript } from "../lib/seo";
@@ -215,51 +214,46 @@ export default function B2BPage() {
 
         {/* ============== 3 · STATS BAND ============== */}
         <Section tone="ivory">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-12 items-start">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-start">
             <StatCallout value="500+" label="Verified farmers" />
             <StatCallout value="80+" label="Business partners" />
             <StatCallout value="12" label="Export countries" />
             <StatCallout value="1,200T" label="Annual volume" />
-
           </div>
         </Section>
 
 
         {/* ============== 4 · WHY PARTNER ============== */}
-        <Section tone="ivory" padded={false} className="section-y" contained={false}>
-          <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
-            <div className="max-w-3xl">
-              <Eyebrow>→ 01 · Why Choose Us</Eyebrow>
-              <Headline as="h2" className="mt-4" accent="With Kopahi?">
-                Why Partner
-              </Headline>
-              <p className="mt-4 text-(--color-ink)/75 leading-relaxed max-w-prose text-base sm:text-lg">
-                From sourcing to shipping, we handle every step so you can focus on selling. Built for buyers who care
-                about authenticity, traceability, and consistency.
-              </p>
-            </div>
+        <Section tone="ivory">
+          <div className="max-w-3xl">
+            <Eyebrow>→ 01 · Why Choose Us</Eyebrow>
+            <Headline as="h2" className="mt-4" accent="With Kopahi?">
+              Why Partner
+            </Headline>
+            <p className="mt-4 text-(--color-ink)/75 leading-relaxed max-w-prose text-base sm:text-lg">
+              From sourcing to shipping, we handle every step so you can focus on selling. Built for buyers who care
+              about authenticity, traceability, and consistency.
+            </p>
           </div>
 
-          <div className="mt-8">
-            <Carousel ariaLabel="reasons to partner with Kopahi" fade="ivory">
-              {REASONS.map((r) => (
-                <article
-                  key={r.n}
-                  className="flex flex-col w-[80vw] sm:w-[21rem] h-full bg-(--color-ivory) border border-(--color-bamboo)/15 rounded-sm overflow-hidden"
-                >
-                  <div className="relative aspect-[5/4] overflow-hidden">
-                    <Image src={r.image} alt={r.title} fill sizes="(max-width: 640px) 80vw, 21rem" className="object-cover" />
-                    <span aria-hidden="true" className="absolute top-3 left-3 font-display italic text-2xl text-(--color-ivory) drop-shadow">
-                      {r.n}
-                    </span>
-                  </div>
-                  <div className="flex flex-col flex-1 p-5">
-                    <h3 className="font-display text-xl text-(--color-ink) leading-tight">{r.title}</h3>
-                    <p className="mt-2 text-small text-(--color-ink)/75 leading-relaxed">{r.body}</p>
-                  </div>
-                </article>
-              ))}
-            </Carousel>
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {REASONS.map((r) => (
+              <article
+                key={r.n}
+                className="flex flex-col h-full bg-(--color-ivory) border border-(--color-bamboo)/15 rounded-sm overflow-hidden"
+              >
+                <div className="relative aspect-[5/4] overflow-hidden">
+                  <Image src={r.image} alt={r.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
+                  <span aria-hidden="true" className="absolute top-3 left-3 font-display italic text-2xl text-(--color-ivory) drop-shadow">
+                    {r.n}
+                  </span>
+                </div>
+                <div className="flex flex-col flex-1 p-5">
+                  <h3 className="font-display text-xl text-(--color-ink) leading-tight">{r.title}</h3>
+                  <p className="mt-2 text-small text-(--color-ink)/75 leading-relaxed">{r.body}</p>
+                </div>
+              </article>
+            ))}
           </div>
         </Section>
 
@@ -268,21 +262,16 @@ export default function B2BPage() {
         <Section tone="ivory" id="how">
           <div className="max-w-3xl">
             <Eyebrow>→ 02 · How It Works</Eyebrow>
-            <Headline as="h2" className="mt-6" accent="In 4 Steps.">
+            <Headline as="h2" className="mt-4" accent="In 4 Steps.">
               From Inquiry To Your Warehouse —
             </Headline>
           </div>
-          <ol className="mt-10 grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-6 relative">
-            {STEPS.map((s, i) => (
-              <li key={s.n} className="relative">
-                <span className="font-display italic text-(--color-gold) text-3xl">{s.n}</span>
-                <h3 className="mt-3 font-display text-2xl text-(--color-ink)">{s.title}</h3>
-                <p className="mt-3 text-(--color-ink)/75 leading-relaxed text-sm">{s.body}</p>
-                {i < STEPS.length - 1 && (
-                  <span aria-hidden="true" className="hidden md:block absolute top-3 right-0 translate-x-1/2 text-(--color-bamboo) text-xl">
-                    ⋯
-                  </span>
-                )}
+          <ol className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-8">
+            {STEPS.map((s) => (
+              <li key={s.n} className="flex flex-col border-t-2 border-(--color-gold)/50 pt-4">
+                <span className="font-display italic text-(--color-gold) text-3xl leading-none">{s.n}</span>
+                <h3 className="mt-3 font-display text-xl sm:text-2xl text-(--color-ink) leading-tight">{s.title}</h3>
+                <p className="mt-2 text-(--color-ink)/75 leading-relaxed text-sm">{s.body}</p>
               </li>
             ))}
           </ol>
@@ -291,12 +280,12 @@ export default function B2BPage() {
         {/* ============== 6 · BUILT FOR ============== */}
         <Section tone="bamboo">
           <Eyebrow>→ 03 · Built For</Eyebrow>
-          <Headline as="h2" className="mt-6 max-w-3xl" accent="Solutions">
+          <Headline as="h2" className="mt-4 max-w-3xl" accent="Solutions">
             Industry-Specific
           </Headline>
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {INDUSTRIES.map((ind) => (
-              <article key={ind.title} className="group bg-(--color-ivory) border border-(--color-bamboo)/20 overflow-hidden">
+              <article key={ind.title} className="group flex flex-col h-full bg-(--color-ivory) border border-(--color-bamboo)/20 overflow-hidden">
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <Image
                     src={ind.image}
@@ -306,10 +295,10 @@ export default function B2BPage() {
                     className="object-cover transition-transform duration-[1.4s] ease-out group-hover:scale-[1.04]"
                   />
                 </div>
-                <div className="bg-(--color-moss-dark) text-(--color-ivory) p-7">
+                <div className="flex flex-col flex-1 bg-(--color-moss-dark) text-(--color-ivory) p-7">
                   <h3 className="font-display text-2xl">{ind.title}</h3>
                   <p className="mt-3 text-(--color-ivory)/75 text-sm leading-relaxed">{ind.body}</p>
-                  <Link href="#quote" className="mt-5 inline-block text-(--color-gold) hover:text-(--color-ivory) text-xs uppercase tracking-[0.22em]">
+                  <Link href="#quote" className="mt-auto pt-5 inline-block text-(--color-gold) hover:text-(--color-ivory) text-xs uppercase tracking-[0.22em]">
                     Learn more →
                   </Link>
                 </div>
@@ -333,7 +322,7 @@ export default function B2BPage() {
         <Section tone="ivory" id="quote">
           <div className="max-w-3xl">
             <Eyebrow>→ Get Started</Eyebrow>
-            <Headline as="h2" className="mt-6" accent="Custom Quote">
+            <Headline as="h2" className="mt-4" accent="Custom Quote">
               Request A
             </Headline>
             <p className="mt-6 text-(--color-ink)/75 leading-relaxed max-w-prose text-lg">
@@ -373,7 +362,7 @@ export default function B2BPage() {
         {/* ============== 9 · BENEFITS ============== */}
         <Section tone="ivory">
           <Eyebrow>→ Benefits</Eyebrow>
-          <Headline as="h2" className="mt-6 max-w-3xl" accent="Growing Businesses">
+          <Headline as="h2" className="mt-4 max-w-3xl" accent="Growing Businesses">
             Built For
           </Headline>
           <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -416,7 +405,7 @@ export default function B2BPage() {
         <Section tone="ivory">
           <div className="mx-auto max-w-3xl">
             <Eyebrow>→ Frequently Asked</Eyebrow>
-            <Headline as="h2" className="mt-6" accent="Buyers Ask Us.">
+            <Headline as="h2" className="mt-4" accent="Buyers Ask Us.">
               The Questions
             </Headline>
             <dl className="mt-8 divide-y divide-(--color-bamboo)/25 border-y border-(--color-bamboo)/25">
