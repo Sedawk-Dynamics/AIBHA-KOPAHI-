@@ -145,20 +145,16 @@ export default function MarketingHeader() {
     >
       <div className={`mx-auto max-w-shell px-5 lg:px-8 flex items-center justify-between gap-4 transition-all duration-300 ${scrolled ? "h-16" : "h-20 lg:h-24"}`}>
         <Link href="/" aria-label="Kopahi — home" className="flex items-center">
-          <div
-            className={`relative transition-all duration-300 ${
-              scrolled ? "h-12 w-12" : "h-16 w-16 lg:h-20 lg:w-20"
+          <Image
+            src="/kopahi-mark.png"
+            alt="Kopahi — home"
+            width={1168}
+            height={874}
+            priority
+            className={`w-auto object-contain transition-all duration-300 ${
+              scrolled ? "h-12" : "h-16 lg:h-20"
             }`}
-          >
-            <Image
-              src="/Logo1.png"
-              alt="Kopahi — home"
-              fill
-              sizes="80px"
-              className="object-contain"
-              priority
-            />
-          </div>
+          />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-7" aria-label="Primary">
