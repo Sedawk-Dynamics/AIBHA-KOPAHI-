@@ -143,18 +143,22 @@ export default function MarketingHeader() {
           : "bg-transparent"
       }`}
     >
-      <div className={`mx-auto max-w-shell px-5 lg:px-8 flex items-center justify-between gap-4 transition-all duration-300 ${scrolled ? "h-16" : "h-16 lg:h-20"}`}>
-        <Link href="/" aria-label="Kopahi home" className="flex items-center gap-2.5">
-          <div className="relative h-11 w-11 sm:h-13 sm:w-13">
-            <Image src="/Logo1.png" alt="" fill sizes="52px" className="object-contain" priority />
-          </div>
-          <span
-            className={`font-display text-[1.25rem] lg:text-[1.5rem] leading-none tracking-tight transition-colors ${
-              scrolled ? "text-(--color-moss)" : "text-(--color-ivory)"
+      <div className={`mx-auto max-w-shell px-5 lg:px-8 flex items-center justify-between gap-4 transition-all duration-300 ${scrolled ? "h-16" : "h-20 lg:h-24"}`}>
+        <Link href="/" aria-label="Kopahi — home" className="flex items-center">
+          <div
+            className={`relative transition-all duration-300 ${
+              scrolled ? "h-12 w-12" : "h-16 w-16 lg:h-20 lg:w-20"
             }`}
           >
-            Kopahi<span className="text-(--color-gold)">.</span>
-          </span>
+            <Image
+              src="/Logo1.png"
+              alt="Kopahi — home"
+              fill
+              sizes="80px"
+              className="object-contain"
+              priority
+            />
+          </div>
         </Link>
 
         <nav className="hidden lg:flex items-center gap-7" aria-label="Primary">
