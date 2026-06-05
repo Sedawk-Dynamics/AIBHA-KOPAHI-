@@ -11,12 +11,10 @@ import WhatsAppFab from "./components/marketing/WhatsAppFab";
 import Section from "./components/marketing/Section";
 import Eyebrow from "./components/marketing/Eyebrow";
 import Headline from "./components/marketing/Headline";
-import OrganicDivider from "./components/marketing/OrganicDivider";
 import StatCallout from "./components/marketing/StatCallout";
-import PillarCard from "./components/marketing/PillarCard";
+import Carousel from "./components/marketing/Carousel";
 import FeaturedCarousel from "./components/marketing/FeaturedCarousel";
 import Marquee from "./components/marketing/Marquee";
-import FounderCard from "./components/marketing/FounderCard";
 import { getFeaturedHomepageProducts } from "./lib/marketing";
 
 const PILLARS = [
@@ -197,6 +195,120 @@ function HeroVideo() {
   );
 }
 
+/* ---- Compact carousel cards ---- */
+
+function PillarMiniCard({
+  index,
+  title,
+  body,
+  image,
+  href,
+}: {
+  index: string;
+  title: string;
+  body: string;
+  image: string;
+  href?: string;
+}) {
+  return (
+    <article className="flex flex-col w-[78vw] sm:w-[20rem] lg:w-[21rem] h-full bg-(--color-ivory-warm) border border-(--color-bamboo)/15 rounded-sm overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <Image
+          src={image}
+          alt={title}
+          fill
+          sizes="(max-width: 640px) 78vw, 21rem"
+          className="object-cover transition-transform duration-[1.4s] ease-out hover:scale-[1.04]"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute top-3 left-3 font-display italic text-2xl text-(--color-ivory) drop-shadow"
+        >
+          {index}
+        </span>
+      </div>
+      <div className="flex flex-col flex-1 p-5">
+        <p className="eyebrow text-(--color-bamboo)">Pillar · {index}</p>
+        <h3 className="font-display text-xl text-(--color-ink) mt-1.5 leading-tight">{title}</h3>
+        <p className="mt-2 text-small text-(--color-ink)/75 leading-relaxed">{body}</p>
+        {href && (
+          <Link
+            href={href}
+            className="mt-auto pt-4 inline-flex items-center gap-2 text-(--color-gold-dark) hover:text-(--color-gold) transition-colors text-xs font-medium uppercase tracking-[0.18em]"
+          >
+            Explore Pillar <span aria-hidden="true">→</span>
+          </Link>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function FarmerMiniCard({
+  name,
+  village,
+  crop,
+  years,
+}: {
+  name: string;
+  village: string;
+  crop: string;
+  years: number;
+}) {
+  return (
+    <article className="flex flex-col w-[72vw] sm:w-[17rem] h-full bg-(--color-ivory) border border-(--color-bamboo)/20 rounded-sm p-6">
+      <span className="font-display italic text-(--color-gold-dark) text-3xl leading-none">{years}</span>
+      <span className="text-[11px] uppercase tracking-[0.22em] text-(--color-ink)/55">years partnered</span>
+      <h3 className="font-display text-xl text-(--color-ink) mt-5 leading-tight">{name}</h3>
+      <p className="font-display italic text-sm text-(--color-bamboo) mt-1">{village}</p>
+      <p className="mt-auto pt-4 text-small text-(--color-ink)/70">{crop}</p>
+    </article>
+  );
+}
+
+function ReasonMiniCard({ index, title, body }: { index: string; title: string; body: string }) {
+  return (
+    <article className="flex flex-col w-[78vw] sm:w-[19rem] h-full bg-(--color-ivory) border-x border-b border-(--color-bamboo)/15 border-t-2 border-t-(--color-gold)/60 rounded-sm p-6">
+      <span className="font-display italic text-[clamp(2.5rem,4vw,3.25rem)] leading-none text-(--color-bamboo)/35">
+        {index}
+      </span>
+      <h3 className="font-display text-xl sm:text-2xl text-(--color-ink) mt-3 leading-tight">{title}</h3>
+      <p className="mt-3 text-small text-(--color-ink)/75 leading-relaxed">{body}</p>
+    </article>
+  );
+}
+
+function LeaderMiniCard({
+  name,
+  role,
+  quote,
+  image,
+}: {
+  name: string;
+  role: string;
+  quote: string;
+  image?: string;
+}) {
+  return (
+    <article className="flex flex-col w-[80vw] sm:w-[20rem] h-full bg-(--color-ivory-warm) border border-(--color-bamboo)/15 rounded-sm overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden bg-(--color-ivory)">
+        {image ? (
+          <Image src={image} alt={`Portrait of ${name}`} fill sizes="(max-width: 640px) 80vw, 20rem" className="object-cover" />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-(--color-bamboo) font-display text-5xl italic">
+            {name.split(" ").map((p) => p[0]).join("")}
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col flex-1 p-5">
+        <p className="eyebrow">{role}</p>
+        <h3 className="font-display text-xl text-(--color-ink) mt-1.5 leading-tight">{name}</h3>
+        <p className="mt-3 font-display italic text-(--color-bamboo) text-sm leading-snug">&ldquo;{quote}&rdquo;</p>
+      </div>
+    </article>
+  );
+}
+
 export default function Home() {
   const reduce = useReducedMotion();
 
@@ -208,7 +320,7 @@ export default function Home() {
         {/* ============================================================
             01 · HERO
            ============================================================ */}
-        <section className="relative min-h-[100svh] flex items-end pb-24 sm:pb-32 overflow-hidden">
+        <section className="relative min-h-[100svh] flex items-end pb-16 sm:pb-20 overflow-hidden">
           <HeroVideo />
           <div className="relative z-10 mx-auto w-full max-w-shell px-5 lg:px-8">
             <motion.div
@@ -283,13 +395,13 @@ export default function Home() {
             02 · STORY INTRO
            ============================================================ */}
         <Section tone="ivory">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <div className="lg:col-span-7">
               <Eyebrow>Our Story</Eyebrow>
-              <Headline as="h2" className="mt-6" accent="A Promise.">
+              <Headline as="h2" className="mt-4" accent="A Promise.">
                 A Land. A Lineage.
               </Headline>
-              <div className="mt-10 space-y-6 text-(--color-ink)/80 leading-relaxed max-w-prose text-base sm:text-lg">
+              <div className="mt-6 space-y-4 text-(--color-ink)/80 leading-relaxed max-w-prose text-base sm:text-lg">
                 <p>
                   Kopahi was born in Jorhat, between mist-soaked tea gardens and
                   the patient hands of weavers whose looms have been quiet for
@@ -327,7 +439,6 @@ export default function Home() {
           </div>
         </Section>
 
-        <OrganicDivider />
 
         {/* ============================================================
             03 · MARKET OPPORTUNITY / STATS
@@ -337,12 +448,12 @@ export default function Home() {
           <Headline
             as="h2"
             tone="ivory"
-            className="mt-6 max-w-3xl"
+            className="mt-4 max-w-3xl"
             accent="Northeast Stands Apart."
           >
             The World Is Looking For Origin.
           </Headline>
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-10">
+          <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-8">
             <StatCallout
               tone="ivory"
               value="$8B"
@@ -369,75 +480,90 @@ export default function Home() {
         {/* ============================================================
             03.5 · SOURCING NETWORK — full-bleed infographic
            ============================================================ */}
-        <Section tone="ivory">
-          <div className="max-w-3xl">
-            <Eyebrow>Our Sourcing Network</Eyebrow>
-            <Headline
-              as="h2"
-              className="mt-6"
-              accent="Seven States. One Promise."
-            >
-              Eight Origins.
-            </Headline>
-            <p className="mt-6 font-display italic text-(--color-bamboo) text-lg max-w-prose">
-              Every line on the map ends in a name. Every name has a face. Every
-              face has a season.
-            </p>
-          </div>
-
-          <figure className="mt-14 relative w-full max-w-6xl mx-auto">
-            <div className="relative w-full aspect-[3/2] overflow-hidden rounded-sm bg-(--color-ivory-warm)">
-              <Image
-                src="/products/mapsimage.webp"
-                alt="Kopahi's ingredient sourcing network — eight origins mapped across Assam and the seven sister states of Northeast India"
-                fill
-                sizes="(max-width: 1024px) 100vw, 1152px"
-                className="object-contain"
-              />
+        <Section tone="ivory" size="sm">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            <div className="lg:col-span-5">
+              <Eyebrow>Our Sourcing Network</Eyebrow>
+              <Headline as="h2" className="mt-4" accent="Seven States. One Promise.">
+                Eight Origins.
+              </Headline>
+              <p className="mt-4 font-display italic text-(--color-bamboo) text-base sm:text-lg max-w-prose">
+                Every line on the map ends in a name. Every name has a face. Every
+                face has a season.
+              </p>
+              <ul className="mt-6 flex flex-wrap gap-x-3 gap-y-2">
+                {[
+                  "Assam Tea",
+                  "Black Rice",
+                  "Honey",
+                  "Turmeric",
+                  "Ginger",
+                  "Lemon",
+                  "Naga Chilli",
+                  "Black Pepper",
+                ].map((o) => (
+                  <li
+                    key={o}
+                    className="px-3 py-1 rounded-full bg-(--color-ivory-warm) border border-(--color-bamboo)/20 text-[11px] uppercase tracking-[0.16em] text-(--color-ink)/75"
+                  >
+                    {o}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <figcaption className="mt-5 text-center font-display italic text-(--color-bamboo) text-sm">
-              Assam Tea · Black Rice · Honey · Turmeric · Ginger · Lemon · Naga
-              Chilli · Black Pepper
-            </figcaption>
-          </figure>
+
+            <figure className="lg:col-span-7">
+              <div className="relative w-full max-h-[58vh] aspect-[3/2] overflow-hidden rounded-sm bg-(--color-ivory-warm)">
+                <Image
+                  src="/products/mapsimage.webp"
+                  alt="Kopahi's ingredient sourcing network — eight origins mapped across Assam and the seven sister states of Northeast India"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 58vw"
+                  className="object-contain"
+                />
+              </div>
+            </figure>
+          </div>
         </Section>
 
-        <OrganicDivider />
 
         {/* ============================================================
             04 · FIVE PILLARS — WHAT WE DO
            ============================================================ */}
-        <Section tone="ivory">
-          <div className="max-w-3xl">
-            <Eyebrow>What We Do</Eyebrow>
-            <Headline as="h2" className="mt-6" accent="Five Pillars.">
-              One Promise.
-            </Headline>
-            <p className="mt-6 text-(--color-ink)/75 max-w-prose text-lg">
-              Sourcing, processing, branding, distribution and farmer
-              empowerment — held together as a single accountable spine, not a
-              stack of vendors.
-            </p>
+        <Section tone="ivory" padded={false} className="section-y" contained={false}>
+          <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
+            <div className="max-w-3xl">
+              <Eyebrow>What We Do</Eyebrow>
+              <Headline as="h2" className="mt-4" accent="Five Pillars.">
+                One Promise.
+              </Headline>
+              <p className="mt-4 text-(--color-ink)/75 max-w-prose text-base sm:text-lg">
+                Sourcing, processing, branding, distribution and farmer
+                empowerment — held together as a single accountable spine, not a
+                stack of vendors.
+              </p>
+            </div>
           </div>
 
-          <div className="mt-20 flex flex-col gap-28">
-            {PILLARS.map((p, i) => (
-              <PillarCard key={p.index} {...p} reverse={i % 2 === 1} />
-            ))}
+          <div className="mt-8">
+            <Carousel ariaLabel="the five pillars" fade="ivory">
+              {PILLARS.map((p) => (
+                <PillarMiniCard key={p.index} {...p} />
+              ))}
+            </Carousel>
           </div>
         </Section>
 
-        <OrganicDivider />
 
         {/* ============================================================
             05 · FEATURED PRODUCTS — horizontal scroll
            ============================================================ */}
-        <Section tone="ivory" padded={false} className="py-24 sm:py-28">
+        <Section tone="ivory" padded={false} className="section-y">
           <div className="mx-auto max-w-shell px-5 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div className="max-w-2xl">
                 <Eyebrow>Featured Origins</Eyebrow>
-                <Headline as="h2" className="mt-6" accent="A Curated Few.">
+                <Headline as="h2" className="mt-4" accent="A Curated Few.">
                   Rare By Right.
                 </Headline>
               </div>
@@ -450,57 +576,56 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-12">
+          <div className="mt-10">
             <FeaturedCarousel items={FEATURED} />
+          </div>
+
+          <div className="mx-auto max-w-shell px-5 lg:px-8 mt-10 flex justify-center">
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
+            >
+              Know More <span aria-hidden="true">→</span>
+            </Link>
           </div>
         </Section>
 
         {/* ============================================================
             06 · KNOW YOUR FARMER
            ============================================================ */}
-        <Section tone="bamboo">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-stretch">
-            <div className="lg:col-span-6 relative aspect-[11/6] lg:aspect-auto lg:h-full min-h-[320px] overflow-hidden rounded-sm">
-              <Image
-                src="/products/empover.png"
-                alt="Empowering Northeast farmer communities"
-                fill
-                sizes="(max-width:1024px) 100vw, 50vw"
-                className="object-cover object-center"
-              />
-            </div>
-            <div className="lg:col-span-6">
-              <Eyebrow>Know Your Farmer</Eyebrow>
-              <p className="mt-8 font-display italic text-(--color-moss) text-[clamp(1.5rem,3vw,2.4rem)] leading-snug">
-                &ldquo;Every leaf has a name. Every name has a face.&rdquo;
-              </p>
-              <div className="mt-10 space-y-5">
-                {FARMERS.map((f) => (
-                  <div
-                    key={f.name}
-                    className="flex items-center justify-between border-t border-(--color-bamboo)/30 pt-4"
-                  >
-                    <div>
-                      <p className="font-display text-xl text-(--color-ink)">
-                        {f.name}
-                      </p>
-                      <p className="font-display italic text-sm text-(--color-bamboo)">
-                        {f.village} · {f.crop}
-                      </p>
-                    </div>
-                    <span className="text-sm text-(--color-ink)/60">
-                      {f.years} yrs partnered
-                    </span>
-                  </div>
-                ))}
+        <Section tone="bamboo" padded={false} className="section-y" contained={false}>
+          <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="lg:col-span-6 relative aspect-[11/6] overflow-hidden rounded-sm">
+                <Image
+                  src="/products/empover.png"
+                  alt="Empowering Northeast farmer communities"
+                  fill
+                  sizes="(max-width:1024px) 100vw, 50vw"
+                  className="object-cover object-center"
+                />
               </div>
-              <Link
-                href="/farmers"
-                className="mt-10 inline-flex items-center gap-2 text-(--color-gold-dark) hover:text-(--color-gold) text-sm uppercase tracking-[0.22em]"
-              >
-                Meet Our Network <span aria-hidden="true">→</span>
-              </Link>
+              <div className="lg:col-span-6">
+                <Eyebrow>Know Your Farmer</Eyebrow>
+                <p className="mt-4 font-display italic text-(--color-moss) text-[clamp(1.4rem,3vw,2.2rem)] leading-snug">
+                  &ldquo;Every leaf has a name. Every name has a face.&rdquo;
+                </p>
+                <Link
+                  href="/farmers"
+                  className="mt-5 inline-flex items-center gap-2 text-(--color-gold-dark) hover:text-(--color-gold) text-sm uppercase tracking-[0.22em]"
+                >
+                  Meet Our Network <span aria-hidden="true">→</span>
+                </Link>
+              </div>
             </div>
+          </div>
+
+          <div className="mt-8">
+            <Carousel ariaLabel="partnered farmers" fade="ivory-warm">
+              {FARMERS.map((f) => (
+                <FarmerMiniCard key={f.name} {...f} />
+              ))}
+            </Carousel>
           </div>
         </Section>
 
@@ -512,50 +637,44 @@ export default function Home() {
         {/* ============================================================
             08 · WHY KOPAHI — USPs
            ============================================================ */}
-        <Section tone="ivory">
-          <div className="max-w-3xl">
-            <Eyebrow>Why Kopahi</Eyebrow>
-            <Headline as="h2" className="mt-6" accent="Our Position Is Earned.">
-              Five Reasons.
-            </Headline>
+        <Section tone="ivory" padded={false} className="section-y" contained={false}>
+          <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
+            <div className="max-w-3xl">
+              <Eyebrow>Why Kopahi</Eyebrow>
+              <Headline as="h2" className="mt-4" accent="Our Position Is Earned.">
+                Five Reasons.
+              </Headline>
+            </div>
           </div>
 
-          <div className="mt-20 flex flex-col">
-            {USPS.map((u) => (
-              <div
-                key={u.index}
-                className="relative grid grid-cols-1 md:grid-cols-12 gap-6 py-12 border-t border-(--color-bamboo)/20 last:border-b"
-              >
-                <div className="md:col-span-2">
-                  <span className="font-display italic text-[clamp(3rem,5vw,5rem)] leading-none text-(--color-bamboo)/40">
-                    {u.index}
-                  </span>
-                </div>
-                <h3 className="md:col-span-4 font-display text-2xl sm:text-3xl text-(--color-ink)">
-                  {u.title}
-                </h3>
-                <p className="md:col-span-6 text-(--color-ink)/75 leading-relaxed max-w-prose">
-                  {u.body}
-                </p>
-              </div>
-            ))}
+          <div className="mt-8">
+            <Carousel ariaLabel="reasons to choose Kopahi" fade="ivory">
+              {USPS.map((u) => (
+                <ReasonMiniCard key={u.index} {...u} />
+              ))}
+            </Carousel>
           </div>
         </Section>
 
         {/* ============================================================
             09 · LEADERSHIP
            ============================================================ */}
-        <Section tone="ivory">
-          <div className="max-w-3xl">
-            <Eyebrow>Leadership</Eyebrow>
-            <Headline as="h2" className="mt-6" accent="The Harvest.">
-              The Hands Behind
-            </Headline>
+        <Section tone="ivory" padded={false} className="section-y" contained={false}>
+          <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
+            <div className="max-w-3xl">
+              <Eyebrow>Leadership</Eyebrow>
+              <Headline as="h2" className="mt-4" accent="The Harvest.">
+                The Hands Behind
+              </Headline>
+            </div>
           </div>
-          <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-20">
-            {FOUNDERS.map((f) => (
-              <FounderCard key={f.name} {...f} />
-            ))}
+
+          <div className="mt-8">
+            <Carousel ariaLabel="leadership team" fade="ivory">
+              {FOUNDERS.map((f) => (
+                <LeaderMiniCard key={f.name} {...f} />
+              ))}
+            </Carousel>
           </div>
         </Section>
 
