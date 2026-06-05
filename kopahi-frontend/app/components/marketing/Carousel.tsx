@@ -1,6 +1,7 @@
 "use client";
 
 import { Children, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useReducedMotion } from "framer-motion";
 
 type FadeTone = "ivory" | "ivory-warm" | "moss" | "none";
 
@@ -30,6 +31,7 @@ export default function Carousel({
   className?: string;
 }) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const reduceMotion = useReducedMotion();
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(true);
 
@@ -58,7 +60,7 @@ export default function Carousel({
     if (!el) return;
     const card = el.querySelector<HTMLElement>("[data-card]");
     const amount = (card?.offsetWidth ?? 300) + 24; // 24 = gap-6
-    el.scrollBy({ left: amount * dir, behavior: "smooth" });
+    el.scrollBy({ left: amount * dir, behavior: reduceMotion ? "auto" : "smooth" });
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -122,7 +124,9 @@ export default function Carousel({
         aria-label={ariaLabel}
         tabIndex={0}
         onKeyDown={onKeyDown}
-        className="no-scrollbar overflow-x-auto snap-x snap-mandatory scroll-smooth focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-gold)"
+        className={`no-scrollbar overflow-x-auto snap-x snap-mandatory focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-gold) ${
+          reduceMotion ? "" : "scroll-smooth"
+        }`}
         style={{ scrollPaddingLeft: "1.25rem", scrollPaddingRight: "1.25rem" }}
       >
         <div className="flex gap-5 sm:gap-6 px-5 sm:px-8 lg:px-12 py-2">

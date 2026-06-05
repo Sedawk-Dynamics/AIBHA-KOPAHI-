@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import ProductTile from "./ProductTile";
 
 type Item = {
@@ -13,6 +14,7 @@ type Item = {
 
 export default function FeaturedCarousel({ items }: { items: Item[] }) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const reduceMotion = useReducedMotion();
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(true);
 
@@ -42,7 +44,7 @@ export default function FeaturedCarousel({ items }: { items: Item[] }) {
     // Move by one tile (tile + gap). Tile width ~300px on desktop, 260 on mobile.
     const tile = el.querySelector<HTMLElement>("[data-tile]");
     const step = (tile?.offsetWidth ?? 300) + 24; // 24 = gap-6
-    el.scrollBy({ left: step * dir, behavior: "smooth" });
+    el.scrollBy({ left: step * dir, behavior: reduceMotion ? "auto" : "smooth" });
   };
 
   return (
@@ -88,7 +90,7 @@ export default function FeaturedCarousel({ items }: { items: Item[] }) {
       {/* Scroller */}
       <div
         ref={scrollerRef}
-        className="no-scrollbar overflow-x-auto snap-x snap-mandatory scroll-smooth"
+        className={`no-scrollbar overflow-x-auto snap-x snap-mandatory ${reduceMotion ? "" : "scroll-smooth"}`}
         style={{ scrollPaddingLeft: "1.5rem", scrollPaddingRight: "1.5rem" }}
       >
         <div className="flex gap-6 px-6 sm:px-8 lg:px-12 py-2">
