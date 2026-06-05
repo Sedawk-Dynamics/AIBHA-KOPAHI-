@@ -139,7 +139,7 @@ export default function MarketingHeader() {
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-(--color-ivory)/90 backdrop-blur-md border-b border-(--color-bamboo)/15 shadow-[0_1px_12px_rgba(46,59,42,0.06)]"
+          ? "bg-(--color-ivory) border-b border-(--color-bamboo)/25 shadow-[0_2px_16px_rgba(46,59,42,0.12)]"
           : "bg-transparent"
       }`}
     >
