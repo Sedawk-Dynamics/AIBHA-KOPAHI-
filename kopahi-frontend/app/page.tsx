@@ -330,8 +330,8 @@ export default function Home() {
               }}
               className="mt-8 max-w-xl font-display italic text-lg sm:text-xl text-(--color-ivory)/85 leading-relaxed"
             >
-              Bringing Northeast India&apos;s GI-certified heritage to the
-              world&apos;s discerning tables.
+              Bringing Northeast India&apos;s GI-certified heritage products to
+              global markets.
             </motion.p>
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 16 }}

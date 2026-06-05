@@ -5,7 +5,7 @@ import { buildMetadata } from "../lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Privacy Notice · Kopahi",
   description:
-    "How Kopahi (AIBA AGRI NE LLP) collects, uses and protects your information when you shop or partner with us.",
+    "How Kopahi (AIBA Agri NE LLP) collects, uses and protects your information when you shop or partner with us.",
   path: "/privacy",
 });
 
@@ -18,7 +18,7 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          Kopahi is a brand of <strong>AIBA AGRI NE LLP</strong>, a Limited Liability Partnership registered in
+          Kopahi is a brand of <strong>AIBA Agri NE LLP</strong>, a Limited Liability Partnership registered in
           India with its principal place of business at Bye Lane 2, Suraj Nagar, NA Ali, Jorhat, Assam — 785001.
         </p>
         <p>
@@ -217,7 +217,7 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          AIBA AGRI NE LLP<br />
+          AIBA Agri NE LLP<br />
           Bye Lane 2, Suraj Nagar, NA Ali,<br />
           Jorhat, Assam — 785001
         </p>
@@ -242,7 +242,7 @@ export default function PrivacyPage() {
       lastUpdated={LAST_UPDATED}
       intro={
         <p>
-          Kopahi is a brand of AIBA AGRI NE LLP, registered at Bye Lane 2, Suraj Nagar, NA Ali, Jorhat, Assam —
+          Kopahi is a brand of AIBA Agri NE LLP, registered at Bye Lane 2, Suraj Nagar, NA Ali, Jorhat, Assam —
           785001. This notice explains what information we collect when you visit kopahi.com, shop with us, or
           partner with us — and how we look after it.
         </p>

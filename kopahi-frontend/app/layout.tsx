@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     "Authentic, GI-certified produce and craft from Assam, Meghalaya, Nagaland, and four more Northeast states. Sourced direct from farmers. Shipped pan-India.",
   keywords: [
     "Kopahi",
-    "AIBA AGRI NE LLP",
+    "AIBA Agri NE LLP",
     "GI tagged products India",
     "Northeast India",
     "Assam tea",

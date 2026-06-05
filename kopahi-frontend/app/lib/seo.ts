@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const SITE = "https://kopahi.com";
 export const SITE_NAME = "Kopahi";
-export const LEGAL_NAME = "AIBA AGRI NE LLP";
+export const LEGAL_NAME = "AIBA Agri NE LLP";
 export const DEFAULT_OG = `${SITE}/og/default.jpg`;
 
 export const ORG_ADDRESS = {
@@ -94,7 +94,7 @@ export function organizationJsonLd() {
     url: SITE,
     logo: `${SITE}/Logo1.png`,
     description:
-      "Sourcing, processing, branding and exporting the GI-tagged heritage of seven Northeast Indian states.",
+      "Bringing Assam and Northeast India's GI-certified and indigenous agricultural and handloom products to global markets.",
     email: ORG_CONTACT.email,
     telephone: ORG_CONTACT.phone,
     address: {
