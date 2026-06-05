@@ -244,28 +244,6 @@ function PillarMiniCard({
   );
 }
 
-function FarmerMiniCard({
-  name,
-  village,
-  crop,
-  years,
-}: {
-  name: string;
-  village: string;
-  crop: string;
-  years: number;
-}) {
-  return (
-    <article className="flex flex-col w-[72vw] sm:w-[17rem] h-full bg-(--color-ivory) border border-(--color-bamboo)/20 rounded-sm p-6">
-      <span className="font-display italic text-(--color-gold-dark) text-3xl leading-none">{years}</span>
-      <span className="text-[11px] uppercase tracking-[0.22em] text-(--color-ink)/55">years partnered</span>
-      <h3 className="font-display text-xl text-(--color-ink) mt-5 leading-tight">{name}</h3>
-      <p className="font-display italic text-sm text-(--color-bamboo) mt-1">{village}</p>
-      <p className="mt-auto pt-4 text-small text-(--color-ink)/70">{crop}</p>
-    </article>
-  );
-}
-
 function ReasonMiniCard({ index, title, body }: { index: string; title: string; body: string }) {
   return (
     <article className="flex flex-col w-[78vw] sm:w-[19rem] h-full bg-(--color-ivory) border-x border-b border-(--color-bamboo)/15 border-t-2 border-t-(--color-gold)/60 rounded-sm p-6">
@@ -530,14 +508,14 @@ export default function Home() {
         {/* ============================================================
             04 · FIVE PILLARS — WHAT WE DO
            ============================================================ */}
-        <Section tone="ivory" padded={false} className="section-y" contained={false}>
+        <Section tone="moss" grain padded={false} className="section-y" contained={false}>
           <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
             <div className="max-w-3xl">
-              <Eyebrow>What We Do</Eyebrow>
-              <Headline as="h2" className="mt-4" accent="Five Pillars.">
+              <Eyebrow tone="gold">What We Do</Eyebrow>
+              <Headline as="h2" tone="ivory" className="mt-4" accent="Five Pillars.">
                 One Promise.
               </Headline>
-              <p className="mt-4 text-(--color-ink)/75 max-w-prose text-base sm:text-lg">
+              <p className="mt-4 text-(--color-ivory)/75 max-w-prose text-base sm:text-lg">
                 Sourcing, processing, branding, distribution and farmer
                 empowerment — held together as a single accountable spine, not a
                 stack of vendors.
@@ -546,7 +524,7 @@ export default function Home() {
           </div>
 
           <div className="mt-8">
-            <Carousel ariaLabel="the five pillars" fade="ivory">
+            <Carousel ariaLabel="the five pillars" fade="moss">
               {PILLARS.map((p) => (
                 <PillarMiniCard key={p.index} {...p} />
               ))}
@@ -593,39 +571,56 @@ export default function Home() {
         {/* ============================================================
             06 · KNOW YOUR FARMER
            ============================================================ */}
-        <Section tone="bamboo" padded={false} className="section-y" contained={false}>
-          <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-              <div className="lg:col-span-6 relative aspect-[11/6] overflow-hidden rounded-sm">
-                <Image
-                  src="/products/empover.png"
-                  alt="Empowering Northeast farmer communities"
-                  fill
-                  sizes="(max-width:1024px) 100vw, 50vw"
-                  className="object-cover object-center"
-                />
-              </div>
-              <div className="lg:col-span-6">
-                <Eyebrow>Know Your Farmer</Eyebrow>
-                <p className="mt-4 font-display italic text-(--color-moss) text-[clamp(1.4rem,3vw,2.2rem)] leading-snug">
-                  &ldquo;Every leaf has a name. Every name has a face.&rdquo;
-                </p>
-                <Link
-                  href="/farmers"
-                  className="mt-5 inline-flex items-center gap-2 text-(--color-gold-dark) hover:text-(--color-gold) text-sm uppercase tracking-[0.22em]"
-                >
-                  Meet Our Network <span aria-hidden="true">→</span>
-                </Link>
+        <Section tone="bamboo">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+            {/* LEFT — image */}
+            <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[28rem] overflow-hidden rounded-sm">
+              <Image
+                src="/products/empover.png"
+                alt="Empowering Northeast farmer communities"
+                fill
+                sizes="(max-width:1024px) 100vw, 50vw"
+                className="object-cover object-center"
+              />
+            </div>
+
+            {/* RIGHT — content */}
+            <div className="flex flex-col">
+              <Eyebrow>Know Your Farmer</Eyebrow>
+              <p className="mt-4 font-display italic text-(--color-moss) text-[clamp(1.4rem,3vw,2.2rem)] leading-snug">
+                &ldquo;Every leaf has a name. Every name has a face.&rdquo;
+              </p>
+              <Link
+                href="/farmers"
+                className="mt-4 inline-flex items-center gap-2 text-(--color-gold-dark) hover:text-(--color-gold) text-sm uppercase tracking-[0.22em]"
+              >
+                Meet Our Network <span aria-hidden="true">→</span>
+              </Link>
+
+              <div className="mt-6 flex flex-col gap-3">
+                {FARMERS.map((f) => (
+                  <div
+                    key={f.name}
+                    className="flex items-center justify-between gap-4 bg-(--color-ivory) border border-(--color-bamboo)/20 rounded-sm px-5 py-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-display text-lg text-(--color-ink) leading-tight">{f.name}</p>
+                      <p className="font-display italic text-sm text-(--color-bamboo) mt-0.5 truncate">
+                        {f.village} · {f.crop}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-right">
+                      <span className="block font-display italic text-2xl text-(--color-gold-dark) leading-none">
+                        {f.years}
+                      </span>
+                      <span className="block text-[10px] uppercase tracking-[0.18em] text-(--color-ink)/55 mt-1">
+                        yrs partnered
+                      </span>
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-
-          <div className="mt-8">
-            <Carousel ariaLabel="partnered farmers" fade="ivory-warm">
-              {FARMERS.map((f) => (
-                <FarmerMiniCard key={f.name} {...f} />
-              ))}
-            </Carousel>
           </div>
         </Section>
 
@@ -659,7 +654,7 @@ export default function Home() {
         {/* ============================================================
             09 · LEADERSHIP
            ============================================================ */}
-        <Section tone="ivory" padded={false} className="section-y" contained={false}>
+        {/* <Section tone="ivory" padded={false} className="section-y" contained={false}>
           <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
             <div className="max-w-3xl">
               <Eyebrow>Leadership</Eyebrow>
@@ -676,7 +671,7 @@ export default function Home() {
               ))}
             </Carousel>
           </div>
-        </Section>
+        </Section> */}
 
         {/* ============================================================
             10 · PARTNER CTA
