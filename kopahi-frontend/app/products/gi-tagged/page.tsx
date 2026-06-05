@@ -74,12 +74,12 @@ export default function GiTaggedPage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(faqLd)} />
 
         <section className="pt-28 sm:pt-32 pb-10">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-shell px-5 lg:px-8">
             <Eyebrow>→ Showing {items.length} GI-Tagged Products</Eyebrow>
-            <Headline as="h1" className="mt-6 max-w-4xl" accent="Legally Protected.">
+            <Headline as="h1" className="mt-4 max-w-4xl" accent="Legally Protected.">
               Five Geographies.
             </Headline>
-            <p className="mt-8 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
+            <p className="mt-6 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
               Each of these origins carries a Geographical Indication — a legal seal that ties the product to the
               place that made it possible. Nothing else can claim the name.
             </p>
@@ -93,7 +93,7 @@ export default function GiTaggedPage() {
               </p>
               <p>
                 Kopahi buys these GIs from registered authorised users inside the gazetted area. We publish the GI
-                registration number on every product page, alongside the farmer's name, the village, the year of
+                registration number on every product page, alongside the farmer&apos;s name, the village, the year of
                 partnership, and — where applicable — independent lab assays. The aim is simple: when you buy a
                 Lakadong from Kopahi, you should be able to trace it back to the slope it grew on.
               </p>
