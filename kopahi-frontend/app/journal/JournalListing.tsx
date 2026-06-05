@@ -55,7 +55,7 @@ export default function JournalListing() {
   return (
     <>
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 border-b border-(--color-bamboo)/20 mb-10">
+      <div className="flex flex-wrap gap-1 border-b border-(--color-bamboo)/20 mb-6">
         {TABS.map((t, i) => {
           const isActive = active === i;
           return (
@@ -80,7 +80,7 @@ export default function JournalListing() {
         })}
       </div>
 
-      <p className="eyebrow mb-10">
+      <p className="eyebrow mb-6">
         → Showing {sorted.length} {sorted.length === 1 ? "essay" : "essays"}
       </p>
 
@@ -89,7 +89,7 @@ export default function JournalListing() {
           Nothing in this category yet.
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
           {featured && <EssayCard essay={featured} variant="featured" />}
           {rest.map((essay) => (
             <EssayCard key={essay.slug} essay={essay} />

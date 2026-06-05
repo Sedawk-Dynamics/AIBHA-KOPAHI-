@@ -7,7 +7,6 @@ import WhatsAppFab from "../components/marketing/WhatsAppFab";
 import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
-import OrganicDivider from "../components/marketing/OrganicDivider";
 import JournalListing from "./JournalListing";
 import { JOURNAL } from "../lib/journal";
 import { SITE, buildMetadata, breadcrumbJsonLd, ldScript } from "../lib/seo";
@@ -50,22 +49,20 @@ export default function JournalPage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
 
         {/* HERO */}
-        <section className="pt-32 sm:pt-40 pb-12">
+        <section className="pt-28 sm:pt-32 pb-4">
           <div className="mx-auto max-w-shell px-5 lg:px-8">
             <Eyebrow>→ The Journal</Eyebrow>
-            <Headline as="h1" className="mt-6 max-w-5xl" accent="Letters From The Field.">
+            <Headline as="h1" className="mt-4 max-w-5xl" accent="Letters From The Field.">
               Slow Writing.
             </Headline>
-            <p className="mt-10 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
+            <p className="mt-5 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
               We write the way we source — slowly, with names, and only when the piece has earned its place. These
               are the working notes, recipes and field essays of a young brand learning at the pace of its growers.
             </p>
           </div>
         </section>
 
-        <OrganicDivider />
-
-        <Section tone="ivory">
+        <Section tone="ivory" size="sm">
           <JournalListing />
         </Section>
 

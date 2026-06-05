@@ -8,7 +8,7 @@ import WhatsAppFab from "../components/marketing/WhatsAppFab";
 import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
-import OrganicDivider from "../components/marketing/OrganicDivider";
+import Carousel from "../components/marketing/Carousel";
 import FounderCard from "../components/marketing/FounderCard";
 import { TIMELINE, FOUNDERS } from "../lib/marketing";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, ldScript } from "../lib/seo";
@@ -102,7 +102,7 @@ export default function AboutPage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(faqLd)} />
         {/* ============== HERO ============== */}
-        <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 overflow-hidden">
+        <section className="relative pt-28 sm:pt-32 pb-12 sm:pb-16 overflow-hidden">
           <div className="absolute inset-0 -z-10">
             <Image
               src="/products/tea-garden.jpg"
@@ -116,47 +116,50 @@ export default function AboutPage() {
           </div>
           <div className="mx-auto max-w-shell px-5 lg:px-8">
             <Eyebrow>About Kopahi</Eyebrow>
-            <Headline as="h1" className="mt-6 max-w-4xl" accent="Reaching For The World.">
+            <Headline as="h1" className="mt-4 max-w-4xl" accent="Reaching For The World.">
               Rooted In Seven States.
             </Headline>
-            <p className="mt-10 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
+            <p className="mt-6 max-w-2xl font-display italic text-lg sm:text-xl text-(--color-bamboo) leading-relaxed">
               We are an AIBA Agri NE LLP brand. We work where the produce is grown, where the silk is woven, where the
               tea is rolled — and only there.
             </p>
           </div>
         </section>
 
-        <OrganicDivider />
 
         {/* ============== TIMELINE ============== */}
-        <Section tone="ivory">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            <div className="lg:col-span-4">
+        <Section tone="ivory" padded={false} className="section-y" contained={false}>
+          <div className="mx-auto w-full max-w-grid px-5 lg:px-8">
+            <div className="max-w-2xl">
               <Eyebrow>Milestones</Eyebrow>
-              <Headline as="h2" className="mt-6" accent="One Promise.">
+              <Headline as="h2" className="mt-4" accent="One Promise.">
                 A Short Road.
               </Headline>
-              <p className="mt-6 max-w-prose text-(--color-ink)/75 leading-relaxed">
+              <p className="mt-4 max-w-prose text-(--color-ink)/75 leading-relaxed">
                 Kopahi is young. Our farmer relationships are older — and that is the order we intend to keep.
               </p>
             </div>
-            <ol className="lg:col-span-8 relative border-l border-(--color-bamboo)/30 pl-8 sm:pl-12 space-y-12">
+          </div>
+
+          <div className="mt-8">
+            <Carousel ariaLabel="company milestones" fade="ivory">
               {TIMELINE.map((m, i) => (
-                <li key={i} className="relative">
-                  <span
-                    className="absolute -left-[37px] sm:-left-[49px] top-2 h-3 w-3 rounded-full bg-(--color-gold) ring-4 ring-(--color-ivory)"
-                    aria-hidden="true"
-                  />
-                  <p className="eyebrow">{m.year}</p>
-                  <h3 className="font-display text-2xl sm:text-3xl text-(--color-ink) mt-2">{m.title}</h3>
-                  <p className="mt-3 text-(--color-ink)/75 leading-relaxed max-w-prose">{m.body}</p>
-                </li>
+                <article
+                  key={i}
+                  className="flex flex-col w-[78vw] sm:w-[20rem] h-full bg-(--color-ivory-warm) border-x border-b border-(--color-bamboo)/15 border-t-2 border-t-(--color-gold)/60 rounded-sm p-6"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="h-2.5 w-2.5 rounded-full bg-(--color-gold)" aria-hidden="true" />
+                    <p className="eyebrow">{m.year}</p>
+                  </div>
+                  <h3 className="font-display text-xl sm:text-2xl text-(--color-ink) mt-3 leading-tight">{m.title}</h3>
+                  <p className="mt-3 text-small text-(--color-ink)/75 leading-relaxed">{m.body}</p>
+                </article>
               ))}
-            </ol>
+            </Carousel>
           </div>
         </Section>
 
-        <OrganicDivider />
 
         {/* ============== VISION / MISSION ============== */}
         <Section tone="ivory">
@@ -181,10 +184,10 @@ export default function AboutPage() {
         {/* ============== VALUES ============== */}
         <Section tone="bamboo">
           <Eyebrow>What We Hold</Eyebrow>
-          <Headline as="h2" className="mt-6 max-w-3xl" accent="Four Convictions.">
+          <Headline as="h2" className="mt-4 max-w-3xl" accent="Four Convictions.">
             No Slogans.
           </Headline>
-          <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {VALUES.map((v) => (
               <div
                 key={v.title}
@@ -202,28 +205,27 @@ export default function AboutPage() {
         <Section tone="ivory">
           <div className="max-w-3xl">
             <Eyebrow>Leadership</Eyebrow>
-            <Headline as="h2" className="mt-6" accent="The Harvest.">
+            <Headline as="h2" className="mt-4" accent="The Harvest.">
               The Hands Behind
             </Headline>
           </div>
-          <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-20">
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
             {FOUNDERS.map((f) => (
               <FounderCard key={f.name} {...f} />
             ))}
           </div>
         </Section>
 
-        <OrganicDivider />
 
         <Section tone="ivory">
           <div className="mx-auto max-w-3xl">
             <Eyebrow>→ Frequently Asked</Eyebrow>
-            <Headline as="h2" className="mt-6" accent="About Kopahi.">
+            <Headline as="h2" className="mt-4" accent="About Kopahi.">
               The Questions, Answered.
             </Headline>
-            <dl className="mt-12 divide-y divide-(--color-bamboo)/25 border-y border-(--color-bamboo)/25">
+            <dl className="mt-8 divide-y divide-(--color-bamboo)/25 border-y border-(--color-bamboo)/25">
               {ABOUT_FAQS.map((q) => (
-                <div key={q.question} className="py-8">
+                <div key={q.question} className="py-6">
                   <dt className="font-display text-xl text-(--color-ink)">{q.question}</dt>
                   <dd className="mt-3 text-(--color-ink)/75 leading-relaxed">{q.answer}</dd>
                 </div>
