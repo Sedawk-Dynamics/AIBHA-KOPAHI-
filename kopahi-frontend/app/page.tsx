@@ -292,7 +292,7 @@ export default function Home() {
 
   return (
     <LenisProvider>
-      <MarketingHeader />
+      <MarketingHeader overHero />
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         {/* ============================================================

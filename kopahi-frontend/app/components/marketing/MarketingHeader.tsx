@@ -117,7 +117,7 @@ function isActivePath(pathname: string | null, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function MarketingHeader() {
+export default function MarketingHeader({ overHero = false }: { overHero?: boolean } = {}) {
   const { user, logout } = useAuth();
   const { count } = useCart();
   const pathname = usePathname();
@@ -131,14 +131,19 @@ export default function MarketingHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navColor = scrolled
+  // Solid (readable cream) header unless we're sitting transparently over a
+  // dark hero AND haven't scrolled yet. Pages without a dark hero pass
+  // overHero={false} (default) so the nav is always visible.
+  const solid = scrolled || !overHero;
+
+  const navColor = solid
     ? "text-(--color-ink)/80 hover:text-(--color-moss)"
     : "text-(--color-ivory)/85 hover:text-(--color-ivory)";
 
   return (
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
-        scrolled
+        solid
           ? "bg-(--color-ivory) border-b border-(--color-bamboo)/25 shadow-[0_2px_16px_rgba(46,59,42,0.12)]"
           : "bg-transparent"
       }`}
@@ -167,7 +172,7 @@ export default function MarketingHeader() {
                 aria-current={active ? "page" : undefined}
                 className={`relative font-body text-[0.8125rem] font-medium tracking-wide transition-colors group ${
                   active
-                    ? scrolled
+                    ? solid
                       ? "text-(--color-moss)"
                       : "text-(--color-ivory)"
                     : navColor
@@ -189,7 +194,7 @@ export default function MarketingHeader() {
             href="/cart"
             aria-label={`Cart${count ? `, ${count} items` : ""}`}
             className={`relative inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
-              scrolled
+              solid
                 ? "border-(--color-bamboo)/30 text-(--color-moss) hover:border-(--color-gold)"
                 : "border-(--color-ivory)/40 text-(--color-ivory) hover:border-(--color-gold)"
             }`}
@@ -251,7 +256,7 @@ export default function MarketingHeader() {
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
           className={`lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-sm border ${
-            scrolled ? "border-(--color-bamboo)/30 text-(--color-ink)" : "border-(--color-ivory)/40 text-(--color-ivory)"
+            solid ? "border-(--color-bamboo)/30 text-(--color-ink)" : "border-(--color-ivory)/40 text-(--color-ivory)"
           }`}
         >
           <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">

@@ -127,7 +127,7 @@ export default function B2BPage() {
 
   return (
     <LenisProvider>
-      <MarketingHeader />
+      <MarketingHeader overHero />
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(crumbsLd)} />
