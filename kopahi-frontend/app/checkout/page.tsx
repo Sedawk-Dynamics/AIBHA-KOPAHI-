@@ -10,7 +10,6 @@ import MarketingHeader from "../components/marketing/MarketingHeader";
 import MarketingFooter from "../components/marketing/MarketingFooter";
 import WhatsAppFab from "../components/marketing/WhatsAppFab";
 import Eyebrow from "../components/marketing/Eyebrow";
-import OrganicDivider from "../components/marketing/OrganicDivider";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { api, ApiError } from "../lib/api";
@@ -69,7 +68,7 @@ export default function CheckoutPage() {
       <LenisProvider>
         <MarketingHeader />
         <main className="bg-(--color-ivory) text-(--color-ink) min-h-screen">
-          <section className="pt-40 pb-32 text-center">
+          <section className="pt-28 pb-16 text-center">
             <div className="mx-auto max-w-2xl px-6">
               <Eyebrow>→ Checkout</Eyebrow>
               <h1 className="mt-6 font-display font-light tracking-tight text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.02] text-(--color-ink)">
@@ -140,7 +139,7 @@ export default function CheckoutPage() {
       <MarketingHeader />
       <main className="bg-(--color-ivory) text-(--color-ink) min-h-screen">
         {/* HERO */}
-        <section className="pt-32 sm:pt-40 pb-10">
+        <section className="pt-28 sm:pt-32 pb-10">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
             <Eyebrow>→ Checkout</Eyebrow>
             <h1 className="mt-6 font-display font-light tracking-tight text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.02] text-(--color-ink) max-w-3xl">
@@ -152,7 +151,6 @@ export default function CheckoutPage() {
           </div>
         </section>
 
-        <OrganicDivider />
 
         <section className="pb-32">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-10">

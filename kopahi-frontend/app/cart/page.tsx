@@ -10,7 +10,6 @@ import MarketingHeader from "../components/marketing/MarketingHeader";
 import MarketingFooter from "../components/marketing/MarketingFooter";
 import WhatsAppFab from "../components/marketing/WhatsAppFab";
 import Eyebrow from "../components/marketing/Eyebrow";
-import OrganicDivider from "../components/marketing/OrganicDivider";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../lib/api";
@@ -77,7 +76,7 @@ export default function CartPage() {
 
       <main className="bg-(--color-ivory) text-(--color-ink) min-h-screen">
         {/* HERO — compact ~30vh */}
-        <section className="pt-32 sm:pt-40 pb-10">
+        <section className="pt-28 sm:pt-32 pb-10">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
             <Eyebrow>→ Your basket</Eyebrow>
             <h1 className="mt-6 font-display font-light tracking-tight text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.02] text-(--color-ink) max-w-3xl">
@@ -91,7 +90,6 @@ export default function CartPage() {
           </div>
         </section>
 
-        <OrganicDivider />
 
         {/* BODY */}
         <section className="pb-32">

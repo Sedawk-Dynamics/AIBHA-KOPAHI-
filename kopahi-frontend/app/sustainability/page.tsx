@@ -7,7 +7,6 @@ import WhatsAppFab from "../components/marketing/WhatsAppFab";
 import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
-import OrganicDivider from "../components/marketing/OrganicDivider";
 import { buildMetadata } from "../lib/seo";
 
 export const metadata: Metadata = buildMetadata({
@@ -63,7 +62,7 @@ export default function SustainabilityPage() {
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         {/* ============== HERO ============== */}
-        <section className="relative pt-32 sm:pt-40 pb-12 sm:pb-16">
+        <section className="relative pt-28 sm:pt-32 pb-12 sm:pb-16">
           <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
             <Eyebrow>Impact</Eyebrow>
             <Headline as="h1" className="mt-6 max-w-4xl" accent="A Way Of Life.">
@@ -75,7 +74,6 @@ export default function SustainabilityPage() {
           </div>
         </section>
 
-        <OrganicDivider />
 
         {/* ============== FOUR PILLARS ============== */}
         <Section tone="ivory">
@@ -104,7 +102,6 @@ export default function SustainabilityPage() {
           </div>
         </Section>
 
-        <OrganicDivider />
 
         {/* ============== VALUE CHAIN ============== */}
         <Section tone="moss" grain>
@@ -113,7 +110,7 @@ export default function SustainabilityPage() {
             Farm To Frontier.
           </Headline>
 
-          <ol className="mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-2">
+          <ol className="mt-10 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-2">
             {CHAIN.map((c, i) => (
               <li key={c.label} className="relative">
                 <div className="flex items-center gap-3 md:block">
