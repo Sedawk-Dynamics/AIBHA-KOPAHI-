@@ -11,7 +11,6 @@ import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
 import StatCallout from "../components/marketing/StatCallout";
-import Marquee from "../components/marketing/Marquee";
 import B2BInquiryForm from "./B2BInquiryForm";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, ldScript } from "../lib/seo";
 
@@ -102,11 +101,6 @@ const INDUSTRIES = [
   { title: "HoReCa & Restaurants", image: "/products/HoReCa.webp", body: "Curated origin selections, consistent supply." },
   { title: "Modern Retail", image: "/products/ModernRetail.webp", body: "Retail-ready packaging, private-label options." },
   { title: "Export & Global Trade", image: "/products/Export&GlobalTrade.webp", body: "FSSAI-compliant, export-documented, lab-tested." },
-];
-
-const PARTNERS = [
-  "Tata Harvest", "BlueOrigin Foods", "Northeast Café", "Saffron Hotels",
-  "GreenLeaf Mart", "Pacific Exports", "Kettle & Brew", "OrganicFirst",
 ];
 
 const BENEFITS = [
@@ -307,16 +301,59 @@ export default function B2BPage() {
           </div>
         </Section>
 
-        {/* ============== 7 · TRUSTED BY ============== */}
-        <section className="bg-(--color-ivory) py-16 sm:py-20">
-          <div className="mx-auto max-w-shell px-5 lg:px-8 mb-10 text-center">
-            <Eyebrow>→ Trusted by buyers across India &amp; beyond</Eyebrow>
+        {/* ============== 7 · BUSINESS MODEL ============== */}
+        <Section tone="ivory">
+          <div className="max-w-3xl">
+            <Eyebrow>→ 04 · Business Model</Eyebrow>
+            <Headline as="h2" className="mt-4" accent="One Accountable Spine.">
+              How Kopahi Works —
+            </Headline>
           </div>
-          <Marquee items={PARTNERS} />
-          <div className="mt-2">
-            <Marquee items={[...PARTNERS].reverse()} />
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { n: "01", title: "Direct Farmer Sourcing", body: "Direct farmer sourcing ensures quality, traceability, and efficiency." },
+              { n: "02", title: "Processing & Branding", body: "Processing, packaging, and branding increase margins from produce." },
+              { n: "03", title: "Diversified Channels", body: "Diversified channels ensure revenue stability and scalability." },
+              { n: "04", title: "Technology", body: "Technology enables transparency, forecasting, and operational efficiency." },
+            ].map((p) => (
+              <article
+                key={p.n}
+                className="flex flex-col h-full bg-(--color-ivory) border-x border-b border-(--color-bamboo)/15 border-t-2 border-t-(--color-gold)/55 rounded-sm p-6"
+              >
+                <span className="font-display italic text-(--color-gold) text-3xl leading-none">{p.n}</span>
+                <h3 className="mt-3 font-display text-xl text-(--color-ink) leading-tight">{p.title}</h3>
+                <p className="mt-2 text-small text-(--color-ink)/75 leading-relaxed">{p.body}</p>
+              </article>
+            ))}
           </div>
-        </section>
+        </Section>
+
+        {/* ============== 8 · GROWTH & EXPANSION ============== */}
+        <Section tone="bamboo">
+          <div className="max-w-3xl">
+            <Eyebrow>→ 05 · The Roadmap</Eyebrow>
+            <Headline as="h2" className="mt-4" accent="Then Global.">
+              Domestic First.
+            </Headline>
+          </div>
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-(--color-ivory) p-8 sm:p-10 border border-(--color-bamboo)/20">
+              <p className="eyebrow text-(--color-bamboo)">Growth</p>
+              <p className="mt-5 text-(--color-ink)/80 leading-relaxed">
+                Kopahi will expand domestically first — scaling SKUs, geographies, partnerships, and digital channels —
+                to strengthen market presence, volumes, margins, and platform-led growth.
+              </p>
+            </div>
+            <div className="bg-(--color-ivory) p-8 sm:p-10 border border-(--color-bamboo)/20">
+              <p className="eyebrow text-(--color-bamboo)">Expansion</p>
+              <p className="mt-5 text-(--color-ink)/80 leading-relaxed">
+                We will deepen Northeast sourcing and processing capabilities, ensure quality volumes, and leverage B2B
+                and exports to accelerate global penetration, improve margins, and position Kopahi as a trusted platform —
+                supported by incentives, branding, and partnerships.
+              </p>
+            </div>
+          </div>
+        </Section>
 
         {/* ============== 8 · REQUEST QUOTE ============== */}
         <Section tone="ivory" id="quote">
