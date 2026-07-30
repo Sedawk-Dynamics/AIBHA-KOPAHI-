@@ -51,12 +51,24 @@ export default function ContactForm() {
     }
     setStatus("loading");
     try {
-      const res = await fetch("/api/contact", {
+      const option = INQUIRY_OPTIONS.find((o) => o.value === type);
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ type, name, email, phone, message }),
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({
+          access_key: "2cabc391-2c50-4ae0-9362-ba3d2e82431f",
+          subject: `Kopahi contact — ${option?.label ?? "General inquiry"}`,
+          from_name: "Kopahi Website",
+          name,
+          email,
+          phone: phone || "—",
+          message,
+          inquiry_type: option?.label ?? "General inquiry",
+          route_to: option?.routes ?? "inquiry@kopahi.com",
+        }),
       });
-      if (!res.ok) throw new Error("Network");
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error("Network");
       setStatus("success");
       setServerMessage("Thank you — we will be in touch.");
       setName("");
