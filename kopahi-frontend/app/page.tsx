@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 import LenisProvider from "./components/marketing/LenisProvider";
@@ -16,6 +17,7 @@ import Carousel from "./components/marketing/Carousel";
 import FeaturedCarousel from "./components/marketing/FeaturedCarousel";
 import Marquee from "./components/marketing/Marquee";
 import { getFeaturedHomepageProducts } from "./lib/marketing";
+import { SHOP_LINKS } from "./lib/shop";
 
 const PILLARS = [
   {
@@ -164,8 +166,11 @@ const USPS = [
 
 function HeroVideo() {
   const reduce = useReducedMotion();
+  // No poster: the moss-dark backdrop shows until the video's first frame
+  // is actually playing, then the video fades in — avoids the still-image flash.
+  const [playing, setPlaying] = useState(false);
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden bg-(--color-moss-dark)">
       {!reduce ? (
         <video
           autoPlay
@@ -173,9 +178,11 @@ function HeroVideo() {
           loop
           playsInline
           preload="auto"
-          poster="/products/tea-garden.jpg"
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
+          onPlaying={() => setPlaying(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            playing ? "opacity-100" : "opacity-0"
+          }`}
         >
           <source src="/hero.mp4" type="video/mp4" />
         </video>
@@ -343,13 +350,13 @@ export default function Home() {
               }}
               className="mt-10 flex flex-wrap gap-4"
             >
-              <Link
-                href="/products"
+              <a
+                href={SHOP_LINKS.shop}
                 className="inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
               >
                 Explore Our Origins
                 <span aria-hidden="true">→</span>
-              </Link>
+              </a>
               <Link
                 href="/contact"
                 className="inline-flex items-center gap-3 px-7 py-4 border border-(--color-ivory)/60 text-(--color-ivory) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-ivory) hover:text-(--color-moss-dark) transition-colors"
@@ -542,12 +549,12 @@ export default function Home() {
                   Rare By Right.
                 </Headline>
               </div>
-              <Link
-                href="/products"
+              <a
+                href={SHOP_LINKS.shop}
                 className="inline-flex items-center gap-2 text-(--color-gold-dark) hover:text-(--color-gold) text-sm uppercase tracking-[0.22em]"
               >
                 Every Origin <span aria-hidden="true">→</span>
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -556,12 +563,12 @@ export default function Home() {
           </div>
 
           <div className="mx-auto max-w-shell px-5 lg:px-8 mt-10 flex justify-center">
-            <Link
-              href="/products"
+            <a
+              href={SHOP_LINKS.shop}
               className="inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
             >
               Know More <span aria-hidden="true">→</span>
-            </Link>
+            </a>
           </div>
         </Section>
 
@@ -687,18 +694,18 @@ export default function Home() {
               </Headline>
             </div>
             <div className="lg:col-span-5 flex flex-col gap-4 lg:items-end">
-              <Link
-                href="/contact?type=stockist"
+              <a
+                href={SHOP_LINKS.account}
                 className="inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
               >
                 Become A Stockist <span aria-hidden="true">→</span>
-              </Link>
-              <Link
-                href="/contact?type=export"
+              </a>
+              <a
+                href={SHOP_LINKS.account}
                 className="inline-flex items-center gap-3 px-7 py-4 border border-(--color-ivory)/60 text-(--color-ivory) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-ivory) hover:text-(--color-moss-dark) transition-colors"
               >
                 Explore Export Partnerships
-              </Link>
+              </a>
             </div>
           </div>
         </Section>

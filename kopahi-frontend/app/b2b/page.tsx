@@ -429,7 +429,7 @@ export default function B2BPage() {
                 Request Quote <span aria-hidden="true">→</span>
               </Link>
               <a
-                href="mailto:partner@kopahi.com"
+                href="https://api.whatsapp.com/send/?phone=919181016660"
                 className="inline-flex items-center gap-3 px-7 py-4 border border-(--color-ivory)/60 text-(--color-ivory) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-ivory) hover:text-(--color-moss-dark) transition-colors"
               >
                 Schedule A Call

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import ProductTile from "./ProductTile";
+import { SHOP_LINKS } from "../../lib/shop";
 
 type Item = {
   slug?: string;
@@ -101,7 +102,7 @@ export default function FeaturedCarousel({ items }: { items: Item[] }) {
                 origin={p.origin}
                 image={p.image}
                 gi={!!p.gi}
-                href={p.slug ? `/products/${p.slug}` : "/products"}
+                href={SHOP_LINKS.shop}
               />
             </div>
           ))}
