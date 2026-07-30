@@ -3,110 +3,63 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
-import { useCart } from "../../context/CartContext";
+import { useEffect, useState } from "react";
 
-const NAV = [
+/* WordPress shop base URL — swap to https://shop.kopahi.com at cutover. */
+const SHOP = "https://staging.kopahi.sedawk.cloud";
+
+type NavItem = { href: string; label: string; external?: boolean };
+
+const NAV: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
-  { href: "/products", label: "Products" },
+  { href: `${SHOP}/shop/`, label: "Product", external: true },
   { href: "/b2b", label: "B2B" },
-  { href: "/journal", label: "Journal" },
+  { href: `${SHOP}/blog/`, label: "Journal", external: true },
   { href: "/contact", label: "Contact" },
 ];
 
-function initialsOf(name?: string | null) {
-  if (!name) return "K";
-  const parts = name.trim().split(/\s+/);
-  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "K";
-}
+const ACCOUNT_URL = `${SHOP}/my-account/`;
+const SEARCH_URL = `${SHOP}/my-account/`;
+const WISHLIST_URL = `${SHOP}/wishlist/`;
+const CART_URL = `${SHOP}/cart/`;
 
-function AvatarMenu({
-  initials,
-  role,
-  name,
-  onSignOut,
-}: {
-  initials: string;
-  role: "user" | "vendor" | "admin";
-  name?: string;
-  onSignOut: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  const secondLabel = role === "vendor" ? "My Products" : role === "admin" ? "Approvals" : "Orders";
-  const secondHref = role === "vendor" ? "/dashboard/products" : role === "admin" ? "/dashboard/approvals" : "/dashboard/orders";
-
+function SearchIcon() {
   return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-2 h-11 px-2 rounded-full border border-(--color-bamboo)/30 hover:border-(--color-gold) bg-(--color-ivory)/90 transition-colors"
-      >
-        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-(--color-moss) text-(--color-ivory) text-xs font-medium tracking-[0.08em]">
-          {initials}
-        </span>
-        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true" className={`mr-1 transition-transform ${open ? "rotate-180" : ""}`}>
-          <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 mt-3 w-64 bg-(--color-ivory) border border-(--color-bamboo)/30 shadow-xl py-2"
-        >
-          <div className="px-4 py-3 border-b border-(--color-bamboo)/20">
-            <p className="font-display text-base text-(--color-ink) leading-tight">{name ?? "Welcome"}</p>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-(--color-bamboo) mt-1">{role}</p>
-          </div>
-          <MenuLink href="/dashboard" onClick={() => setOpen(false)}>My Profile</MenuLink>
-          <MenuLink href={secondHref} onClick={() => setOpen(false)}>{secondLabel}</MenuLink>
-          <MenuLink href="/dashboard/settings" onClick={() => setOpen(false)}>Settings</MenuLink>
-          <div className="my-2 mx-4 h-px bg-(--color-bamboo)/30" />
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-              onSignOut();
-            }}
-            className="w-full text-left px-4 py-2.5 font-display italic text-(--color-bamboo) hover:bg-(--color-ivory-warm) transition-colors"
-          >
-            Sign out
-          </button>
-        </div>
-      )}
-    </div>
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
   );
 }
 
-function MenuLink({ href, children, onClick }: { href: string; children: React.ReactNode; onClick: () => void }) {
+function HeartIcon() {
   return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className="block px-4 py-2.5 font-display text-(--color-ink) hover:bg-(--color-ivory-warm) hover:text-(--color-moss) transition-colors"
-    >
-      {children}
-    </Link>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 20.5s-7.5-4.7-9.3-9.2C1.4 8 3.4 4.9 6.6 4.9c2 0 3.6 1.1 4.4 2.7h2c.8-1.6 2.4-2.7 4.4-2.7 3.2 0 5.2 3.1 3.9 6.4-1.8 4.5-9.3 9.2-9.3 9.2z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M3 4h2l2.5 11h11L21 7H7"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="9" cy="20" r="1.4" fill="currentColor" />
+      <circle cx="17" cy="20" r="1.4" fill="currentColor" />
+    </svg>
   );
 }
 
@@ -118,8 +71,6 @@ function isActivePath(pathname: string | null, href: string) {
 }
 
 export default function MarketingHeader({ overHero = false }: { overHero?: boolean } = {}) {
-  const { user, logout } = useAuth();
-  const { count } = useCart();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -139,6 +90,23 @@ export default function MarketingHeader({ overHero = false }: { overHero?: boole
   const navColor = solid
     ? "text-(--color-ink)/80 hover:text-(--color-moss)"
     : "text-(--color-ivory)/85 hover:text-(--color-ivory)";
+
+  const toolColor = solid
+    ? "text-(--color-moss) hover:text-(--color-gold-dark)"
+    : "text-(--color-ivory) hover:text-(--color-gold)";
+
+  const navLinkClass = (active: boolean) =>
+    `relative font-body text-[0.8125rem] font-medium tracking-wide transition-colors group ${
+      active ? (solid ? "text-(--color-moss)" : "text-(--color-ivory)") : navColor
+    }`;
+
+  const underline = (active: boolean) => (
+    <span
+      className={`absolute left-1/2 -translate-x-1/2 -bottom-1 h-px bg-(--color-gold) transition-all duration-300 ${
+        active ? "w-full" : "w-0 group-hover:w-full"
+      }`}
+    />
+  );
 
   return (
     <header
@@ -164,90 +132,45 @@ export default function MarketingHeader({ overHero = false }: { overHero?: boole
 
         <nav className="hidden lg:flex items-center gap-7" aria-label="Primary">
           {NAV.map((n) => {
+            if (n.external) {
+              return (
+                <a key={n.href} href={n.href} className={navLinkClass(false)}>
+                  {n.label}
+                  {underline(false)}
+                </a>
+              );
+            }
             const active = isActivePath(pathname, n.href);
             return (
               <Link
                 key={n.href}
                 href={n.href}
                 aria-current={active ? "page" : undefined}
-                className={`relative font-body text-[0.8125rem] font-medium tracking-wide transition-colors group ${
-                  active
-                    ? solid
-                      ? "text-(--color-moss)"
-                      : "text-(--color-ivory)"
-                    : navColor
-                }`}
+                className={navLinkClass(active)}
               >
                 {n.label}
-                <span
-                  className={`absolute left-1/2 -translate-x-1/2 -bottom-1 h-px bg-(--color-gold) transition-all duration-300 ${
-                    active ? "w-full" : "w-0 group-hover:w-full"
-                  }`}
-                />
+                {underline(active)}
               </Link>
             );
           })}
         </nav>
 
-        <div className="hidden lg:flex items-center gap-2.5">
-          <Link
-            href="/cart"
-            aria-label={`Cart${count ? `, ${count} items` : ""}`}
-            className={`relative inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
-              solid
-                ? "border-(--color-bamboo)/30 text-(--color-moss) hover:border-(--color-gold)"
-                : "border-(--color-ivory)/40 text-(--color-ivory) hover:border-(--color-gold)"
-            }`}
+        <div className="hidden lg:flex items-center gap-5">
+          <a
+            href={ACCOUNT_URL}
+            className={`font-body text-[0.8125rem] font-medium uppercase tracking-[0.08em] transition-colors ${navColor}`}
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M3 4h2l2.5 11h11L21 7H7"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle cx="9" cy="20" r="1.4" fill="currentColor" />
-              <circle cx="17" cy="20" r="1.4" fill="currentColor" />
-            </svg>
-            {count > 0 && (
-              <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-gold) text-(--color-moss-dark) text-[10px] font-medium px-1">
-                {count}
-              </span>
-            )}
-          </Link>
-
-          {user ? (
-            <>
-              <Link
-                href="/dashboard"
-                className="text-[0.8125rem] font-medium px-3.5 py-1.5 rounded-sm bg-(--color-gold) text-(--color-moss-dark) hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
-              >
-                Dashboard
-              </Link>
-              <AvatarMenu
-                initials={initialsOf(user.name)}
-                role={user.role}
-                name={user.name}
-                onSignOut={() => logout()}
-              />
-            </>
-          ) : (
-            <>
-              <Link href="/login" className={`text-[0.8125rem] font-medium px-3 py-1.5 transition-colors ${navColor}`}>
-                Login
-              </Link>
-              <Link href="/signup" className={`text-[0.8125rem] font-medium px-3 py-1.5 transition-colors ${navColor}`}>
-                Sign up
-              </Link>
-              <Link
-                href="/products"
-                className="text-[0.8125rem] font-medium px-3.5 py-1.5 rounded-sm bg-(--color-gold) text-(--color-moss-dark) hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors"
-              >
-                Shop →
-              </Link>
-            </>
-          )}
+            My Account
+          </a>
+          <a href={SEARCH_URL} aria-label="Search" className={`transition-colors ${toolColor}`}>
+            <SearchIcon />
+          </a>
+          <a href={WISHLIST_URL} aria-label="Wishlist" className={`transition-colors ${toolColor}`}>
+            <HeartIcon />
+          </a>
+          <a href={CART_URL} aria-label="Cart" className={`transition-colors ${toolColor}`}>
+            <CartIcon />
+          </a>
         </div>
 
         <button
@@ -277,18 +200,26 @@ export default function MarketingHeader({ overHero = false }: { overHero?: boole
         <div className="lg:hidden bg-(--color-ivory) border-t border-(--color-bamboo)/15">
           <nav className="mx-auto max-w-7xl px-6 py-6 flex flex-col gap-4" aria-label="Mobile navigation">
             {NAV.map((n) => {
-              const active = isActivePath(pathname, n.href);
+              const active = !n.external && isActivePath(pathname, n.href);
+              const itemClass = `text-[14px] uppercase tracking-[0.22em] font-medium py-2 border-b flex items-center justify-between ${
+                active
+                  ? "text-(--color-moss) border-(--color-gold)"
+                  : "text-(--color-ink) border-(--color-bamboo)/15"
+              }`;
+              if (n.external) {
+                return (
+                  <a key={n.href} href={n.href} onClick={() => setOpen(false)} className={itemClass}>
+                    {n.label}
+                  </a>
+                );
+              }
               return (
                 <Link
                   key={n.href}
                   href={n.href}
                   onClick={() => setOpen(false)}
                   aria-current={active ? "page" : undefined}
-                  className={`text-[14px] uppercase tracking-[0.22em] font-medium py-2 border-b flex items-center justify-between ${
-                    active
-                      ? "text-(--color-moss) border-(--color-gold)"
-                      : "text-(--color-ink) border-(--color-bamboo)/15"
-                  }`}
+                  className={itemClass}
                 >
                   {n.label}
                   {active && <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-(--color-gold)" />}
@@ -296,58 +227,27 @@ export default function MarketingHeader({ overHero = false }: { overHero?: boole
               );
             })}
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <Link
-                href="/cart"
+              <a
+                href={ACCOUNT_URL}
                 onClick={() => setOpen(false)}
-                className="col-span-2 inline-flex items-center justify-between px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink) text-[13px] uppercase tracking-[0.22em]"
+                className="col-span-2 text-center text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink)"
               >
-                Cart <span className="text-(--color-bamboo)">{count}</span>
-              </Link>
-              {user ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setOpen(false)}
-                    className="col-span-2 text-center text-[13px] uppercase tracking-[0.22em] font-medium px-5 py-3 rounded-sm bg-(--color-gold) text-(--color-moss-dark)"
-                  >
-                    Dashboard
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpen(false);
-                      logout();
-                    }}
-                    className="col-span-2 px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink) text-[13px] uppercase tracking-[0.22em]"
-                  >
-                    Sign out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={() => setOpen(false)}
-                    className="text-center text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink)"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={() => setOpen(false)}
-                    className="text-center text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink)"
-                  >
-                    Sign up
-                  </Link>
-                  <Link
-                    href="/products"
-                    onClick={() => setOpen(false)}
-                    className="col-span-2 text-center text-[13px] uppercase tracking-[0.22em] font-medium px-5 py-3 rounded-sm bg-(--color-gold) text-(--color-moss-dark)"
-                  >
-                    Shop →
-                  </Link>
-                </>
-              )}
+                My Account
+              </a>
+              <a
+                href={WISHLIST_URL}
+                onClick={() => setOpen(false)}
+                className="inline-flex items-center justify-center gap-2 text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink)"
+              >
+                <HeartIcon /> Wishlist
+              </a>
+              <a
+                href={CART_URL}
+                onClick={() => setOpen(false)}
+                className="inline-flex items-center justify-center gap-2 text-[13px] uppercase tracking-[0.22em] font-medium px-4 py-3 border border-(--color-bamboo)/30 text-(--color-ink)"
+              >
+                <CartIcon /> Cart
+              </a>
             </div>
           </nav>
         </div>
