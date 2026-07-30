@@ -366,44 +366,21 @@ export default function B2BPage() {
             </p>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-            <aside className="lg:col-span-5">
-              <p className="eyebrow">Why partner with us</p>
-              <ul className="mt-6 space-y-4">
-                {[
-                  "24-hour response window",
-                  "Free product samples",
-                  "Dedicated account manager",
-                  "Volume-based discounts",
-                ].map((b) => (
-                  <li key={b} className="flex items-start gap-3 text-(--color-ink)/85">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-(--color-gold) shrink-0 mt-1">
-                      <path d="M12 3c0 6 3 9 9 9-6 0-9 3-9 9 0-6-3-9-9-9 6 0 9-3 9-9z" fill="currentColor" />
-                    </svg>
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-            </aside>
-
-            <div className="lg:col-span-7">
-              {/* Webelio CRM web-to-lead form — submissions land in the CRM directly. */}
-              <div className="bg-(--color-ivory-warm) border border-(--color-bamboo)/20 rounded-sm p-4 sm:p-6">
-                <p className="eyebrow mb-4">→ Tell us about your business</p>
-                <iframe
-                  src="https://crm.kopahi.com/forms/wtl/2417f7b65e2ad073abd1d91f385ee098"
-                  title="Request a custom quote"
-                  className="block w-full border-0 bg-transparent"
-                  style={{ height: "850px" }}
-                  loading="lazy"
-                  sandbox="allow-top-navigation allow-forms allow-scripts allow-same-origin allow-popups"
-                  allowFullScreen
-                />
-                <p className="mt-3 text-xs text-(--color-ink)/55">
-                  By submitting, you agree to our terms. We never share your data.
-                </p>
-              </div>
-            </div>
+          {/* Webelio CRM web-to-lead form — submissions land in the CRM directly. */}
+          <div className="mt-10 bg-(--color-ivory-warm) border border-(--color-bamboo)/20 rounded-sm p-4 sm:p-6">
+            <p className="eyebrow mb-4">→ Tell us about your business</p>
+            <iframe
+              src="https://crm.kopahi.com/forms/wtl/2417f7b65e2ad073abd1d91f385ee098"
+              title="Request a custom quote"
+              className="block w-full border-0 bg-transparent"
+              style={{ height: "850px" }}
+              loading="lazy"
+              sandbox="allow-top-navigation allow-forms allow-scripts allow-same-origin allow-popups"
+              allowFullScreen
+            />
+            <p className="mt-3 text-xs text-(--color-ink)/55">
+              By submitting, you agree to our terms. We never share your data.
+            </p>
           </div>
         </Section>
 
