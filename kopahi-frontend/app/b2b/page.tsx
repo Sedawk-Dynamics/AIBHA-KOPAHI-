@@ -366,9 +366,11 @@ export default function B2BPage() {
             </p>
           </div>
 
-          {/* Webelio CRM web-to-lead form — submissions land in the CRM directly. */}
-          <div className="mt-10 bg-(--color-ivory-warm) border border-(--color-bamboo)/20 rounded-sm p-4 sm:p-6">
-            <p className="eyebrow mb-4">→ Tell us about your business</p>
+          {/* Webelio CRM web-to-lead form — submissions land in the CRM directly.
+              The card is white so the iframe's white interior merges into it
+              seamlessly (its inner styling can't be changed cross-origin). */}
+          <div className="mt-10 bg-white border border-(--color-bamboo)/25 border-t-2 border-t-(--color-gold)/60 rounded-sm p-6 sm:p-10">
+            <p className="eyebrow mb-2">→ Tell us about your business</p>
             <iframe
               src="https://crm.kopahi.com/forms/wtl/2417f7b65e2ad073abd1d91f385ee098"
               title="Request a custom quote"
