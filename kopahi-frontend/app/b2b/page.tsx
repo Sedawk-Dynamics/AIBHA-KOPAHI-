@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
 
 import LenisProvider from "../components/marketing/LenisProvider";
 import MarketingHeader from "../components/marketing/MarketingHeader";
@@ -11,7 +10,6 @@ import Section from "../components/marketing/Section";
 import Eyebrow from "../components/marketing/Eyebrow";
 import Headline from "../components/marketing/Headline";
 import StatCallout from "../components/marketing/StatCallout";
-import B2BInquiryForm from "./B2BInquiryForm";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, ldScript } from "../lib/seo";
 
 export const metadata: Metadata = buildMetadata({
@@ -389,9 +387,22 @@ export default function B2BPage() {
             </aside>
 
             <div className="lg:col-span-7">
-              <Suspense fallback={null}>
-                <B2BInquiryForm />
-              </Suspense>
+              {/* Webelio CRM web-to-lead form — submissions land in the CRM directly. */}
+              <div className="bg-(--color-ivory-warm) border border-(--color-bamboo)/20 rounded-sm p-4 sm:p-6">
+                <p className="eyebrow mb-4">→ Tell us about your business</p>
+                <iframe
+                  src="https://crm.kopahi.com/forms/wtl/2417f7b65e2ad073abd1d91f385ee098"
+                  title="Request a custom quote"
+                  className="block w-full border-0 bg-transparent"
+                  style={{ height: "850px" }}
+                  loading="lazy"
+                  sandbox="allow-top-navigation allow-forms allow-scripts allow-same-origin allow-popups"
+                  allowFullScreen
+                />
+                <p className="mt-3 text-xs text-(--color-ink)/55">
+                  By submitting, you agree to our terms. We never share your data.
+                </p>
+              </div>
             </div>
           </div>
         </Section>
