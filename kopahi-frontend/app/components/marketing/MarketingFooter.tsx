@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SHOP_LINKS } from "../../lib/shop";
 
 type SocialIcon = { label: string; href: string; path: React.ReactNode };
 
@@ -116,9 +117,9 @@ export default function MarketingFooter() {
               <li><Link href="/" className="hover:text-(--color-gold) transition-colors">Home</Link></li>
               <li><Link href="/about" className="hover:text-(--color-gold) transition-colors">About</Link></li>
               <li><Link href="/farmers" className="hover:text-(--color-gold) transition-colors">Farmers</Link></li>
-              <li><Link href="/products" className="hover:text-(--color-gold) transition-colors">Products</Link></li>
+              <li><a href={SHOP_LINKS.shop} className="hover:text-(--color-gold) transition-colors">Products</a></li>
               <li><Link href="/b2b" className="hover:text-(--color-gold) transition-colors">B2B</Link></li>
-              <li><Link href="/journal" className="hover:text-(--color-gold) transition-colors">Journal</Link></li>
+              <li><a href={SHOP_LINKS.blog} className="hover:text-(--color-gold) transition-colors">Journal</a></li>
               <li><Link href="/contact" className="hover:text-(--color-gold) transition-colors">Contact</Link></li>
             </ul>
           </div>
@@ -154,9 +155,9 @@ export default function MarketingFooter() {
               Terms
             </Link>
             <span aria-hidden="true" className="text-(--color-bamboo)/40">·</span>
-            <Link href="/products" className="hover:text-(--color-gold) transition-colors hover:underline underline-offset-4">
+            <a href={SHOP_LINKS.shop} className="hover:text-(--color-gold) transition-colors hover:underline underline-offset-4">
               Shop
-            </Link>
+            </a>
           </div>
         </div>
       </div>
