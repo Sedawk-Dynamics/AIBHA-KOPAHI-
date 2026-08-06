@@ -375,7 +375,7 @@ export default function B2BPage() {
               src="https://crm.kopahi.com/forms/wtl/2417f7b65e2ad073abd1d91f385ee098"
               title="Request a custom quote"
               className="block w-full border-0 bg-transparent"
-              style={{ height: "850px" }}
+              style={{ height: "1050px" }}
               loading="lazy"
               sandbox="allow-top-navigation allow-forms allow-scripts allow-same-origin allow-popups"
               allowFullScreen

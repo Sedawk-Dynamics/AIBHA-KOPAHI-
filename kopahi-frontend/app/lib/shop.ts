@@ -1,7 +1,6 @@
-/* Single source of truth for every link into the WordPress shop.
-   Swap SHOP_URL to https://shop.kopahi.com at cutover. */
+/* Single source of truth for every link into the WordPress shop. */
 
-export const SHOP_URL = "https://staging.kopahi.sedawk.cloud";
+export const SHOP_URL = "https://shop.kopahi.com";
 
 export const SHOP_LINKS = {
   shop: `${SHOP_URL}/shop/`,
