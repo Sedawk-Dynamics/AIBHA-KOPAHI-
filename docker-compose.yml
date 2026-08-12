@@ -1,115 +1,27 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Dokploy production compose — 3 services behind Traefik on `dokploy-network`.
+# Dokploy production compose — kopahi.com brand site (Next.js) behind Traefik.
 #
-# DATABASE: this compose does NOT include Postgres. The DB is provisioned as
-# a separate Dokploy "Database" service (the `db` service in your project).
-# Copy the connection URL Dokploy shows on the db service page into the
-# DATABASE_URL env var below.
+# HYBRID MODEL: this repo now ships ONLY the Next.js brand site. All commerce
+# (shop, cart, checkout, accounts, vendor dashboards, blog) lives on WordPress
+# at shop.kopahi.com, deployed separately. The old Node backend, admin SPA and
+# Postgres database are retired.
 #
 # Required env vars (set in Dokploy → project → Environment):
-#   DATABASE_URL            postgresql://USER:PASS@db:5432/DBNAME?schema=public
-#                           (Dokploy gives you this on the db service page)
-#   JWT_SECRET              `openssl rand -hex 48`
-#   FRONTEND_HOST           bare hostname, no scheme (e.g. aibaagri.sedawk.cloud)
-#   ADMIN_HOST              bare hostname, no scheme
-#   API_HOST                bare hostname, no scheme
-#   FRONTEND_URL            https://${FRONTEND_HOST}
-#   ADMIN_URL               https://${ADMIN_HOST}
-#   NEXT_PUBLIC_API_URL     https://${API_HOST}
-#   NEXT_PUBLIC_ADMIN_URL   https://${ADMIN_HOST}
-#   (optional)              SMTP_*, CLOUDINARY_*, RAZORPAY_*
-#
-# Local dev (uses its own throwaway Postgres):
-#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#   FRONTEND_HOST   bare hostname, no scheme (e.g. kopahi.com)
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
-  backend:
-    build:
-      context: ./kopahi-backend
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      PORT: "5000"
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set (copy from Dokploy db service)}
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-30d}
-      # v9-REST access tokens (signed by the Next.js frontend) — backend's
-      # protect middleware verifies these alongside legacy JWT_SECRET tokens.
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-}
-      FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL must be set}
-      ADMIN_URL: ${ADMIN_URL:?ADMIN_URL must be set}
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASS: ${SMTP_PASS:-}
-      # One-time admin bootstrap / recovery (src/utils/bootstrapAdmin.ts).
-      # Set BOOTSTRAP_ADMIN_EMAIL (+ optional BOOTSTRAP_ADMIN_PASSWORD) in the
-      # Dokploy env, redeploy, then REMOVE them. BCRYPT_COST controls the
-      # password hash cost when a bootstrap password reset is performed.
-      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
-      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
-      BCRYPT_COST: ${BCRYPT_COST:-12}
-      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
-      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
-      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
-      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
-      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
-    expose:
-      - "5000"
-    networks:
-      - dokploy-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=dokploy-network"
-      - "traefik.http.routers.kopahi-backend.rule=Host(`${API_HOST}`)"
-      - "traefik.http.routers.kopahi-backend.entrypoints=websecure"
-      - "traefik.http.routers.kopahi-backend.tls=true"
-      - "traefik.http.routers.kopahi-backend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.kopahi-backend.loadbalancer.server.port=5000"
-
   frontend:
     build:
       context: ./kopahi-frontend
       dockerfile: Dockerfile
-      # NEXT_PUBLIC_* vars are baked into the bundle at build time. Anything
-      # the browser needs to see (toggles, public URLs) must be passed here.
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?NEXT_PUBLIC_API_URL must be set}
-        NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL:?NEXT_PUBLIC_ADMIN_URL must be set}
-        NEXT_PUBLIC_ENABLE_DEMO: ${NEXT_PUBLIC_ENABLE_DEMO:-false}
-        NEXT_PUBLIC_DEMO_PASSWORD: ${NEXT_PUBLIC_DEMO_PASSWORD:-}
     restart: unless-stopped
     environment:
       NODE_ENV: production
       HOSTNAME: "0.0.0.0"
       PORT: "3000"
-      # ── v9-REST auth (Next.js route handlers + middleware) ────────────
-      # The frontend now owns auth — Prisma client + JWT + Resend live here.
-      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set (copy from Dokploy db service)}
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET must be set (openssl rand -base64 64)}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET must be set (different from JWT_ACCESS_SECRET)}
-      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
-      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-30d}
-      # Fallback used by lib/auth/jwt.ts only if the two split secrets are absent.
-      JWT_SECRET: ${JWT_SECRET:-}
-      BCRYPT_COST: ${BCRYPT_COST:-12}
-      APP_URL: ${FRONTEND_URL:?FRONTEND_URL must be set}
-      ENABLE_DEMO: ${ENABLE_DEMO:-false}
-      # SMTP / Nodemailer — used only for password-reset emails. When unset
-      # the email helper falls back to console-stub mode (no real send).
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASS: ${SMTP_PASS:-}
-      EMAIL_FROM: ${EMAIL_FROM:-}
-      EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-info@kopahi.com}
     expose:
       - "3000"
-    depends_on:
-      - backend
     networks:
       - dokploy-network
     labels:
@@ -121,30 +33,6 @@ services:
       - "traefik.http.routers.kopahi-frontend.tls.certresolver=letsencrypt"
       - "traefik.http.services.kopahi-frontend.loadbalancer.server.port=3000"
 
-  admin:
-    build:
-      context: ./kopahi-admin
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: ${NEXT_PUBLIC_API_URL:?NEXT_PUBLIC_API_URL must be set}
-    restart: unless-stopped
-    expose:
-      - "80"
-    depends_on:
-      - backend
-    networks:
-      - dokploy-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=dokploy-network"
-      - "traefik.http.routers.kopahi-admin.rule=Host(`${ADMIN_HOST}`)"
-      - "traefik.http.routers.kopahi-admin.entrypoints=websecure"
-      - "traefik.http.routers.kopahi-admin.tls=true"
-      - "traefik.http.routers.kopahi-admin.tls.certresolver=letsencrypt"
-      - "traefik.http.services.kopahi-admin.loadbalancer.server.port=80"
-
 networks:
-  # Dokploy's reverse-proxy network. The managed `db` service also joins this
-  # network so the backend can reach it by its internal hostname.
   dokploy-network:
     external: true

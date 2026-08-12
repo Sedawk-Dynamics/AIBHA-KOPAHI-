@@ -39,7 +39,7 @@ const PILLARS = [
     title: "Brand",
     body: "GI storytelling, premium packaging and export-ready labelling — heritage translated for global shelves without losing its soul.",
     image: "/products/brand.png",
-    href: "/products",
+    href: SHOP_LINKS.shop,
   },
   {
     index: "04",

@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { PRODUCTS } from "./lib/marketing";
 import { JOURNAL } from "./lib/journal";
 import { SITE } from "./lib/seo";
 
@@ -12,10 +11,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }> = [
     { path: "", priority: 1.0, changeFrequency: "weekly" },
     { path: "/about", priority: 0.9, changeFrequency: "monthly" },
-    { path: "/about/farmers", priority: 0.9, changeFrequency: "monthly" },
-    { path: "/products", priority: 0.95, changeFrequency: "weekly" },
-    { path: "/products/gi-tagged", priority: 0.95, changeFrequency: "weekly" },
-    { path: "/products/non-gi-tagged", priority: 0.9, changeFrequency: "weekly" },
     { path: "/farmers", priority: 0.85, changeFrequency: "monthly" },
     { path: "/b2b", priority: 0.95, changeFrequency: "monthly" },
     { path: "/journal", priority: 0.85, changeFrequency: "weekly" },
@@ -32,13 +27,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: r.priority,
   }));
 
-  const productRoutes = PRODUCTS.map((p) => ({
-    url: `${SITE}/products/${p.slug}`,
-    lastModified: now,
-    changeFrequency: "weekly" as const,
-    priority: 0.85,
-  }));
-
+  // Journal entries stay listed until the essays migrate to the WordPress
+  // blog — drop this block together with app/journal at that point.
   const journalRoutes = JOURNAL.map((p) => ({
     url: `${SITE}/journal/${p.slug}`,
     lastModified: new Date(p.publishedAt),
@@ -46,5 +36,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.75,
   }));
 
-  return [...staticEntries, ...productRoutes, ...journalRoutes];
+  return [...staticEntries, ...journalRoutes];
 }

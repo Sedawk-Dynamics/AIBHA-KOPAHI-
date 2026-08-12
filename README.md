@@ -1,121 +1,53 @@
 # Kopahi
 
-A B2B2C marketplace for North-East-India agri-products — GI-tagged tea, raw honey, black rice, and regional spices sourced directly from farmer cooperatives.
+The kopahi.com brand site for AIBA Agri NE LLP — GI-tagged tea, spices, rice
+and heritage produce from Northeast India, sourced through farmer cooperatives
+and FPOs.
 
-## Architecture
-
-Three apps in this monorepo:
+## Architecture (hybrid model)
 
 ```
-kopahi-backend/   Express 5 + TypeScript + Prisma 6 + PostgreSQL 16
-                  Listens on :5000. Serves /api/* and Swagger at /api/docs.
+kopahi.com          kopahi-frontend/ (this repo) — Next.js 16 + React 19 +
+                    Tailwind 4 brand site: Home, About, Farmers, B2B, Contact,
+                    Sustainability, Privacy, Terms. Listens on :3000.
 
-kopahi-frontend/  Next.js 16 + React 19 + Tailwind 4 customer site
-                  Listens on :3000. Marketing pages, product catalog,
-                  cart/checkout, customer dashboard, signup/login,
-                  vendor signup at /vendor-signup.
+shop.kopahi.com     WordPress + WooCommerce + Dokan Lite (deployed separately,
+                    NOT in this repo): shop, cart, checkout, customer accounts,
+                    FPO/vendor dashboards, blog, districts.
+                    Custom behavior lives in WPCode snippets — reference
+                    copies in kopahi-wordpress/.
 
-kopahi-admin/     Vite 8 + React 19 + react-router-dom 7 + Axios
-                  Listens on :3001. Admin and vendor dashboards.
-                  Cross-origin from the customer site — admins/vendors
-                  who log in on :3000 are redirected here.
+crm.kopahi.com      Webelio CRM — receives B2B leads from the kopahi.com/b2b
+                    form (embedded web-to-lead iframe).
 ```
 
-The customer site and admin app share the same `kopahi_token` localStorage key, but because they're on different origins users sign in on each app once.
+Every commerce link in the frontend derives from `SHOP_URL` in
+`kopahi-frontend/app/lib/shop.ts`. Retired routes (old /products catalog,
+cart, auth, dashboards) permanently redirect to their shop.kopahi.com
+equivalents via `next.config.ts`.
+
+`/journal` is temporarily still served by the frontend — its essays are being
+migrated into the WordPress blog; delete `app/journal/` and restore the
+/journal redirects in `next.config.ts` once migration is complete.
 
 ## Local development
 
-### Prerequisites
-- Node 20+
-- PostgreSQL 16 listening on `127.0.0.1:5432` with a `kopahi` database, user `kopahi`, password `kopahi` (or supply your own `DATABASE_URL`).
-
-### First run
-
 ```bash
-# Backend
-cd kopahi-backend
-npm install
-npx prisma migrate dev --name init    # apply schema
-npm run seed                          # demo users, products, coupons, blog posts
-npm run dev                           # :5000
-
-# Customer site (new terminal)
 cd kopahi-frontend
 npm install
-npm run dev                           # :3000
-
-# Admin app (new terminal)
-cd kopahi-admin
-npm install
-npm run dev                           # :3001
+npm run dev   # http://localhost:3000
 ```
 
-Then open:
-- http://localhost:3000 — customer site
-- http://localhost:3001 — admin/vendor app
-- http://localhost:5000/api/docs — Swagger UI
-
-### Demo credentials
-
-After running `npm run seed` in the backend (password is `DemoPass!2026` for all three):
-
-| Role     | Email                  | Where to sign in       |
-|----------|------------------------|------------------------|
-| Admin    | `admin@kopahi.com`     | either site            |
-| Vendor   | `vendor@kopahi.com`    | either site            |
-| Customer | `customer@kopahi.com`  | http://localhost:3000  |
-
-After your first real users exist, **change the seed admin password** (or delete the demo admin row) — the demo password is publicly documented.
-
-## Creating users
-
-| Who        | How                                                                                                                                    |
-|------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| Customer   | Self-signup at `/signup` on the customer site, or `POST /api/auth/register`.                                                           |
-| Vendor     | Self-signup at `/vendor-signup`. Creates the account but **email must be verified before first login** (gate is enforced backend-side). |
-| First admin| `npm run seed` in the backend. There is no public admin signup endpoint — by design.                                                    |
-| More admins| Sign in as an existing admin and `POST /api/admin/users/create-admin`. Audit action: `admin.user_create_admin`.                         |
-| More vendors (manual onboarding) | Sign in as admin and `POST /api/admin/users/create-vendor`. These vendors are created with `emailVerified: true` so they can sign in immediately. |
-
-The standard signup endpoint (`/api/auth/register`) ignores any `role` field in the body and always creates a customer.
-
-## Tests
-
-| Layer | Command | What it covers |
-|---|---|---|
-| **Unit** (Vitest) | `cd kopahi-backend && npm test` | 29 tests across `passwordPolicy`, `escapeRegex`, `escapeHtml`, `generateToken`, and the `_shape` shim. Pure functions only — no Postgres needed. |
-| **End-to-end smoke** | `cd kopahi-backend && npm run smoke` | 13-step script against the live API. Signs up customer + vendor, admin onboards a second vendor, places an order with a coupon, verifies stock decrement + restore on cancel, confirms the rate limit trips on the 6th failed attempt. Uses fake `X-Forwarded-For` IPs so each simulated user gets its own rate-limit bucket. |
-| **Browser e2e** (Playwright) | `cd e2e && npm test` | 7 headless Chromium tests covering customer site (home, login, vendor-signup, forgot-password) and admin app (login form, dashboard load, Orders page). Pre-requisite: all three apps running. |
-
-## Rate limits
-
-In-process `MemoryStore` by default. Set `REDIS_URL` to switch the credential + password-reset limiters to a shared Redis store (`rate-limit-redis`) — required for multi-replica deploys. See [DEPLOYMENT.md §8a](DEPLOYMENT.md).
-
-## Type-checking
-
-```bash
-# Each app independently
-cd kopahi-backend  && npm run typecheck   # tsc --noEmit
-cd kopahi-frontend && npx tsc --noEmit
-cd kopahi-admin    && npx tsc -b --noEmit
-```
+No environment variables are required.
 
 ## Deployment
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) — covers Dokploy with a managed Postgres service plus a Compose project for the three apps.
+Dokploy builds `docker-compose.yml` (single `frontend` service) on push to
+`main`. The only required Dokploy env var is `FRONTEND_HOST` (e.g.
+`kopahi.com`).
 
-## Repo layout
+## History
 
-| Path                                  | What lives here                                                  |
-|---------------------------------------|------------------------------------------------------------------|
-| [kopahi-backend/src/routes/](kopahi-backend/src/routes/)         | All HTTP routes (auth, products, orders, admin, vendor, …)        |
-| [kopahi-backend/src/db/](kopahi-backend/src/db/)                 | Repository layer over Prisma. `_shape.ts` adds the `_id = id` shim |
-| [kopahi-backend/prisma/schema.prisma](kopahi-backend/prisma/schema.prisma)        | Data model (User, Product, Order, Review, Coupon, …)              |
-| [kopahi-backend/openapi.yaml](kopahi-backend/openapi.yaml)        | OpenAPI doc, served at `/api/docs`                                |
-| [kopahi-frontend/app/](kopahi-frontend/app/)                     | Customer site — Next App Router                                   |
-| [kopahi-admin/src/pages/](kopahi-admin/src/pages/)               | Admin and vendor pages                                            |
-| [kopahi-admin/src/lib/resources/](kopahi-admin/src/lib/resources/) | Typed API client (one module per resource)                        |
-| [docker-compose.yml](docker-compose.yml)                         | Production compose (3 services on `dokploy-network`)              |
-| [docker-compose.dev.yml](docker-compose.dev.yml)                 | Local-dev override that bundles a throwaway Postgres              |
-| [scripts/smoke-test.ts](scripts/smoke-test.ts)                   | End-to-end smoke test                                             |
-| [AUDIT.md](AUDIT.md)                                             | Phase 1 audit of the auth and admin surfaces                      |
+This repo previously contained a full custom marketplace (Express backend,
+Postgres, Vite admin SPA). That stack was retired in favor of the WordPress
+shop — see git history before the `cleanup/hybrid-model` merge if you need it.

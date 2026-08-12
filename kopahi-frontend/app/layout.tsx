@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
-import Providers from "./providers";
 import CookieBanner from "./components/marketing/CookieBanner";
-import CartDrawer from "./components/marketing/CartDrawer";
 import { SITE, organizationJsonLd, ldScript } from "./lib/seo";
 
 const fraunces = Fraunces({
@@ -75,10 +73,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={ldScript(organizationJsonLd())}
         />
-        <Providers>
-          {children}
-          <CartDrawer />
-        </Providers>
+        {children}
         <CookieBanner />
       </body>
     </html>

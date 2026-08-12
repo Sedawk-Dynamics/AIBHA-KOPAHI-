@@ -6,6 +6,7 @@ import MarketingHeader from "./components/marketing/MarketingHeader";
 import MarketingFooter from "./components/marketing/MarketingFooter";
 import WhatsAppFab from "./components/marketing/WhatsAppFab";
 import Eyebrow from "./components/marketing/Eyebrow";
+import { SHOP_LINKS } from "./lib/shop";
 
 export const metadata: Metadata = {
   title: "Off the map",
@@ -31,12 +32,12 @@ export default function NotFound() {
             >
               Back to Kopahi
             </Link>
-            <Link
-              href="/products"
+            <a
+              href={SHOP_LINKS.shop}
               className="inline-flex items-center gap-3 px-7 py-4 border border-(--color-moss)/60 text-(--color-moss) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-moss) hover:text-(--color-ivory) transition-colors"
             >
               Browse origins
-            </Link>
+            </a>
           </div>
         </div>
       </main>
