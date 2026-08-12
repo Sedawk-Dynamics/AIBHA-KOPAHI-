@@ -21,10 +21,12 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       // Retired in-app commerce/content routes → WordPress shop.
+      // The :path regex excludes anything containing a dot so static files in
+      // public/products/ and public/journal/ (images etc.) are still served.
       { source: "/products", destination: `${SHOP}/shop/`, permanent: true },
-      { source: "/products/:path*", destination: `${SHOP}/shop/`, permanent: true },
+      { source: "/products/:path((?!.*\\.).*)", destination: `${SHOP}/shop/`, permanent: true },
       { source: "/journal", destination: `${SHOP}/blog/`, permanent: true },
-      { source: "/journal/:path*", destination: `${SHOP}/blog/`, permanent: true },
+      { source: "/journal/:path((?!.*\\.).*)", destination: `${SHOP}/blog/`, permanent: true },
       { source: "/cart", destination: `${SHOP}/cart/`, permanent: true },
       { source: "/checkout", destination: `${SHOP}/checkout/`, permanent: true },
       { source: "/login", destination: `${SHOP}/my-account/`, permanent: true },
