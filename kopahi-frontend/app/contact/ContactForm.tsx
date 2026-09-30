@@ -83,38 +83,42 @@ export default function ContactForm() {
 
   const routeEmail = INQUIRY_OPTIONS.find((o) => o.value === type)?.routes ?? "inquiry@kopahi.com";
 
+  const fieldCls =
+    "w-full bg-transparent border-b border-(--color-bamboo)/40 focus:border-(--color-gold) outline-none py-2 text-(--color-ink) placeholder:text-(--color-ink)/40";
+
   return (
-    <form noValidate onSubmit={onSubmit} className="space-y-6" aria-describedby="contact-status">
-      <FormField id="type" label="Inquiry type">
-        <select
-          id="type"
-          value={type}
-          onChange={(e) => setType(e.target.value as InquiryType)}
-          className="w-full bg-transparent border-b border-(--color-bamboo)/40 focus:border-(--color-gold) outline-none py-3 text-(--color-ink)"
-        >
-          {INQUIRY_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <p className="mt-1 text-xs text-(--color-ink)/55">Routes to {routeEmail}</p>
-      </FormField>
+    <form noValidate onSubmit={onSubmit} className="space-y-5 short:space-y-4" aria-describedby="contact-status">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <FormField id="type" label="Inquiry type">
+          <select
+            id="type"
+            value={type}
+            onChange={(e) => setType(e.target.value as InquiryType)}
+            className={fieldCls}
+          >
+            {INQUIRY_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </FormField>
 
-      <FormField id="name" label="Your name" error={errors.name}>
-        <input
-          id="name"
-          type="text"
-          value={name}
-          autoComplete="name"
-          onChange={(e) => setName(e.target.value)}
-          onBlur={() => setErrors((p) => ({ ...p, name: validate().name }))}
-          className="w-full bg-transparent border-b border-(--color-bamboo)/40 focus:border-(--color-gold) outline-none py-3 text-(--color-ink) placeholder:text-(--color-ink)/40"
-          placeholder="Your full name"
-        />
-      </FormField>
+        <FormField id="name" label="Your name" error={errors.name}>
+          <input
+            id="name"
+            type="text"
+            value={name}
+            autoComplete="name"
+            onChange={(e) => setName(e.target.value)}
+            onBlur={() => setErrors((p) => ({ ...p, name: validate().name }))}
+            className={fieldCls}
+            placeholder="Your full name"
+          />
+        </FormField>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <FormField id="email" label="Email" error={errors.email}>
           <input
             id="email"
@@ -123,7 +127,7 @@ export default function ContactForm() {
             autoComplete="email"
             onChange={(e) => setEmail(e.target.value)}
             onBlur={() => setErrors((p) => ({ ...p, email: validate().email }))}
-            className="w-full bg-transparent border-b border-(--color-bamboo)/40 focus:border-(--color-gold) outline-none py-3 text-(--color-ink) placeholder:text-(--color-ink)/40"
+            className={fieldCls}
             placeholder="you@example.com"
           />
         </FormField>
@@ -135,7 +139,7 @@ export default function ContactForm() {
             autoComplete="tel"
             onChange={(e) => setPhone(e.target.value)}
             onBlur={() => setErrors((p) => ({ ...p, phone: validate().phone }))}
-            className="w-full bg-transparent border-b border-(--color-bamboo)/40 focus:border-(--color-gold) outline-none py-3 text-(--color-ink) placeholder:text-(--color-ink)/40"
+            className={fieldCls}
             placeholder="+91 …"
           />
         </FormField>
@@ -144,29 +148,32 @@ export default function ContactForm() {
       <FormField id="message" label="Your message" error={errors.message}>
         <textarea
           id="message"
-          rows={5}
+          rows={3}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onBlur={() => setErrors((p) => ({ ...p, message: validate().message }))}
-          className="w-full bg-transparent border-b border-(--color-bamboo)/40 focus:border-(--color-gold) outline-none py-3 text-(--color-ink) placeholder:text-(--color-ink)/40 resize-none"
+          className={`${fieldCls} h-24 short:h-[4.5rem] resize-none`}
           placeholder="A sentence is fine. Two is generous."
         />
       </FormField>
 
-      <button
-        type="submit"
-        disabled={status === "loading" || status === "success"}
-        className="inline-flex items-center gap-3 px-7 py-4 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors disabled:opacity-60"
-      >
-        {status === "loading" ? "Sending…" : status === "success" ? "Thank you" : "Send"}
-        {status !== "loading" && status !== "success" && <span aria-hidden="true">→</span>}
-      </button>
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <button
+          type="submit"
+          disabled={status === "loading" || status === "success"}
+          className="inline-flex items-center gap-3 px-7 py-3.5 bg-(--color-gold) text-(--color-moss-dark) text-[13px] uppercase tracking-[0.22em] font-medium hover:bg-(--color-gold-dark) hover:text-(--color-ivory) transition-colors disabled:opacity-60"
+        >
+          {status === "loading" ? "Sending…" : status === "success" ? "Thank you" : "Send"}
+          {status !== "loading" && status !== "success" && <span aria-hidden="true">→</span>}
+        </button>
+        <p className="text-xs text-(--color-ink)/55">Goes to {routeEmail}</p>
+      </div>
 
       <p
         id="contact-status"
         role="status"
         aria-live="polite"
-        className={`text-sm min-h-[1.25rem] ${
+        className={`-mt-2 text-sm min-h-[1.25rem] ${
           status === "success"
             ? "text-(--color-moss)"
             : status === "error" && serverMessage
@@ -193,7 +200,7 @@ function FormField({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block eyebrow mb-2">
+      <label htmlFor={id} className="block eyebrow mb-1">
         {label}
       </label>
       {children}

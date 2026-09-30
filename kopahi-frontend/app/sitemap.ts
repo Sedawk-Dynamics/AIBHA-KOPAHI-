@@ -14,7 +14,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/farmers", priority: 0.85, changeFrequency: "monthly" },
     { path: "/b2b", priority: 0.95, changeFrequency: "monthly" },
     { path: "/journal", priority: 0.85, changeFrequency: "weekly" },
-    { path: "/sustainability", priority: 0.7, changeFrequency: "monthly" },
     { path: "/contact", priority: 0.7, changeFrequency: "yearly" },
     { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
     { path: "/terms", priority: 0.3, changeFrequency: "yearly" },

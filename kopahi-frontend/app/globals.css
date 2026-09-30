@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Desktop-width screens that are short on height (laptops, browser chrome):
+   the homepage story compacts itself so each chapter still fits the screen. */
+@custom-variant short (@media (min-width: 1024px) and (max-height: 800px));
+
 /* ============================================================
    KOPAHI — Northeast Heritage design tokens
    ============================================================ */
@@ -13,6 +17,8 @@
   --color-gold: #d4a33a;         /* Muga Gold — accent */
   --color-gold-dark: #b2871f;
   --color-chilli: #c8472e;       /* Bhut Jolokia Red — optional accent */
+  --color-rust: #ad4f2d;         /* Restrained terracotta — About page secondary accent */
+  --color-rust-dark: #8c3d21;
   --color-ink: #1a1f18;
   --color-mist: rgba(46, 59, 42, 0.08);
 }
@@ -29,14 +35,27 @@
   --color-gold: var(--color-gold);
   --color-gold-dark: var(--color-gold-dark);
   --color-chilli: var(--color-chilli);
+  --color-rust: var(--color-rust);
+  --color-rust-dark: var(--color-rust-dark);
   --color-ink: var(--color-ink);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
 }
 
-html, body {
+/* Horizontal-overflow guard. `overflow-x: hidden` on BODY turns it into a
+   scroll container and silently breaks position:sticky everywhere (the
+   homepage story pins with sticky) — so html gets `hidden`, body gets
+   `clip`, which clips without creating a scroll container. */
+html {
   max-width: 100%;
   overflow-x: hidden;
+  /* Sideways swipes drive the homepage slider — don't let them overscroll
+     into the browser's back/forward navigation gesture. */
+  overscroll-behavior-x: none;
+}
+body {
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* Sticky-header offset so in-page anchors (#quote, #how, …) don't hide
@@ -175,6 +194,22 @@ img { max-width: 100%; }
   100% { transform: translateY(10px); opacity: 0; }
 }
 .scroll-dot { animation: scroll-dot 1.8s ease-in-out infinite; }
+
+/* Organic, hand-cut image edges. The mask is a stretched SVG, so the wave
+   scales with the image; only the named side is shaped. Declared as
+   utilities so they take breakpoint variants (lg:edge-organic-left). */
+@utility edge-organic-left {
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='M9 0C4 9 10 17 7 27S2 44 6 55s4 20 0 30S3 96 6 100H100V0Z'/></svg>") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='M9 0C4 9 10 17 7 27S2 44 6 55s4 20 0 30S3 96 6 100H100V0Z'/></svg>") center / 100% 100% no-repeat;
+}
+@utility edge-organic-right {
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='M91 0C96 9 90 17 93 27S98 44 94 55s-4 20 0 30S97 96 94 100H0V0Z'/></svg>") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='M91 0C96 9 90 17 93 27S98 44 94 55s-4 20 0 30S97 96 94 100H0V0Z'/></svg>") center / 100% 100% no-repeat;
+}
+@utility edge-organic-bottom {
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='M0 0H100V94C88 97 79 92 67 95S46 99 34 95 13 93 0 97Z'/></svg>") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='M0 0H100V94C88 97 79 92 67 95S46 99 34 95 13 93 0 97Z'/></svg>") center / 100% 100% no-repeat;
+}
 
 /* Hide scrollbars cross-browser without removing scrollability */
 .no-scrollbar {
