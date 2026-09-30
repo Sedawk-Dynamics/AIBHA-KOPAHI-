@@ -49,6 +49,8 @@ const nextConfig: NextConfig = {
       { source: "/support", destination: "/contact", permanent: true },
       { source: "/partners", destination: "/b2b", permanent: true },
       { source: "/about/farmers", destination: "/farmers", permanent: true },
+      // Impact page retired (client request, Sep 2026) — its story now lives on About.
+      { source: "/sustainability", destination: "/about", permanent: true },
     ];
   },
 };

@@ -18,7 +18,7 @@ const NAV: NavItem[] = [
   { href: "/about", label: "About" },
   { href: SHOP_LINKS.shop, label: "Product", external: true },
   { href: "/b2b", label: "B2B" },
-  { href: SHOP_LINKS.blog, label: "Journal", external: true },
+  { href: "/journal", label: "Journal" },
   { href: "/contact", label: "Contact" },
 ];
 

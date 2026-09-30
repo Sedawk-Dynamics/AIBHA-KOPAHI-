@@ -65,14 +65,8 @@ const SOCIALS: SocialIcon[] = [
 export default function MarketingFooter() {
   return (
     <footer className="relative bg-(--color-moss-dark) text-(--color-ivory) overflow-hidden grain">
-      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 pt-24 pb-12">
-        <p className="font-display italic font-light text-[clamp(2.5rem,8vw,6.5rem)] leading-[0.95] tracking-tight text-(--color-ivory)/95">
-          Authentic by Geography.
-          <br />
-          <span className="text-(--color-gold)">Pure by Nature.</span>
-        </p>
-
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 pt-16 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* ============ Brand ============ */}
           <div className="max-w-sm">
             <p className="font-display text-2xl text-(--color-ivory)">
@@ -119,7 +113,7 @@ export default function MarketingFooter() {
               <li><Link href="/farmers" className="hover:text-(--color-gold) transition-colors">Farmers</Link></li>
               <li><a href={SHOP_LINKS.shop} className="hover:text-(--color-gold) transition-colors">Products</a></li>
               <li><Link href="/b2b" className="hover:text-(--color-gold) transition-colors">B2B</Link></li>
-              <li><a href={SHOP_LINKS.blog} className="hover:text-(--color-gold) transition-colors">Journal</a></li>
+              <li><Link href="/journal" className="hover:text-(--color-gold) transition-colors">Journal</Link></li>
               <li><Link href="/contact" className="hover:text-(--color-gold) transition-colors">Contact</Link></li>
             </ul>
           </div>
@@ -144,7 +138,7 @@ export default function MarketingFooter() {
           </div>
         </div>
 
-        <div className="mt-20 pt-8 border-t border-(--color-ivory)/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-sm text-(--color-ivory)/70">
+        <div className="mt-14 pt-8 border-t border-(--color-ivory)/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-sm text-(--color-ivory)/70">
           <p>© {new Date().getFullYear()} Kopahi. All rights reserved.</p>
           <div className="flex items-center gap-3 font-display italic">
             <Link href="/privacy" className="hover:text-(--color-gold) transition-colors hover:underline underline-offset-4">
