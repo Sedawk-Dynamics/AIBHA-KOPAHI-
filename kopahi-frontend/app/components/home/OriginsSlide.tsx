@@ -321,10 +321,10 @@ export default function OriginsSlide({ active, onHold }: SlideProps) {
           {/* The map sits in the middle; the card has its own column, so it
               never covers a state. */}
           <Reveal show={active} delay={0.3} y={10} className="min-w-0">
-            <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(15.5rem,0.75fr)] lg:gap-10">
+            <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(14rem,1fr)] lg:grid-cols-[minmax(0,1.7fr)_minmax(15.5rem,0.75fr)] lg:gap-10">
               <div
                 ref={mapRef}
-                className="relative mx-auto w-full max-w-[34rem] lg:max-w-[calc((100svh-12rem)*1.1)]"
+                className="relative mx-auto w-full max-w-[34rem] lg:max-w-[calc((100svh-13.5rem)*1.1)]"
               >
                 <OriginMap
                   selected={selected}

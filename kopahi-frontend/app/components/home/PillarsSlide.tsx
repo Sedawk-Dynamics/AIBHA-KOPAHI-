@@ -118,7 +118,7 @@ export default function PillarsSlide({ active, progress, onHold }: SlideProps) {
             </Reveal>
 
             <Reveal show={active} delay={0.42} className="mt-7 lg:mt-10 short:mt-5">
-              <div role="tablist" aria-label="The five pillars" className="flex flex-wrap gap-x-4 gap-y-3 sm:gap-x-6">
+              <div role="tablist" aria-label="The five pillars" className="flex flex-wrap gap-x-3 gap-y-3 sm:gap-x-6">
                 {PILLARS.map((pl, i) => {
                   const on = i === current;
                   return (
@@ -147,7 +147,7 @@ export default function PillarsSlide({ active, progress, onHold }: SlideProps) {
                         )}
                       </span>
                       <span
-                        className={`mt-2 block text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.2em] transition-colors ${
+                        className={`mt-2 block text-[9px] uppercase tracking-[0.08em] sm:text-[10px] sm:tracking-[0.2em] transition-colors ${
                           on ? "text-(--color-gold)" : "text-(--color-ivory)/55"
                         }`}
                       >

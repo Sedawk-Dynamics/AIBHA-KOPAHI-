@@ -35,9 +35,11 @@ export default function ContactPage() {
 
       <main className="bg-(--color-ivory) text-(--color-ink)">
         <section className="flex min-h-svh items-center pt-24 pb-10 lg:pt-28 lg:pb-8">
-          <div className="mx-auto grid w-full max-w-grid grid-cols-1 gap-10 px-5 lg:grid-cols-12 lg:items-center lg:gap-14 lg:px-8">
+          {/* Both columns share one height: the heading lines up with the top of
+              the form, and the visit card (its map) fills down to the contacts. */}
+          <div className="mx-auto grid w-full max-w-grid grid-cols-1 gap-10 px-5 lg:grid-cols-12 lg:items-stretch lg:gap-14 lg:px-8">
             {/* ============ LEFT — heading + visit ============ */}
-            <div className="lg:col-span-5">
+            <div className="flex flex-col lg:col-span-5">
               <Eyebrow>Contact</Eyebrow>
               <h1 className="mt-3 font-display font-light tracking-tight text-[clamp(2rem,3.2vw,3rem)] leading-[1.06] short:text-[2.1rem]">
                 We Answer Within
@@ -49,7 +51,7 @@ export default function ContactPage() {
                 you.
               </p>
 
-              <div className="relative mt-6 overflow-hidden rounded-sm bg-(--color-moss) p-5 text-(--color-ivory) grain">
+              <div className="relative mt-6 flex flex-1 flex-col overflow-hidden rounded-sm bg-(--color-moss) p-5 text-(--color-ivory) grain">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                   <div>
                     <Eyebrow tone="gold">Visit</Eyebrow>
@@ -69,11 +71,11 @@ export default function ContactPage() {
                     Directions <span aria-hidden="true">→</span>
                   </a>
                 </div>
-                <div className="relative mt-4 hidden h-[clamp(7rem,17svh,11rem)] overflow-hidden rounded-sm sm:block short:hidden">
+                <div className="relative mt-4 hidden min-h-[8rem] flex-1 overflow-hidden rounded-sm sm:block">
                   <iframe
                     title="Kopahi office in Jorhat, Assam"
                     src="https://www.google.com/maps?q=Jorhat,Assam&hl=en&z=12&output=embed"
-                    className="h-full w-full"
+                    className="absolute inset-0 h-full w-full"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                   />
@@ -82,14 +84,17 @@ export default function ContactPage() {
             </div>
 
             {/* ============ RIGHT — form + departments ============ */}
-            <div className="lg:col-span-7">
+            <div className="flex flex-col lg:col-span-7">
               <div className="rounded-sm border border-(--color-bamboo)/20 bg-(--color-ivory-warm)/60 p-6 sm:p-8 short:p-6">
                 <Suspense fallback={null}>
                   <ContactForm />
                 </Suspense>
               </div>
 
-              <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4" aria-label="Contacts by department">
+              <ul
+                className="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4"
+                aria-label="Contacts by department"
+              >
                 {CONTACTS.map((c) => (
                   <li key={c.label} className="min-w-0 border-t border-(--color-bamboo)/30 pt-3">
                     <p className="eyebrow">{c.label}</p>
